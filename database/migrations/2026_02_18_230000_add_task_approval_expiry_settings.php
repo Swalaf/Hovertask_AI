@@ -11,15 +11,26 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Add task_approval_expiry settings to system_settings table
-        // This will be stored as JSON or we can add individual columns
-        
-        // Option 1: Add individual columns for flexibility
+        if (!Schema::hasTable('system_settings')) {
+            return;
+        }
+
         Schema::table('system_settings', function (Blueprint $table) {
-            $table->boolean('task_approval_expiry_enabled')->default(false)->after('referral_bonus_amount');
-            $table->integer('task_approval_expiry_value')->default(24)->after('task_approval_expiry_enabled');
-            $table->enum('task_approval_expiry_unit', ['hours', 'days'])->default('hours')->after('task_approval_expiry_value');
-            $table->enum('task_approval_expiry_action', ['auto_approve', 'expire'])->default('auto_approve')->after('task_approval_expiry_unit');
+            if (!Schema::hasColumn('system_settings', 'task_approval_expiry_enabled')) {
+                $table->boolean('task_approval_expiry_enabled')->default(false);
+            }
+
+            if (!Schema::hasColumn('system_settings', 'task_approval_expiry_value')) {
+                $table->integer('task_approval_expiry_value')->default(24);
+            }
+
+            if (!Schema::hasColumn('system_settings', 'task_approval_expiry_unit')) {
+                $table->enum('task_approval_expiry_unit', ['hours', 'days'])->default('hours');
+            }
+
+            if (!Schema::hasColumn('system_settings', 'task_approval_expiry_action')) {
+                $table->enum('task_approval_expiry_action', ['auto_approve', 'expire'])->default('auto_approve');
+            }
         });
     }
 
@@ -28,13 +39,26 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (!Schema::hasTable('system_settings')) {
+            return;
+        }
+
         Schema::table('system_settings', function (Blueprint $table) {
-            $table->dropColumn([
-                'task_approval_expiry_enabled',
-                'task_approval_expiry_value',
-                'task_approval_expiry_unit',
-                'task_approval_expiry_action',
-            ]);
+            if (Schema::hasColumn('system_settings', 'task_approval_expiry_enabled')) {
+                $table->dropColumn('task_approval_expiry_enabled');
+            }
+
+            if (Schema::hasColumn('system_settings', 'task_approval_expiry_value')) {
+                $table->dropColumn('task_approval_expiry_value');
+            }
+
+            if (Schema::hasColumn('system_settings', 'task_approval_expiry_unit')) {
+                $table->dropColumn('task_approval_expiry_unit');
+            }
+
+            if (Schema::hasColumn('system_settings', 'task_approval_expiry_action')) {
+                $table->dropColumn('task_approval_expiry_action');
+            }
         });
     }
 };

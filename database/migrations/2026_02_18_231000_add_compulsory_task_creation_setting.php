@@ -11,8 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasTable('system_settings')) {
+            return;
+        }
+
         Schema::table('system_settings', function (Blueprint $table) {
-            $table->boolean('compulsory_task_creation_before_earning')->default(false)->after('task_approval_expiry_action');
+            if (!Schema::hasColumn('system_settings', 'compulsory_task_creation_before_earning')) {
+                $table->boolean('compulsory_task_creation_before_earning')->default(false);
+            }
         });
     }
 
@@ -21,8 +27,14 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (!Schema::hasTable('system_settings')) {
+            return;
+        }
+
         Schema::table('system_settings', function (Blueprint $table) {
-            $table->dropColumn('compulsory_task_creation_before_earning');
+            if (Schema::hasColumn('system_settings', 'compulsory_task_creation_before_earning')) {
+                $table->dropColumn('compulsory_task_creation_before_earning');
+            }
         });
     }
 };
