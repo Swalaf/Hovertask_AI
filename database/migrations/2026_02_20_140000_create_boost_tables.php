@@ -75,6 +75,18 @@ return new class extends Migration
             $table->timestamp('expires_at')->nullable();
             $table->timestamps();
         });
+
+        // Add foreign key to user_boosts if table exists (from earlier migration)
+        if (Schema::hasTable('user_boosts')) {
+            Schema::table('user_boosts', function (Blueprint $table) {
+                try {
+                    // Add the deferred foreign key constraint from Feb 19 migration
+                    $table->foreign('package_id')->references('id')->on('boost_packages')->onDelete('cascade');
+                } catch (\Exception $e) {
+                    // Foreign key may already exist if migration was run before
+                }
+            });
+        }
     }
 
     public function down(): void
