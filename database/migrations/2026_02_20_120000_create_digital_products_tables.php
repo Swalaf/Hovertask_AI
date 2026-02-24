@@ -20,7 +20,7 @@ return new class extends Migration
                 $table->string('file_path')->nullable();
                 $table->string('file_size')->nullable();
                 $table->string('file_type')->nullable();
-                $table->foreignId('category_id')->nullable()->constrained('marketplace_categories')->onDelete('set null');
+                $table->unsignedBigInteger('category_id')->nullable();
                 $table->json('tags')->nullable();
                 $table->integer('downloads')->default(0);
                 $table->integer('total_sales')->default(0);
@@ -33,6 +33,7 @@ return new class extends Migration
                 $table->integer('version')->default(1);
                 $table->text('changelog')->nullable();
                 $table->text('requirements')->nullable();
+                $table->index('category_id');
                 $table->timestamps();
             });
         }

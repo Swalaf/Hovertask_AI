@@ -2,50 +2,68 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
     public function up(): void
     {
-        // Skip if marketplace_categories constraint already exists
-        if (!Schema::hasTable('digital_products')) {
+        if (!Schema::hasTable('digital_products') || !Schema::hasTable('marketplace_categories')) {
             return;
         }
 
-        Schema::table('digital_products', function (Blueprint $table) {
-            // Safely drop the old constraint if it exists (task_categories reference)
-            try {
-                $table->dropForeign(['category_id']);
-            } catch (\Exception $e) {
-                // Constraint might already be corrected or not exist
-            }
-        });
+        $constraintName = 'digital_products_category_id_foreign';
 
-        // Add marketplace_categories constraint (safe if already exists)
-        Schema::table('digital_products', function (Blueprint $table) {
-            try {
-                $table->foreign('category_id')
-                    ->references('id')
-                    ->on('marketplace_categories')
-                    ->onDelete('set null');
-            } catch (\Exception $e) {
-                // Foreign key may already exist
-            }
-        });
+        $constraintExists = DB::table('information_schema.TABLE_CONSTRAINTS')
+            ->where('TABLE_SCHEMA', DB::raw('DATABASE()'))
+            ->where('TABLE_NAME', 'digital_products')
+            ->where('CONSTRAINT_NAME', $constraintName)
+            ->exists();
+
+        if ($constraintExists) {
+            DB::statement('ALTER TABLE `digital_products` DROP FOREIGN KEY `digital_products_category_id_foreign`');
+        }
+
+        $constraintExists = DB::table('information_schema.TABLE_CONSTRAINTS')
+            ->where('TABLE_SCHEMA', DB::raw('DATABASE()'))
+            ->where('TABLE_NAME', 'digital_products')
+            ->where('CONSTRAINT_NAME', $constraintName)
+            ->exists();
+
+        if (!$constraintExists) {
+            DB::statement('ALTER TABLE `digital_products` ADD CONSTRAINT `digital_products_category_id_foreign` FOREIGN KEY (`category_id`) REFERENCES `marketplace_categories`(`id`) ON DELETE SET NULL');
+        }
     }
 
     public function down(): void
     {
-        Schema::table('digital_products', function (Blueprint $table) {
-            $table->dropForeign(['category_id']);
-        });
+        if (!Schema::hasTable('digital_products')) {
+            return;
+        }
 
-        Schema::table('digital_products', function (Blueprint $table) {
-            $table->foreign('category_id')
-                ->references('id')
-                ->on('task_categories')
-                ->onDelete('set null');
-        });
+        $constraintName = 'digital_products_category_id_foreign';
+
+        $constraintExists = DB::table('information_schema.TABLE_CONSTRAINTS')
+            ->where('TABLE_SCHEMA', DB::raw('DATABASE()'))
+            ->where('TABLE_NAME', 'digital_products')
+            ->where('CONSTRAINT_NAME', $constraintName)
+            ->exists();
+
+        if ($constraintExists) {
+            DB::statement('ALTER TABLE `digital_products` DROP FOREIGN KEY `digital_products_category_id_foreign`');
+        }
+
+        if (Schema::hasTable('task_categories')) {
+            $constraintExists = DB::table('information_schema.TABLE_CONSTRAINTS')
+                ->where('TABLE_SCHEMA', DB::raw('DATABASE()'))
+                ->where('TABLE_NAME', 'digital_products')
+                ->where('CONSTRAINT_NAME', $constraintName)
+                ->exists();
+
+            if (!$constraintExists) {
+                DB::statement('ALTER TABLE `digital_products` ADD CONSTRAINT `digital_products_category_id_foreign` FOREIGN KEY (`category_id`) REFERENCES `task_categories`(`id`) ON DELETE SET NULL');
+            }
+        }
     }
 };
