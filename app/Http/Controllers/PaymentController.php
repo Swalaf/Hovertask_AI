@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Transaction;
 use App\Models\Wallet;
-use App\Models\WalletLedger;
 use App\Services\PaymentGatewayService;
 use App\Services\RevenueAggregator;
 use Illuminate\Http\Request;
@@ -135,7 +134,7 @@ class PaymentController extends Controller
             // Verify payment with gateway
             $verificationData = $this->paymentGatewayService->verifyPayment($reference);
 
-            if ($verificationData['status'] === 'success') {
+            if (!empty($verificationData['success'])) {
                 DB::transaction(function () use ($transaction, $verificationData) {
                     $user = $transaction->user;
                     $wallet = $user->wallet;
@@ -153,10 +152,14 @@ class PaymentController extends Controller
                     }
 
                     // Convert amount to NGN if needed
-                    $amountInNGN = $verificationData['amount_in_ngn'] ?? $transaction->amount;
+                    $verifiedAmount = $verificationData['amount'] ?? $transaction->amount;
+                    $verifiedCurrency = $verificationData['currency'] ?? $transaction->currency;
+                    $amountInNGN = $verifiedCurrency === 'NGN'
+                        ? $verifiedAmount
+                        : $this->paymentGatewayService->convertToNgn($verifiedAmount, $verifiedCurrency);
 
                     // Credit wallet
-                    $wallet->addWithdrawable($amountInNGN, 'Payment deposit verified');
+                    $wallet->addWithdrawable($amountInNGN, 'deposit', 'Payment deposit verified');
 
                     // Update transaction
                     $transaction->update([
@@ -169,17 +172,6 @@ class PaymentController extends Controller
                                 'gateway_response' => $verificationData,
                             ]
                         )),
-                    ]);
-
-                    // Create wallet ledger entry
-                    WalletLedger::create([
-                        'wallet_id' => $wallet->id,
-                        'transaction_id' => $transaction->id,
-                        'type' => 'credit',
-                        'category' => 'deposit',
-                        'amount' => $amountInNGN,
-                        'balance_after' => $wallet->withdrawable_balance,
-                        'description' => 'Deposit via payment gateway',
                     ]);
 
                     // Revenue will be aggregated automatically by RevenueAggregator job
@@ -316,10 +308,10 @@ class PaymentController extends Controller
         $webhookSecret = config('services.stripe.webhook_secret');
 
         // If Stripe SDK is available, use it for signature verification
-        if (class_exists('\Stripe\Webhook')) {
+        $stripeWebhookClass = '\\Stripe\\Webhook';
+        if (class_exists($stripeWebhookClass)) {
             try {
-                /** @phpstan-ignore-next-line */
-                $event = \Stripe\Webhook::constructEvent($body, $signature, $webhookSecret);
+                $event = call_user_func([$stripeWebhookClass, 'constructEvent'], $body, $signature, $webhookSecret);
             } catch (\Exception $e) {
                 Log::warning('Invalid Stripe webhook signature', ['error' => $e->getMessage()]);
                 return response()->json(['error' => 'Invalid signature'], 401);
@@ -428,8 +420,8 @@ class PaymentController extends Controller
                 'escrow_balance' => 0,
             ]);
 
-            // Credit wallet
-            $wallet->addWithdrawable($transaction->amount, 'Webhook payment verified');
+            // Credit wallet (creates ledger entry internally)
+            $wallet->addWithdrawable((float) $transaction->amount, 'deposit', 'Webhook payment verified');
 
             // Update transaction
             $transaction->update([
@@ -442,17 +434,6 @@ class PaymentController extends Controller
                         'webhook_data' => $data,
                     ]
                 )),
-            ]);
-
-            // Create ledger entry
-            WalletLedger::create([
-                'wallet_id' => $wallet->id,
-                'transaction_id' => $transaction->id,
-                'type' => 'credit',
-                'category' => 'deposit',
-                'amount' => $transaction->amount,
-                'balance_after' => $wallet->withdrawable_balance,
-                'description' => 'Webhook payment verified',
             ]);
 
             Log::info('Webhook payment processed', [
