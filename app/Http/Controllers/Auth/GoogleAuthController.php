@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -70,10 +71,12 @@ class GoogleAuthController extends Controller
                 Wallet::firstOrCreate(
                     ['user_id' => $user->id],
                     [
-                        'balance' => 0,
+                        'withdrawable_balance' => 0,
+                        'promo_credit_balance' => 0,
                         'total_earned' => 0,
-                        'total_withdrawn' => 0,
+                        'total_spent' => 0,
                         'pending_balance' => 0,
+                        'escrow_balance' => 0,
                     ]
                 );
             }
@@ -89,7 +92,7 @@ class GoogleAuthController extends Controller
             return redirect()->intended(route('dashboard'));
 
         } catch (\Exception $e) {
-            \Log::error('Google OAuth Error: ' . $e->getMessage());
+            Log::error('Google OAuth Error: ' . $e->getMessage());
             return redirect()->route('login')
                 ->with('error', 'Unable to login with Google. Please try again.');
         }
@@ -148,10 +151,12 @@ class GoogleAuthController extends Controller
                 Wallet::firstOrCreate(
                     ['user_id' => $user->id],
                     [
-                        'balance' => 0,
+                        'withdrawable_balance' => 0,
+                        'promo_credit_balance' => 0,
                         'total_earned' => 0,
-                        'total_withdrawn' => 0,
+                        'total_spent' => 0,
                         'pending_balance' => 0,
+                        'escrow_balance' => 0,
                     ]
                 );
             }
@@ -165,7 +170,7 @@ class GoogleAuthController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Google One Tap Error: ' . $e->getMessage());
+            Log::error('Google One Tap Error: ' . $e->getMessage());
             return response()->json(['error' => 'Unable to login with Google'], 500);
         }
     }

@@ -108,7 +108,12 @@ class PaymentController extends Controller
      */
     public function callback(Request $request)
     {
-        $reference = $request->query('reference') ?? $request->input('reference');
+        $reference = $request->query('reference')
+            ?? $request->input('reference')
+            ?? $request->query('tx_ref')
+            ?? $request->input('tx_ref')
+            ?? $request->query('transaction_reference')
+            ?? $request->input('transaction_reference');
 
         if (!$reference) {
             Log::warning('Payment callback received without reference', ['query' => $request->all()]);

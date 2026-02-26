@@ -331,28 +331,59 @@ class PaymentGatewayService
     protected function processKora($data)
     {
         try {
-            $response = Http::withHeaders([
+            if (!$this->hasCredentialValue($this->credentials['secret_key'] ?? null)) {
+                return [
+                    'success' => false,
+                    'message' => 'Kora secret key is missing. Set it in admin settings or KORA_SECRET_KEY in .env.',
+                ];
+            }
+
+            $koraPayload = [
+                'amount' => ((float) ($data['amount'] ?? 0)) / 100,
+                'currency' => $data['currency'] ?? 'NGN',
+                'reference' => $data['reference'] ?? null,
+                'tx_ref' => $data['reference'] ?? null,
+                'redirect_url' => $data['callback_url'] ?? route('payment.callback'),
+                'callback_url' => $data['callback_url'] ?? route('payment.callback'),
+                'customer' => [
+                    'email' => $data['email'] ?? null,
+                ],
+                'metadata' => $data['metadata'] ?? [],
+            ];
+
+            $response = Http::timeout(25)->withHeaders([
                 'Authorization' => 'Bearer ' . $this->credentials['secret_key'],
                 'Content-Type' => 'application/json',
-            ])->post($this->credentials['api_url'] . '/charges', $data);
+            ])->post($this->credentials['api_url'] . '/charges/initialize', $koraPayload);
 
-            if ($response->successful()) {
+            if (!$response->successful()) {
+                $response = Http::timeout(25)->withHeaders([
+                    'Authorization' => 'Bearer ' . $this->credentials['secret_key'],
+                    'Content-Type' => 'application/json',
+                ])->post($this->credentials['api_url'] . '/charges', $koraPayload);
+            }
+
+            $json = $response->json() ?? [];
+            $payload = $json['data'] ?? [];
+            $authorizationUrl = $payload['checkout_url'] ?? $payload['redirect_url'] ?? $payload['payment_link'] ?? null;
+
+            if ($response->successful() && $authorizationUrl) {
                 return [
                     'success' => true,
-                    'authorization_url' => $response->json()['data']['checkout_url'],
+                    'authorization_url' => $authorizationUrl,
                     'reference' => $data['reference'],
                 ];
             }
 
             return [
                 'success' => false,
-                'message' => $response->json()['message'] ?? 'Payment initialization failed',
+                'message' => $json['message'] ?? $json['error'] ?? 'Kora payment initialization failed',
             ];
         } catch (\Exception $e) {
             Log::error('Kora payment error', ['error' => $e->getMessage()]);
             return [
                 'success' => false,
-                'message' => 'Payment processing error',
+                'message' => 'Kora payment processing error: ' . $e->getMessage(),
             ];
         }
     }
@@ -444,14 +475,22 @@ class PaymentGatewayService
     protected function verifyKora($reference)
     {
         try {
-            $response = Http::withHeaders([
+            $response = Http::timeout(25)->withHeaders([
                 'Authorization' => 'Bearer ' . $this->credentials['secret_key'],
             ])->get($this->credentials['api_url'] . '/transactions/' . $reference);
 
+            if (!$response->successful()) {
+                $response = Http::timeout(25)->withHeaders([
+                    'Authorization' => 'Bearer ' . $this->credentials['secret_key'],
+                ])->get($this->credentials['api_url'] . '/transactions/verify/' . $reference);
+            }
+
             if ($response->successful()) {
-                $data = $response->json()['data'];
+                $json = $response->json() ?? [];
+                $data = $json['data'] ?? [];
+                $status = strtolower((string) ($data['status'] ?? ''));
                 return [
-                    'success' => $data['status'] === 'successful',
+                    'success' => in_array($status, ['successful', 'success', 'succeeded']),
                     'amount' => $data['amount'],
                     'currency' => $data['currency'],
                     'metadata' => $data['metadata'] ?? [],
