@@ -115,7 +115,7 @@
             <input id="terms" type="checkbox" name="terms" required
                 class="w-5 h-5 rounded border-gray-300 dark:border-dark-600 text-indigo-600 focus:ring-indigo-500 bg-gray-50 dark:bg-dark-800 mt-0.5 transition-colors">
             <label for="terms" class="ml-3 text-sm text-gray-600 dark:text-gray-400">
-                I agree to the <a href="#" class="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300">Terms of Service</a> and <a href="#" class="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300">Privacy Policy</a>
+                I agree to the <a href="{{ route('legal.terms') }}" class="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300">Terms of Service</a> and <a href="{{ route('legal.privacy') }}" class="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300">Privacy Policy</a>
             </label>
         </div>
 

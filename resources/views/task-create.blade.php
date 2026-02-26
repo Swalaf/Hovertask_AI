@@ -255,7 +255,7 @@
                             Create Task & Pay
                         </button>
                         <p class="mt-3 text-xs text-center text-neutral-500">
-                            By creating this task, you agree to our <a href="#" class="text-primary-600 hover:underline">Terms of Service</a>.
+                            By creating this task, you agree to our <a href="{{ route('legal.terms') }}" class="text-primary-600 hover:underline">Terms of Service</a>.
                         </p>
                     </div>
                 </div>

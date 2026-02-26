@@ -758,8 +758,8 @@
             <div class="border-t border-dark-700 pt-6 md:pt-8 flex flex-col md:flex-row justify-between items-center">
                 <p class="text-sm text-gray-500">© {{ date('Y') }} SwiftKudi. All rights reserved.</p>
                 <div class="flex gap-4 md:gap-6 mt-4 md:mt-0">
-                    <a href="#" class="text-sm text-gray-500 hover:text-gray-400">Privacy Policy</a>
-                    <a href="#" class="text-sm text-gray-500 hover:text-gray-400">Terms of Service</a>
+                    <a href="{{ route('legal.privacy') }}" class="text-sm text-gray-500 hover:text-gray-400">Privacy Policy</a>
+                    <a href="{{ route('legal.terms') }}" class="text-sm text-gray-500 hover:text-gray-400">Terms of Service</a>
                     <a href="#" class="text-sm text-gray-500 hover:text-gray-400">Contact</a>
                 </div>
             </div>

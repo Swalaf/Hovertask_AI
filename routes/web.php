@@ -42,6 +42,8 @@ Route::post('/webhooks/stripe', [PaymentController::class, 'stripeWebhook'])->na
 Route::get('/', function () {
     return view('landing');
 })->name('home');
+Route::view('/privacy-policy', 'legal.privacy')->name('legal.privacy');
+Route::view('/terms-of-service', 'legal.terms')->name('legal.terms');
 
 // Short referral link - stores code in session then redirects to register
 Route::get('/ref/{code}', [ReferralController::class, 'redirectWithCode'])->name('ref.redirect');
