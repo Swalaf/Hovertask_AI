@@ -188,11 +188,20 @@ class DashboardController extends Controller
     public function worker()
     {
         $user = Auth::user();
-        $wallet = $user->wallet;
+        $wallet = $user->wallet ?? Wallet::firstOrCreate(
+            ['user_id' => $user->id],
+            [
+                'withdrawable_balance' => 0,
+                'promo_credit_balance' => 0,
+                'total_earned' => 0,
+                'total_spent' => 0,
+                'pending_balance' => 0,
+                'escrow_balance' => 0,
+            ]
+        );
 
-        if (!$wallet || !$wallet->is_activated) {
-            return redirect()->route('wallet.activate')
-                ->with('info', 'Please activate your account to start earning.');
+        if (!$wallet->is_activated && !session()->has('activation_skip_notice_dismissed')) {
+            session()->flash('info', 'Activation is optional for now. You can continue and activate later when you want to unlock withdrawals.');
         }
 
         // Ensure permanent referral task exists

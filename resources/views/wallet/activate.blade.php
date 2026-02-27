@@ -41,7 +41,7 @@
                         <i class="fas fa-rocket text-3xl sm:text-4xl"></i>
                     </div>
                     <h1 class="text-xl sm:text-2xl md:text-3xl font-bold">Activate Your Account</h1>
-                    <p class="mt-2 opacity-90 text-sm sm:text-base">Unlock full access to all features</p>
+                    <p class="mt-2 opacity-90 text-sm sm:text-base">Activation is optional. Continue now and activate anytime later.</p>
                 </div>
 
                 <!-- Current Balance -->
@@ -217,9 +217,16 @@
                     </button>
                     @endif
 
+                    <form action="{{ route('wallet.activate.skip') }}" method="POST" class="mt-3">
+                        @csrf
+                        <input type="hidden" name="redirect_to" value="{{ url()->previous() }}">
+                        <button type="submit" class="w-full py-3 sm:py-4 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-600 text-gray-700 dark:text-gray-200 font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors text-sm sm:text-base">
+                            Continue Without Activation
+                        </button>
+                    </form>
+
                     <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-4 text-center">
-                        <i class="fas fa-shield-alt mr-1"></i>
-                        Your payment is secured and non-refundable
+                        You can activate later from your wallet when you are ready.
                     </p>
                 </div>
             </div>

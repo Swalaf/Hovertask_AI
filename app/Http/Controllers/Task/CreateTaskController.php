@@ -84,6 +84,7 @@ class CreateTaskController extends Controller
      */
     public function store(CreateTaskRequest $request): JsonResponse
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         $idempotencyToken = $request->input('idempotency_token');
 
@@ -91,7 +92,7 @@ class CreateTaskController extends Controller
         if (!$user->canCreateTasks()) {
             return response()->json([
                 'success' => false,
-                'message' => 'You are not authorized to create tasks. Please activate your wallet first.',
+                'message' => 'You are not authorized to create tasks at the moment.',
             ], 403);
         }
 

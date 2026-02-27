@@ -79,12 +79,17 @@ class DigitalProductService
     {
         return DB::transaction(function () use ($product, $buyerId) {
             $buyer = \App\Models\User::findOrFail($buyerId);
-            $wallet = $buyer->wallet;
-
-            // Check if buyer has a wallet
-            if (!$wallet) {
-                throw new \Exception('Please activate your wallet first');
-            }
+            $wallet = $buyer->wallet ?? Wallet::firstOrCreate(
+                ['user_id' => $buyer->id],
+                [
+                    'withdrawable_balance' => 0,
+                    'promo_credit_balance' => 0,
+                    'total_earned' => 0,
+                    'total_spent' => 0,
+                    'pending_balance' => 0,
+                    'escrow_balance' => 0,
+                ]
+            );
 
             $amount = $product->is_free ? 0 : $product->current_price;
             $platformFee = $amount > 0 ? ($amount * $this->platformFeePercent / 100) : 0;
@@ -130,10 +135,19 @@ class DigitalProductService
                 ]);
 
                 // Add to seller wallet (escrow - will release when download completes)
-                $sellerWallet = $product->user->wallet;
-                if ($sellerWallet) {
-                    $sellerWallet->increment('pending_balance', $sellerEarnings);
-                }
+                $seller = $product->user;
+                $sellerWallet = $seller->wallet ?? Wallet::firstOrCreate(
+                    ['user_id' => $seller->id],
+                    [
+                        'withdrawable_balance' => 0,
+                        'promo_credit_balance' => 0,
+                        'total_earned' => 0,
+                        'total_spent' => 0,
+                        'pending_balance' => 0,
+                        'escrow_balance' => 0,
+                    ]
+                );
+                $sellerWallet->increment('pending_balance', $sellerEarnings);
             }
 
             $order->save();
@@ -157,7 +171,18 @@ class DigitalProductService
 
             // Release funds to seller
             $product = $order->product;
-            $sellerWallet = $product->user->wallet;
+            $seller = $product->user;
+            $sellerWallet = $seller->wallet ?? Wallet::firstOrCreate(
+                ['user_id' => $seller->id],
+                [
+                    'withdrawable_balance' => 0,
+                    'promo_credit_balance' => 0,
+                    'total_earned' => 0,
+                    'total_spent' => 0,
+                    'pending_balance' => 0,
+                    'escrow_balance' => 0,
+                ]
+            );
 
             $sellerWallet->decrement('pending_balance', $order->seller_earnings);
             $sellerWallet->increment('balance', $order->seller_earnings);

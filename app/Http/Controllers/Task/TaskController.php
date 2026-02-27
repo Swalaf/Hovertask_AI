@@ -83,13 +83,20 @@ class TaskController extends Controller
 
         $user = Auth::user();
 
-        // Check if user has wallet
+        // Ensure user has wallet (activation is optional)
         if (!$user->wallet) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Please activate your wallet first',
-                'redirect' => route('wallet.activate'),
-            ], 400);
+            \App\Models\Wallet::firstOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'withdrawable_balance' => 0,
+                    'promo_credit_balance' => 0,
+                    'total_earned' => 0,
+                    'total_spent' => 0,
+                    'pending_balance' => 0,
+                    'escrow_balance' => 0,
+                ]
+            );
+            $user->refresh();
         }
 
         $result = $this->taskService->createTask($user, $validated);

@@ -6,6 +6,7 @@ use App\Models\GrowthListing;
 use App\Models\GrowthOrder;
 use App\Models\User;
 use App\Models\SystemSetting;
+use App\Models\Wallet;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -27,7 +28,18 @@ class GrowthService
         try {
             return DB::transaction(function () use ($user, $data) {
                 if (!$user->wallet) {
-                    return ['success' => false, 'message' => 'Please activate your wallet first'];
+                    Wallet::firstOrCreate(
+                        ['user_id' => $user->id],
+                        [
+                            'withdrawable_balance' => 0,
+                            'promo_credit_balance' => 0,
+                            'total_earned' => 0,
+                            'total_spent' => 0,
+                            'pending_balance' => 0,
+                            'escrow_balance' => 0,
+                        ]
+                    );
+                    $user->refresh();
                 }
 
                 $listing = GrowthListing::create([
@@ -66,10 +78,17 @@ class GrowthService
                     return ['success' => false, 'message' => 'Listing is not available'];
                 }
 
-                $wallet = $buyer->wallet;
-                if (!$wallet) {
-                    return ['success' => false, 'message' => 'Please activate your wallet first'];
-                }
+                $wallet = $buyer->wallet ?? Wallet::firstOrCreate(
+                    ['user_id' => $buyer->id],
+                    [
+                        'withdrawable_balance' => 0,
+                        'promo_credit_balance' => 0,
+                        'total_earned' => 0,
+                        'total_spent' => 0,
+                        'pending_balance' => 0,
+                        'escrow_balance' => 0,
+                    ]
+                );
 
                 $amount = $listing->price;
                 $commissionRate = $this->getCommissionRate();
@@ -167,8 +186,19 @@ class GrowthService
 
                 // Release funds to seller
                 $seller = User::find($order->seller_id);
-                if ($seller && $seller->wallet) {
-                    $seller->wallet->addWithdrawable($order->seller_payout, 'growth_order_complete');
+                if ($seller) {
+                    $sellerWallet = $seller->wallet ?? Wallet::firstOrCreate(
+                        ['user_id' => $seller->id],
+                        [
+                            'withdrawable_balance' => 0,
+                            'promo_credit_balance' => 0,
+                            'total_earned' => 0,
+                            'total_spent' => 0,
+                            'pending_balance' => 0,
+                            'escrow_balance' => 0,
+                        ]
+                    );
+                    $sellerWallet->addWithdrawable($order->seller_payout, 'growth_order_complete');
                 }
 
                 $order->update([
@@ -235,8 +265,19 @@ class GrowthService
 
                 // Refund buyer
                 $buyer = User::find($order->buyer_id);
-                if ($buyer && $buyer->wallet && $order->escrow_amount > 0) {
-                    $buyer->wallet->addWithdrawable($order->escrow_amount, 'growth_order_refund');
+                if ($buyer && $order->escrow_amount > 0) {
+                    $buyerWallet = $buyer->wallet ?? Wallet::firstOrCreate(
+                        ['user_id' => $buyer->id],
+                        [
+                            'withdrawable_balance' => 0,
+                            'promo_credit_balance' => 0,
+                            'total_earned' => 0,
+                            'total_spent' => 0,
+                            'pending_balance' => 0,
+                            'escrow_balance' => 0,
+                        ]
+                    );
+                    $buyerWallet->addWithdrawable($order->escrow_amount, 'growth_order_refund');
                 }
 
                 $order->update([

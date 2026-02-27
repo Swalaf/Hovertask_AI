@@ -535,14 +535,41 @@ class SettingsController extends Controller
         try {
             $enabled = SystemSetting::getBool('smtp_enabled', false);
 
-            $driver = SystemSetting::get('smtp_driver', config('mail.default'));
+            $selectedDriver = SystemSetting::get('smtp_driver', config('mail.default'));
+            $isTurbo = $selectedDriver === 'turbosmtp';
+            $driver = $isTurbo ? 'smtp' : $selectedDriver;
+
             $host = SystemSetting::get('smtp_host', config('mail.mailers.smtp.host'));
+            if (empty($host) && $isTurbo) {
+                $host = config('services.turbosmtp.server', $host);
+            }
+
             $port = SystemSetting::getNumber('smtp_port', config('mail.mailers.smtp.port'));
+            if ((empty($port) || $port <= 0) && $isTurbo) {
+                $port = (int) config('services.turbosmtp.port', 587);
+            }
+
             $username = SystemSetting::get('smtp_username', config('mail.mailers.smtp.username'));
+            if (empty($username) && $isTurbo) {
+                $username = config('services.turbosmtp.username', $username);
+            }
+
             $password = SystemSetting::getDecrypted('smtp_password', config('mail.mailers.smtp.password'));
+            if (empty($password) && $isTurbo) {
+                $password = config('services.turbosmtp.password', $password);
+            }
+
             $encryption = SystemSetting::get('smtp_encryption', config('mail.mailers.smtp.encryption'));
+
             $fromAddress = SystemSetting::get('smtp_from_email', config('mail.from.address'));
+            if (empty($fromAddress) && $isTurbo) {
+                $fromAddress = config('services.turbosmtp.from_address', $fromAddress);
+            }
+
             $fromName = SystemSetting::get('smtp_from_name', config('mail.from.name'));
+            if (empty($fromName) && $isTurbo) {
+                $fromName = config('services.turbosmtp.from_name', $fromName);
+            }
 
             if ($enabled) {
                 Config::set('mail.default', $driver);

@@ -180,9 +180,56 @@
     </div>
 </div>
 
-@section('scripts')
+@push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const driverEl = document.getElementById('smtp_driver');
+        const hostEl = document.getElementById('smtp_host');
+        const portEl = document.getElementById('smtp_port');
+        const encryptionEl = document.getElementById('smtp_encryption');
+        const fromEmailEl = document.getElementById('smtp_from_email');
+        const fromNameEl = document.getElementById('smtp_from_name');
+        const turboDefaults = {
+            host: 'pro.turbo-smtp.com',
+            port: '587',
+            encryption: 'tls',
+            fromEmail: '',
+            fromName: 'SwiftKudi'
+        };
+
+        const isBlank = (value) => !value || value.trim() === '';
+
+        function applyTurboDefaults() {
+            if (!driverEl || driverEl.value !== 'turbosmtp') {
+                return;
+            }
+
+            if (hostEl && isBlank(hostEl.value)) {
+                hostEl.value = turboDefaults.host;
+            }
+
+            if (portEl && isBlank(portEl.value)) {
+                portEl.value = turboDefaults.port;
+            }
+
+            if (encryptionEl && isBlank(encryptionEl.value)) {
+                encryptionEl.value = turboDefaults.encryption;
+            }
+
+            if (fromEmailEl && isBlank(fromEmailEl.value) && turboDefaults.fromEmail) {
+                fromEmailEl.value = turboDefaults.fromEmail;
+            }
+
+            if (fromNameEl && isBlank(fromNameEl.value) && turboDefaults.fromName) {
+                fromNameEl.value = turboDefaults.fromName;
+            }
+        }
+
+        if (driverEl) {
+            driverEl.addEventListener('change', applyTurboDefaults);
+            applyTurboDefaults();
+        }
+
         const sendBtn = document.getElementById('send-test');
         if (!sendBtn) return;
 
@@ -198,6 +245,6 @@
         });
     });
 </script>
-@endsection
+    @endpush
 
 @endsection

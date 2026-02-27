@@ -9,6 +9,7 @@ use App\Models\MarketplaceCategory;
 use App\Services\DigitalProductService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class DigitalProductController extends Controller
@@ -209,13 +210,8 @@ class DigitalProductController extends Controller
                 return back()->with('error', 'Insufficient wallet balance. Please fund your wallet to purchase this product.');
             }
             
-            if (strpos($message, 'activate your wallet') !== false) {
-                return redirect()->route('wallet.activate')
-                    ->with('error', 'Please activate your wallet first to make purchases.');
-            }
-            
             // Log the actual error for debugging
-            \Log::error('Digital product purchase error: ' . $message, [
+            Log::error('Digital product purchase error: ' . $message, [
                 'product_id' => $product->id,
                 'user_id' => Auth::id(),
             ]);

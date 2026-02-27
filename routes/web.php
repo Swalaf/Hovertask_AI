@@ -87,6 +87,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/escrow', [WalletController::class, 'escrow'])->name('escrow');
         Route::get('/activate', [WalletController::class, 'activate'])->name('activate');
         Route::post('/activate', [WalletController::class, 'processActivation'])->name('activate.process');
+        Route::post('/activate/skip', [WalletController::class, 'skipActivation'])->name('activate.skip');
         Route::get('/deposit', [WalletController::class, 'deposit'])->name('deposit');
         Route::post('/deposit', [WalletController::class, 'deposit'])->name('process-deposit');
         Route::get('/withdraw', [WalletController::class, 'withdraw'])->name('withdraw');

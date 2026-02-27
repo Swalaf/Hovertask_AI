@@ -101,13 +101,29 @@ class TaskCreationService
         );
 
         try {
+            // Ensure user wallet exists (activation is optional)
+            if (!$user->wallet) {
+                \App\Models\Wallet::firstOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'withdrawable_balance' => 0,
+                        'promo_credit_balance' => 0,
+                        'total_earned' => 0,
+                        'total_spent' => 0,
+                        'pending_balance' => 0,
+                        'escrow_balance' => 0,
+                    ]
+                );
+                $user->refresh();
+            }
+
             // Validate user can create tasks
             if (!$user->canCreateTasks()) {
                 $this->logFailure($creationLog, 'User is not authorized to create tasks');
                 return [
                     'task' => null,
                     'success' => false,
-                    'message' => 'You are not authorized to create tasks. Please activate your wallet first.',
+                    'message' => 'You are not authorized to create tasks at the moment.',
                     'status' => Response::HTTP_FORBIDDEN,
                 ];
             }
@@ -426,12 +442,22 @@ class TaskCreationService
      */
     protected function checkWalletBalance(User $user, float $requiredAmount): array
     {
-        $wallet = $user->wallet;
+        $wallet = $user->wallet ?? \App\Models\Wallet::firstOrCreate(
+            ['user_id' => $user->id],
+            [
+                'withdrawable_balance' => 0,
+                'promo_credit_balance' => 0,
+                'total_earned' => 0,
+                'total_spent' => 0,
+                'pending_balance' => 0,
+                'escrow_balance' => 0,
+            ]
+        );
 
         if (!$wallet) {
             return [
                 'sufficient' => false,
-                'message' => 'Please activate your wallet first.',
+                'message' => 'Wallet setup incomplete. Please refresh and try again.',
                 'balance' => 0,
             ];
         }

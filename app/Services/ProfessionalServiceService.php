@@ -32,9 +32,20 @@ class ProfessionalServiceService
     {
         try {
             return DB::transaction(function () use ($user, $data) {
-                // Verify user has wallet
+                // Ensure user has wallet (activation is optional)
                 if (!$user->wallet) {
-                    return ['success' => false, 'message' => 'Please activate your wallet first'];
+                    Wallet::firstOrCreate(
+                        ['user_id' => $user->id],
+                        [
+                            'withdrawable_balance' => 0,
+                            'promo_credit_balance' => 0,
+                            'total_earned' => 0,
+                            'total_spent' => 0,
+                            'pending_balance' => 0,
+                            'escrow_balance' => 0,
+                        ]
+                    );
+                    $user->refresh();
                 }
 
                 $service = ProfessionalService::create([
@@ -90,10 +101,17 @@ class ProfessionalServiceService
                 }
 
                 // Verify buyer has sufficient balance
-                $wallet = $buyer->wallet;
-                if (!$wallet) {
-                    return ['success' => false, 'message' => 'Please activate your wallet first'];
-                }
+                $wallet = $buyer->wallet ?? Wallet::firstOrCreate(
+                    ['user_id' => $buyer->id],
+                    [
+                        'withdrawable_balance' => 0,
+                        'promo_credit_balance' => 0,
+                        'total_earned' => 0,
+                        'total_spent' => 0,
+                        'pending_balance' => 0,
+                        'escrow_balance' => 0,
+                    ]
+                );
 
                 // Calculate totals
                 $servicePrice = $service->price;
@@ -217,8 +235,19 @@ class ProfessionalServiceService
 
                 // Release funds to seller
                 $seller = User::find($order->seller_id);
-                if ($seller && $seller->wallet) {
-                    $seller->wallet->addWithdrawable($order->seller_payout, 'service_order_complete');
+                if ($seller) {
+                    $sellerWallet = $seller->wallet ?? Wallet::firstOrCreate(
+                        ['user_id' => $seller->id],
+                        [
+                            'withdrawable_balance' => 0,
+                            'promo_credit_balance' => 0,
+                            'total_earned' => 0,
+                            'total_spent' => 0,
+                            'pending_balance' => 0,
+                            'escrow_balance' => 0,
+                        ]
+                    );
+                    $sellerWallet->addWithdrawable($order->seller_payout, 'service_order_complete');
                 }
 
                 // Update order status

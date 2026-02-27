@@ -233,6 +233,26 @@ class WalletController extends Controller
     }
 
     /**
+     * Skip activation and continue using platform with limited features.
+     */
+    public function skipActivation(Request $request)
+    {
+        session([
+            'activation_skipped_at' => now()->toDateTimeString(),
+            'activation_skip_notice_dismissed' => true,
+        ]);
+
+        $redirectTo = $request->input('redirect_to');
+        if (!$redirectTo || !filter_var($redirectTo, FILTER_VALIDATE_URL)) {
+            return redirect()->route('dashboard')
+                ->with('info', 'You can continue without activation. Activate anytime to unlock withdrawals and full earning access.');
+        }
+
+        return redirect()->to($redirectTo)
+            ->with('info', 'You can continue without activation. Activate anytime to unlock withdrawals and full earning access.');
+    }
+
+    /**
      * Display deposit form or process deposit
      */
     public function deposit(Request $request)
