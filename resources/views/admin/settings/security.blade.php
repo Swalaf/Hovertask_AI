@@ -32,8 +32,8 @@
             <div class="bg-white dark:bg-dark-900 rounded-2xl shadow-lg shadow-gray-200/50 dark:shadow-dark-950/50 border border-gray-100 dark:border-dark-700 mb-6">
                 <div class="px-6 py-5 border-b border-gray-200 dark:border-dark-700">
                     <div class="flex items-center">
-                        <div class="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-500/20 flex items-center justify-center mr-3">
-                            <i class="fas fa-user-shield text-red-600 dark:text-red-400"></i>
+                        <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center mr-3">
+                            <i class="fas fa-user-shield text-indigo-600 dark:text-indigo-400"></i>
                         </div>
                         <div>
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Account Security</h3>

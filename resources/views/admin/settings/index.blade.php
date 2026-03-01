@@ -155,8 +155,8 @@
             <a href="{{ route('admin.settings.group', 'smtp') }}" class="block bg-white rounded-lg shadow hover:shadow-md transition-shadow">
                 <div class="p-6">
                     <div class="flex items-center">
-                        <div class="flex-shrink-0 bg-red-100 rounded-md p-3">
-                            <i class="fas fa-envelope text-red-600 text-xl"></i>
+                        <div class="flex-shrink-0 bg-indigo-100 rounded-md p-3">
+                            <i class="fas fa-envelope text-indigo-600 text-xl"></i>
                         </div>
                         <div class="ml-5 w-0 flex-1">
                             <dl>
@@ -166,7 +166,7 @@
                         </div>
                     </div>
                     <div class="mt-4 flex items-center text-sm text-gray-500">
-                        <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">
+                        <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">
                             {{ $settingsCounts['smtp'] ?? 0 }} settings
                         </span>
                     </div>

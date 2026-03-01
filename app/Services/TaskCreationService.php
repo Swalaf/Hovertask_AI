@@ -179,7 +179,11 @@ class TaskCreationService
             }
 
             // Create the task using repository (transaction-safe)
-            $task = $this->taskRepository->create($data);
+            // Ensure required foreign key is always present.
+            $taskPayload = array_merge($data, [
+                'user_id' => $user->id,
+            ]);
+            $task = $this->taskRepository->create($taskPayload);
 
             // Deduct from wallet if not a draft
             if (!$isDraft) {

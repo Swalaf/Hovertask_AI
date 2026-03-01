@@ -166,34 +166,39 @@ class SwiftKudiService
 
             // Determine activation fee using SystemSetting (supports referred users discount)
             $isReferred = $referrer !== null;
-            $activationFee = SystemSetting::getActivationFeeForUser($isReferred);
-            $platformRevenue = SystemSetting::getNumber('activation_fee', 1000);
+            $activationFeeRequired = SystemSetting::isCompulsoryActivationFee();
+            $activationFee = $activationFeeRequired
+                ? SystemSetting::getActivationFeeForUser($isReferred)
+                : 0;
+            $platformRevenue = $activationFee;
 
-            // Check if user has enough balance
-            $totalBalance = $wallet->withdrawable_balance + $wallet->promo_credit_balance;
-            if ($totalBalance < $activationFee) {
-                return [
-                    'success' => false,
-                    'message' => 'Insufficient balance. You need ' . self::formatCurrency($activationFee) . ' to activate. Please deposit funds first.',
-                    'needs_deposit' => true,
-                ];
-            }
-
-            // Deduct activation fee: use promo credit first, then withdrawable
-            $remaining = $activationFee;
-            if ($wallet->promo_credit_balance > 0) {
-                $usePromo = min($wallet->promo_credit_balance, $remaining);
-                $wallet->deductPromoCredit($usePromo, 'activation');
-                $remaining -= $usePromo;
-            }
-            if ($remaining > 0) {
-                $ok = $wallet->deductWithdrawable($remaining, 'activation');
-                if (!$ok) {
+            if ($activationFee > 0) {
+                // Check if user has enough balance
+                $totalBalance = $wallet->withdrawable_balance + $wallet->promo_credit_balance;
+                if ($totalBalance < $activationFee) {
                     return [
                         'success' => false,
-                        'message' => 'Insufficient withdrawable balance to complete activation. Please deposit funds.',
+                        'message' => 'Insufficient balance. You need ' . self::formatCurrency($activationFee) . ' to activate. Please deposit funds first.',
                         'needs_deposit' => true,
                     ];
+                }
+
+                // Deduct activation fee: use promo credit first, then withdrawable
+                $remaining = $activationFee;
+                if ($wallet->promo_credit_balance > 0) {
+                    $usePromo = min($wallet->promo_credit_balance, $remaining);
+                    $wallet->deductPromoCredit($usePromo, 'activation');
+                    $remaining -= $usePromo;
+                }
+                if ($remaining > 0) {
+                    $ok = $wallet->deductWithdrawable($remaining, 'activation');
+                    if (!$ok) {
+                        return [
+                            'success' => false,
+                            'message' => 'Insufficient withdrawable balance to complete activation. Please deposit funds.',
+                            'needs_deposit' => true,
+                        ];
+                    }
                 }
             }
 

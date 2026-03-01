@@ -8,6 +8,7 @@ use App\Models\Withdrawal;
 use App\Models\WalletLedger;
 use App\Models\User;
 use App\Models\Referral;
+use App\Models\SystemSetting;
 use App\Services\SwiftKudiService;
 use App\Services\RevenueAggregator;
 use Illuminate\Http\Request;
@@ -131,8 +132,7 @@ class WalletController extends Controller
         }
 
         $isActivated = $wallet->is_activated ?? false;
-        $activationFee = User::getActivationFee();
-        $referredActivationFee = User::getReferredActivationFee();
+        $activationFeeEnabled = SystemSetting::isCompulsoryActivationFee();
 
         // Check if user was referred. Prefer explicit referred_by relation but fall back to Referral records
         $referredBy = $user->referredBy;
@@ -155,7 +155,9 @@ class WalletController extends Controller
             }
         }
 
-        $actualFee = $referredBy ? $referredActivationFee : $activationFee;
+        $activationFee = SystemSetting::getActivationFeeForUser(false);
+        $referredActivationFee = SystemSetting::getActivationFeeForUser(true);
+        $actualFee = $activationFeeEnabled ? ($referredBy ? $referredActivationFee : $activationFee) : 0;
 
         return view('wallet.activate', compact(
             'wallet',
@@ -163,7 +165,8 @@ class WalletController extends Controller
             'activationFee',
             'referredActivationFee',
             'actualFee',
-            'referredBy'
+            'referredBy',
+            'activationFeeEnabled'
         ));
     }
 

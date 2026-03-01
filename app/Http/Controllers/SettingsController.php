@@ -83,6 +83,10 @@ class SettingsController extends Controller
             return view('admin.settings._task_gate', compact('settings', 'settingsByKey', 'group'));
         }
 
+        if ($group === 'registration') {
+            $this->ensureRegistrationSettingsExist();
+        }
+
         $settings = SystemSetting::where('group', $group)->get();
 
         // Build settings by key using casted/decrypted values so views show usable values
@@ -127,6 +131,10 @@ class SettingsController extends Controller
         if (!$this->canEditSettings($group)) {
             return redirect()->route('admin.index')
                 ->with('error', 'You do not have permission to edit these settings.');
+        }
+
+        if ($group === 'registration') {
+            $this->ensureRegistrationSettingsExist();
         }
 
         $settings = SystemSetting::where('group', $group)->get();
@@ -209,6 +217,30 @@ class SettingsController extends Controller
         }
 
         return redirect()->back()->with('success', ucfirst($group) . ' settings saved successfully.');
+    }
+
+    /**
+     * Ensure required registration settings rows exist.
+     */
+    protected function ensureRegistrationSettingsExist(): void
+    {
+        $defaults = [
+            'registration_enabled' => ['value' => true, 'type' => 'boolean'],
+            'email_verification_required' => ['value' => true, 'type' => 'boolean'],
+            'admin_approval_required' => ['value' => false, 'type' => 'boolean'],
+            'referral_enabled' => ['value' => true, 'type' => 'boolean'],
+            'referral_bonus_amount' => ['value' => 500, 'type' => 'number'],
+            'activation_fee' => ['value' => 1000, 'type' => 'number'],
+            'referred_activation_discount' => ['value' => 0, 'type' => 'number'],
+            'referred_activation_multiplier' => ['value' => 1.0, 'type' => 'number'],
+            'compulsory_activation_fee' => ['value' => true, 'type' => 'boolean'],
+        ];
+
+        foreach ($defaults as $key => $meta) {
+            if (!SystemSetting::keyExists($key)) {
+                SystemSetting::set($key, $meta['value'], 'registration', $meta['type']);
+            }
+        }
     }
 
     /**

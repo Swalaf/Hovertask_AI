@@ -117,10 +117,7 @@ class ProcessTaskCreation implements ShouldQueue
                 'attempt' => $this->attempts(),
             ]);
 
-            $creationLog->update([
-                'status' => TaskCreationLog::STATUS_FAILED,
-                'failure_reason' => $e->getMessage(),
-            ]);
+            $creationLog->markFailed($e->getMessage());
 
             throw $e;
         }
@@ -147,10 +144,7 @@ class ProcessTaskCreation implements ShouldQueue
             ->first();
 
         if ($creationLog) {
-            $creationLog->update([
-                'status' => TaskCreationLog::STATUS_FAILED,
-                'failure_reason' => $exception->getMessage(),
-            ]);
+            $creationLog->markFailed($exception->getMessage());
         }
     }
 

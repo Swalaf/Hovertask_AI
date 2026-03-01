@@ -159,8 +159,8 @@
             <div class="bg-white dark:bg-dark-900 rounded-2xl shadow-lg shadow-gray-200/50 dark:shadow-dark-950/50 border border-gray-100 dark:border-dark-700 mb-6">
                 <div class="px-6 py-5 border-b border-gray-200 dark:border-dark-700">
                     <div class="flex items-center">
-                        <div class="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-500/20 flex items-center justify-center mr-3">
-                            <i class="fas fa-credit-card text-red-600 dark:text-red-400"></i>
+                        <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center mr-3">
+                            <i class="fas fa-credit-card text-indigo-600 dark:text-indigo-400"></i>
                         </div>
                         <div>
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Activation Fee</h3>
@@ -169,22 +169,22 @@
                     </div>
                 </div>
                 <div class="px-6 py-5 space-y-5">
-                    <!-- Compulsory Activation Fee -->
+                    <!-- Activation Fee Toggle -->
                     <div class="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-dark-800">
                         <div class="flex items-center">
-                            <div class="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-500/20 flex items-center justify-center mr-4">
-                                <i class="fas fa-exclamation-circle text-red-600 dark:text-red-400"></i>
+                            <div class="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center mr-4">
+                                <i class="fas fa-toggle-on text-indigo-600 dark:text-indigo-400"></i>
                             </div>
                             <div>
-                                <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100">Compulsory Activation Fee</h4>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">Users must pay activation fee to use the platform</p>
+                                <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100">Enable Activation Fee</h4>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Turn on to require payment before activation; turn off to make activation free</p>
                             </div>
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" name="compulsory_activation_fee" value="true"
                                 {{ (($settingsByKey['compulsory_activation_fee'] ?? true) === 'true' || ($settingsByKey['compulsory_activation_fee'] ?? true)) ? 'checked' : '' }}
                                 class="sr-only peer">
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-500/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-500/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                         </label>
                     </div>
 

@@ -170,7 +170,7 @@
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
                             <span class="text-gray-600 dark:text-gray-400 text-sm sm:text-base">Activation Fee</span>
                             <span class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
-                                ₦{{ number_format($actualFee, 0) }}
+                                {{ $activationFeeEnabled ? '₦' . number_format($actualFee, 0) : 'FREE' }}
                             </span>
                         </div>
                         @if($referredBy)
@@ -179,14 +179,21 @@
                             Special rate because you were referred by {{ $referredBy->name }}
                         </p>
                         @endif
-                        <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-2">
-                            <i class="fas fa-info-circle mr-1"></i>
-                            This fee will be deducted from your wallet balance
-                        </p>
+                        @if($activationFeeEnabled)
+                            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-2">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                This fee will be deducted from your wallet balance
+                            </p>
+                        @else
+                            <p class="text-xs sm:text-sm text-green-600 dark:text-green-400 mt-2">
+                                <i class="fas fa-check-circle mr-1"></i>
+                                Activation fee is currently disabled by admin
+                            </p>
+                        @endif
                     </div>
 
                     <!-- Deposit Link -->
-                    @if($wallet && $wallet->getTotalBalanceAttribute() < $actualFee)
+                    @if($activationFeeEnabled && $wallet && $wallet->getTotalBalanceAttribute() < $actualFee)
                     <div class="bg-yellow-50 dark:bg-yellow-500/10 border border-yellow-200 dark:border-yellow-500/20 rounded-xl p-3 sm:p-4 mb-6">
                         <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
                             <i class="fas fa-exclamation-triangle text-yellow-600 dark:text-yellow-400"></i>
@@ -202,12 +209,12 @@
                     @endif
 
                     <!-- Activate Form -->
-                    @if($wallet && $wallet->getTotalBalanceAttribute() >= $actualFee)
+                    @if(!$activationFeeEnabled || ($wallet && $wallet->getTotalBalanceAttribute() >= $actualFee))
                     <form action="{{ route('wallet.activate.process') }}" method="POST">
                         @csrf
                         <button type="submit" class="w-full py-3 sm:py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold rounded-xl shadow-xl shadow-indigo-500/30 transition-all transform hover:scale-[1.02] text-sm sm:text-base">
                             <i class="fas fa-rocket mr-2"></i>
-                            Pay ₦{{ number_format($actualFee, 0) }} & Activate
+                            {{ $activationFeeEnabled ? 'Pay ₦' . number_format($actualFee, 0) . ' & Activate' : 'Activate Now (Free)' }}
                         </button>
                     </form>
                     @else

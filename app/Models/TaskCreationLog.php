@@ -122,9 +122,11 @@ class TaskCreationLog extends Model
      */
     public function markFailed(string $reason, array $responseData = []): void
     {
+        $safeReason = mb_substr(trim($reason), 0, 250);
+
         $this->update([
             'status' => self::STATUS_FAILED,
-            'failure_reason' => $reason,
+            'failure_reason' => $safeReason,
             'response_data' => $responseData,
             'completed_at' => now(),
         ]);

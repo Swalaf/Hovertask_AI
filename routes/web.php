@@ -216,6 +216,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/users', [AdminController::class, 'users'])->name('users');
         Route::get('/users/{user}', [AdminController::class, 'userDetails'])->name('user-details');
         Route::post('/users/{user}/suspend', [AdminController::class, 'suspendUser'])->name('users.suspend');
+        Route::post('/users/{user}/promote', [AdminController::class, 'promoteToAdmin'])->name('users.promote');
+        Route::post('/users/{user}/demote', [AdminController::class, 'demoteFromAdmin'])->name('users.demote');
 
         // Task management (admin)
         Route::get('/tasks', [AdminController::class, 'tasks'])->name('tasks');
@@ -224,6 +226,37 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/tasks/{task}/reject', [AdminController::class, 'rejectTask'])->name('tasks.reject');
         Route::post('/tasks/{task}/feature', [AdminController::class, 'featureTask'])->name('tasks.feature');
 
+        // Marketplace Management
+        Route::get('/marketplace', [\App\Http\Controllers\Admin\MarketplaceController::class, 'index'])->name('marketplace.index');
+        Route::get('/marketplace/create', [\App\Http\Controllers\Admin\MarketplaceController::class, 'create'])->name('marketplace.create');
+        Route::post('/marketplace', [\App\Http\Controllers\Admin\MarketplaceController::class, 'store'])->name('marketplace.store');
+        Route::get('/marketplace/{category}/edit', [\App\Http\Controllers\Admin\MarketplaceController::class, 'edit'])->name('marketplace.edit');
+        Route::put('/marketplace/{category}', [\App\Http\Controllers\Admin\MarketplaceController::class, 'update'])->name('marketplace.update');
+        Route::delete('/marketplace/{category}', [\App\Http\Controllers\Admin\MarketplaceController::class, 'destroy'])->name('marketplace.destroy');
+        Route::post('/marketplace/{category}/toggle', [\App\Http\Controllers\Admin\MarketplaceController::class, 'toggle'])->name('marketplace.toggle');
+        Route::post('/marketplace/bulk-action', [\App\Http\Controllers\Admin\MarketplaceController::class, 'bulkAction'])->name('marketplace.bulk-action');
+
+        // Feature Toggles
+        Route::get('/marketplace/features', [\App\Http\Controllers\Admin\MarketplaceController::class, 'features'])->name('marketplace.features');
+        Route::post('/marketplace/features/toggle', [\App\Http\Controllers\Admin\MarketplaceController::class, 'toggleFeature'])->name('marketplace.toggle-feature');
+
+        // Revenue reporting (admin)
+        Route::get('/revenue', [\App\Http\Controllers\Admin\RevenueController::class, 'index'])->name('revenue.index');
+        Route::get('/revenue/data', [\App\Http\Controllers\Admin\RevenueController::class, 'getRevenueData'])->name('revenue.data');
+        Route::get('/revenue/expenses', [\App\Http\Controllers\Admin\RevenueController::class, 'expenses'])->name('revenue.expenses');
+        Route::post('/revenue/expenses', [\App\Http\Controllers\Admin\RevenueController::class, 'createExpense'])->name('revenue.expenses.create');
+        Route::get('/revenue/activations', [\App\Http\Controllers\Admin\RevenueController::class, 'activations'])->name('revenue.activations');
+        Route::get('/revenue/export', [\App\Http\Controllers\Admin\RevenueController::class, 'export'])->name('revenue.export');
+        Route::get('/revenue/stats', [\App\Http\Controllers\Admin\RevenueController::class, 'getQuickStats'])->name('revenue.stats');
+        Route::match(['get','post'], '/revenue/refresh', [\App\Http\Controllers\Admin\RevenueController::class, 'refresh'])->name('revenue.refresh');
+        Route::get('/revenue/chart-data', [\App\Http\Controllers\RevenueApiController::class, 'chartData'])->name('revenue.chart-data');
+        Route::get('/revenue/drilldown', [\App\Http\Controllers\RevenueApiController::class, 'drilldown'])->name('revenue.drilldown');
+
+        // Completion review
+        Route::get('/completions', [AdminController::class, 'completions'])->name('completions');
+        Route::post('/completions/{completion}/approve', [AdminController::class, 'approveCompletion'])->name('completions.approve');
+        Route::post('/completions/{completion}/reject', [AdminController::class, 'rejectCompletion'])->name('completions.reject');
+
         // Withdrawal management
         Route::get('/withdrawals', [AdminController::class, 'withdrawals'])->name('withdrawals');
         Route::post('/withdrawals/{withdrawal}/process', [AdminController::class, 'processWithdrawal'])->name('withdrawals.process');
@@ -231,6 +264,38 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Convenience routes used by admin views for approve/reject actions
         Route::post('/withdrawals/{withdrawal}/approve', [AdminController::class, 'processWithdrawal'])->name('approve-withdrawal');
         Route::post('/withdrawals/{withdrawal}/reject', [AdminController::class, 'processWithdrawal'])->name('reject-withdrawal');
+
+        // Fraud logs
+        Route::get('/fraud-logs', [AdminController::class, 'fraudLogs'])->name('fraud-logs');
+        Route::post('/fraud-logs/{log}/resolve', [AdminController::class, 'resolveFraudLog'])->name('fraud-logs.resolve');
+
+        // Referral management
+        Route::get('/referrals', [AdminController::class, 'referrals'])->name('referrals');
+        Route::get('/referrals/{referral}', [AdminController::class, 'referralDetails'])->name('referrals.show');
+        Route::post('/referrals/{referral}/approve', [AdminController::class, 'approveReferralBonus'])->name('referrals.approve');
+
+        // Activation management
+        Route::get('/activations', [AdminController::class, 'activations'])->name('activations');
+        Route::get('/activations/{activation}', [AdminController::class, 'activationDetails'])->name('activations.show');
+        Route::post('/activations/{activation}/process', [AdminController::class, 'processActivation'])->name('activations.process');
+
+        // Professional Services management
+        Route::get('/professional-services', [AdminController::class, 'professionalServices'])->name('professional-services');
+        Route::get('/professional-services/{service}', [AdminController::class, 'professionalServiceDetails'])->name('professional-services.show');
+        Route::post('/professional-services/{service}/approve', [AdminController::class, 'approveProfessionalService'])->name('professional-services.approve');
+        Route::post('/professional-services/{service}/reject', [AdminController::class, 'rejectProfessionalService'])->name('professional-services.reject');
+
+        // Growth Listings management
+        Route::get('/growth-listings', [AdminController::class, 'growthListings'])->name('growth-listings');
+        Route::get('/growth-listings/{listing}', [AdminController::class, 'growthListingDetails'])->name('growth-listings.show');
+        Route::post('/growth-listings/{listing}/approve', [AdminController::class, 'approveGrowthListing'])->name('growth-listings.approve');
+        Route::post('/growth-listings/{listing}/reject', [AdminController::class, 'rejectGrowthListing'])->name('growth-listings.reject');
+
+        // Digital Products management
+        Route::get('/digital-products', [AdminController::class, 'digitalProducts'])->name('digital-products');
+        Route::get('/digital-products/{product}', [AdminController::class, 'digitalProductDetails'])->name('digital-products.show');
+        Route::post('/digital-products/{product}/approve', [AdminController::class, 'approveDigitalProduct'])->name('digital-products.approve');
+        Route::post('/digital-products/{product}/reject', [AdminController::class, 'rejectDigitalProduct'])->name('digital-products.reject');
 
          // end admin routes
     });
@@ -248,98 +313,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/{conversation}/read', [ChatController::class, 'markAsRead'])->name('read');
         Route::post('/{conversation}/close', [ChatController::class, 'closeConversation'])->name('close');
     });
-});
-
-// Additional Admin Routes
-Route::prefix('admin')->name('admin.')->group(function () {
-    // Main admin routes
-    Route::get('/', [AdminController::class, 'index'])->name('index');
-
-    // User management
-    Route::get('/users', [AdminController::class, 'users'])->name('users');
-    Route::get('/users/{user}', [AdminController::class, 'userDetails'])->name('user-details');
-    Route::post('/users/{user}/suspend', [AdminController::class, 'suspendUser'])->name('users.suspend');
-    Route::post('/users/{user}/promote', [AdminController::class, 'promoteToAdmin'])->name('users.promote');
-    Route::post('/users/{user}/demote', [AdminController::class, 'demoteFromAdmin'])->name('users.demote');
-
-    // Task management (admin)
-    Route::get('/tasks', [AdminController::class, 'tasks'])->name('tasks');
-    Route::get('/tasks/{task}', [AdminController::class, 'taskDetails'])->name('tasks.show');
-    Route::post('/tasks/{task}/approve', [AdminController::class, 'approveTask'])->name('tasks.approve');
-    Route::post('/tasks/{task}/reject', [AdminController::class, 'rejectTask'])->name('tasks.reject');
-    Route::post('/tasks/{task}/feature', [AdminController::class, 'featureTask'])->name('tasks.feature');
-
-    // Analytics
-    Route::get('/analytics', [AdminController::class, 'analytics'])->name('analytics');
-
-    // Marketplace Management
-    Route::get('/marketplace', [\App\Http\Controllers\Admin\MarketplaceController::class, 'index'])->name('marketplace.index');
-    Route::get('/marketplace/create', [\App\Http\Controllers\Admin\MarketplaceController::class, 'create'])->name('marketplace.create');
-    Route::post('/marketplace', [\App\Http\Controllers\Admin\MarketplaceController::class, 'store'])->name('marketplace.store');
-    Route::get('/marketplace/{category}/edit', [\App\Http\Controllers\Admin\MarketplaceController::class, 'edit'])->name('marketplace.edit');
-    Route::put('/marketplace/{category}', [\App\Http\Controllers\Admin\MarketplaceController::class, 'update'])->name('marketplace.update');
-    Route::delete('/marketplace/{category}', [\App\Http\Controllers\Admin\MarketplaceController::class, 'destroy'])->name('marketplace.destroy');
-    Route::post('/marketplace/{category}/toggle', [\App\Http\Controllers\Admin\MarketplaceController::class, 'toggle'])->name('marketplace.toggle');
-    Route::post('/marketplace/bulk-action', [\App\Http\Controllers\Admin\MarketplaceController::class, 'bulkAction'])->name('marketplace.bulk-action');
-
-    // Feature Toggles
-    Route::get('/marketplace/features', [\App\Http\Controllers\Admin\MarketplaceController::class, 'features'])->name('marketplace.features');
-    Route::post('/marketplace/features/toggle', [\App\Http\Controllers\Admin\MarketplaceController::class, 'toggleFeature'])->name('marketplace.toggle-feature');
-
-    // Revenue reporting (admin)
-    Route::get('/revenue', [\App\Http\Controllers\Admin\RevenueController::class, 'index'])->name('revenue.index');
-    Route::get('/revenue/data', [\App\Http\Controllers\Admin\RevenueController::class, 'getRevenueData'])->name('revenue.data');
-    Route::get('/revenue/expenses', [\App\Http\Controllers\Admin\RevenueController::class, 'expenses'])->name('revenue.expenses');
-    Route::post('/revenue/expenses', [\App\Http\Controllers\Admin\RevenueController::class, 'createExpense'])->name('revenue.expenses.create');
-    Route::get('/revenue/activations', [\App\Http\Controllers\Admin\RevenueController::class, 'activations'])->name('revenue.activations');
-    Route::get('/revenue/export', [\App\Http\Controllers\Admin\RevenueController::class, 'export'])->name('revenue.export');
-    Route::get('/revenue/stats', [\App\Http\Controllers\Admin\RevenueController::class, 'getQuickStats'])->name('revenue.stats');
-    Route::match(['get','post'], '/revenue/refresh', [\App\Http\Controllers\Admin\RevenueController::class, 'refresh'])->name('revenue.refresh');
-    Route::get('/revenue/chart-data', [\App\Http\Controllers\RevenueApiController::class, 'chartData'])->name('revenue.chart-data');
-    Route::get('/revenue/drilldown', [\App\Http\Controllers\RevenueApiController::class, 'drilldown'])->name('revenue.drilldown');
-
-    // Completion review
-    Route::get('/completions', [AdminController::class, 'completions'])->name('completions');
-    Route::post('/completions/{completion}/approve', [AdminController::class, 'approveCompletion'])->name('completions.approve');
-    Route::post('/completions/{completion}/reject', [AdminController::class, 'rejectCompletion'])->name('completions.reject');
-
-    // Withdrawal management
-    Route::get('/withdrawals', [AdminController::class, 'withdrawals'])->name('withdrawals');
-    Route::post('/withdrawals/{withdrawal}/process', [AdminController::class, 'processWithdrawal'])->name('withdrawals.process');
-    Route::post('/withdrawals/{withdrawal}/approve', [AdminController::class, 'processWithdrawal'])->name('approve-withdrawal');
-    Route::post('/withdrawals/{withdrawal}/reject', [AdminController::class, 'processWithdrawal'])->name('reject-withdrawal');
-
-    // Fraud logs
-    Route::get('/fraud-logs', [AdminController::class, 'fraudLogs'])->name('fraud-logs');
-    Route::post('/fraud-logs/{log}/resolve', [AdminController::class, 'resolveFraudLog'])->name('fraud-logs.resolve');
-
-    // Referral management
-    Route::get('/referrals', [AdminController::class, 'referrals'])->name('referrals');
-    Route::get('/referrals/{referral}', [AdminController::class, 'referralDetails'])->name('referrals.show');
-    Route::post('/referrals/{referral}/approve', [AdminController::class, 'approveReferralBonus'])->name('referrals.approve');
-
-    // Activation management
-    Route::get('/activations', [AdminController::class, 'activations'])->name('activations');
-    Route::get('/activations/{activation}', [AdminController::class, 'activationDetails'])->name('activations.show');
-    Route::post('/activations/{activation}/process', [AdminController::class, 'processActivation'])->name('activations.process');
-
-    // Professional Services management
-    Route::get('/professional-services', [AdminController::class, 'professionalServices'])->name('professional-services');
-    Route::get('/professional-services/{service}', [AdminController::class, 'professionalServiceDetails'])->name('professional-services.show');
-    Route::post('/professional-services/{service}/approve', [AdminController::class, 'approveProfessionalService'])->name('professional-services.approve');
-    Route::post('/professional-services/{service}/reject', [AdminController::class, 'rejectProfessionalService'])->name('professional-services.reject');
-
-    // Growth Listings management
-    Route::get('/growth-listings', [AdminController::class, 'growthListings'])->name('growth-listings');
-    Route::get('/growth-listings/{listing}', [AdminController::class, 'growthListingDetails'])->name('growth-listings.show');
-    Route::post('/growth-listings/{listing}/approve', [AdminController::class, 'approveGrowthListing'])->name('growth-listings.approve');
-    Route::post('/growth-listings/{listing}/reject', [AdminController::class, 'rejectGrowthListing'])->name('growth-listings.reject');
-
-    // Digital Products management
-    Route::get('/digital-products', [AdminController::class, 'digitalProducts'])->name('digital-products');
-    Route::get('/digital-products/{product}', [AdminController::class, 'digitalProductDetails'])->name('digital-products.show');
-    Route::post('/digital-products/{product}/approve', [AdminController::class, 'approveDigitalProduct'])->name('digital-products.approve');
-    Route::post('/digital-products/{product}/reject', [AdminController::class, 'rejectDigitalProduct'])->name('digital-products.reject');
 });
 
 // Professional Services (Hire) - Available to all authenticated users
