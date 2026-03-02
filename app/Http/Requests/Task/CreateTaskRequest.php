@@ -225,11 +225,20 @@ class CreateTaskRequest extends FormRequest
                 : null,
         ]);
 
-        // If category is selected but platform is missing, derive platform from category
-        if ((!$this->filled('platform')) && $this->filled('category_id')) {
+        // In this UI, task_type select often carries the category id.
+        // If category_id is missing but task_type is numeric, normalize category_id from task_type.
+        if ((!$this->filled('category_id')) && is_numeric($this->input('task_type'))) {
+            $this->merge(['category_id' => (int) $this->input('task_type')]);
+        }
+
+        // Always derive platform from category when category is known.
+        // This prevents stale/empty hidden platform values from failing validation.
+        if ($this->filled('category_id')) {
             $category = TaskCategory::find($this->input('category_id'));
-            if ($category && !empty($category->platform)) {
-                $this->merge(['platform' => $category->platform]);
+            if ($category) {
+                $this->merge([
+                    'platform' => $category->platform,
+                ]);
             }
         }
     }
