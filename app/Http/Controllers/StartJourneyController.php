@@ -76,6 +76,12 @@ class StartJourneyController extends Controller
     {
         $user = Auth::user();
 
+        // If admin disabled mandatory task-creation gate, user is already unlocked.
+        if (!SystemSetting::isMandatoryTaskCreationEnabled()) {
+            return redirect()->route('dashboard')
+                ->with('info', 'Task-creation requirement is currently disabled. You can start earning immediately.');
+        }
+
         // Get settings
         $minimumBudget = SystemSetting::get('minimum_required_budget', 1000);
         $currency = SystemSetting::get('mandatory_budget_currency', 'NGN');
@@ -196,6 +202,16 @@ class StartJourneyController extends Controller
     public function checkUnlockStatus()
     {
         $user = Auth::user();
+
+        if (!SystemSetting::isMandatoryTaskCreationEnabled()) {
+            return response()->json([
+                'unlocked' => true,
+                'current_budget' => $user->total_created_task_budget ?? 0,
+                'required_budget' => 0,
+                'remaining' => 0,
+            ]);
+        }
+
         $minimumBudget = SystemSetting::get('minimum_required_budget', 2500);
         $userBudget = $user->total_created_task_budget ?? 0;
 

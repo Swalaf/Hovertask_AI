@@ -99,6 +99,16 @@ class TaskGateProgressService
      */
     public function getProgress(User $user): array
     {
+        if (!SystemSetting::isMandatoryTaskCreationEnabled()) {
+            return [
+                'current' => $user->total_created_task_budget ?? 0,
+                'required' => 0,
+                'remaining' => 0,
+                'percentage' => 100.0,
+                'unlocked' => true,
+            ];
+        }
+
         $current = $user->total_created_task_budget ?? 0;
         $required = SystemSetting::get('minimum_required_budget', 2500);
         $remaining = max(0, $required - $current);

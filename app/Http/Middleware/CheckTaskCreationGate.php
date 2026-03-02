@@ -30,7 +30,7 @@ class CheckTaskCreationGate
         }
 
         // Check if mandatory task creation gate is enabled
-        $gateEnabled = SystemSetting::get('mandatory_task_creation_enabled', true);
+        $gateEnabled = SystemSetting::isMandatoryTaskCreationEnabled();
 
         if (!$gateEnabled) {
             return $next($request);
