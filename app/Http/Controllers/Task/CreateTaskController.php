@@ -58,12 +58,9 @@ class CreateTaskController extends Controller
         // Check for saved draft
         $draftData = $this->taskCreationService->getDraft($user);
 
-        // Generate idempotency token for this session
-        $idempotencyToken = $request->session()->get('task_idempotency_token');
-        if (!$idempotencyToken) {
-            $idempotencyToken = $this->taskCreationService->generateIdempotencyToken();
-            $request->session()->put('task_idempotency_token', $idempotencyToken);
-        }
+        // Always generate a fresh idempotency token for each new create session/page load.
+        $idempotencyToken = $this->taskCreationService->generateIdempotencyToken();
+        $request->session()->put('task_idempotency_token', $idempotencyToken);
 
         return view('tasks.create', compact(
             'categories',
@@ -133,6 +130,11 @@ class CreateTaskController extends Controller
         if (isset($result['required_amount'])) {
             $response['required_amount'] = $result['required_amount'];
         }
+
+        // Rotate token after each submission response to avoid stale token reuse.
+        $nextToken = $this->taskCreationService->generateIdempotencyToken();
+        $request->session()->put('task_idempotency_token', $nextToken);
+        $response['idempotency_token'] = $nextToken;
 
         return response()->json($response, $result['status']);
     }

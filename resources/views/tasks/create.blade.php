@@ -366,6 +366,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 const data = await response.json();
 
+                // Always refresh token from backend response when provided.
+                if (data && data.idempotency_token) {
+                    const tokenInput = form.querySelector('input[name="idempotency_token"]');
+                    if (tokenInput) {
+                        tokenInput.value = data.idempotency_token;
+                    }
+                }
+
                 const existingErrorBox = document.getElementById('task-create-error-box');
                 if (existingErrorBox) {
                     existingErrorBox.remove();

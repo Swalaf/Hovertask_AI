@@ -79,7 +79,7 @@ class TaskCreationService
                 return [
                     'task' => $existingLog->task,
                     'success' => true,
-                    'message' => 'Task created successfully (from previous request)',
+                    'message' => 'Your last task submission was already processed successfully.',
                     'status' => Response::HTTP_CREATED,
                     'existing' => true,
                 ];
