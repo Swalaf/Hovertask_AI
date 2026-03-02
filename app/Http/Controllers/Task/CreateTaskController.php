@@ -196,8 +196,10 @@ class CreateTaskController extends Controller
     {
         $user = Auth::user();
         
-        // Get stored task creation data from session
-        $storedData = session('task_creation_data') ?: $this->taskCreationService->getDraft($user);
+        // Get stored task creation data from session and merge with draft (session wins per field)
+        $sessionData = (array) session('task_creation_data', []);
+        $draftData = $this->taskCreationService->getDraft($user) ?? [];
+        $storedData = array_merge($draftData, $sessionData);
         $requiredAmount = session('insufficient_balance_required');
 
         if (!$storedData) {
@@ -226,7 +228,7 @@ class CreateTaskController extends Controller
         $canProceed = false;
         $message = '';
         $prefillData = $storedData;
-        $draftData = null;
+        $draftData = $draftData ?: null;
         
         if ($wallet && $requiredAmount) {
             $totalBalance = $wallet->withdrawable_balance + $wallet->promo_credit_balance;

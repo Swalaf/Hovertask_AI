@@ -69,10 +69,20 @@
                 $totalBalance = $wallet ? $wallet->withdrawable_balance + $wallet->promo_credit_balance : 0;
                 $hasFormData = (bool) old('title') || !empty($prefillData['title']);
 
-                $getValue = function($field, $default = '') {
-                    if (old($field)) return old($field);
-                    if (!empty($prefillData[$field])) return $prefillData[$field];
-                    if (!empty($draftData[$field])) return $draftData[$field];
+                $getValue = function($field, $default = '') use ($prefillData, $draftData) {
+                    $oldValue = old($field, null);
+                    if ($oldValue !== null && $oldValue !== '') {
+                        return $oldValue;
+                    }
+
+                    if (isset($prefillData[$field]) && $prefillData[$field] !== '') {
+                        return $prefillData[$field];
+                    }
+
+                    if (isset($draftData[$field]) && $draftData[$field] !== '') {
+                        return $draftData[$field];
+                    }
+
                     return $default;
                 };
             @endphp

@@ -55,6 +55,7 @@ class CreateTaskRequest extends FormRequest
 
             // Proof and instructions
             'proof_type' => ['required', 'string'],
+            'instructions' => ['nullable', 'string', 'max:2000'],
             'proof_instructions' => ['nullable', 'string', 'max:2000'],
 
             // Requirements
@@ -126,6 +127,7 @@ class CreateTaskRequest extends FormRequest
             'target_url' => 'target URL',
             'target_account' => 'target account',
             'hashtag' => 'hashtag',
+            'instructions' => 'specific instructions',
             'worker_reward_per_task' => 'reward per task',
             'min_followers' => 'minimum followers',
             'min_account_age_days' => 'minimum account age',
