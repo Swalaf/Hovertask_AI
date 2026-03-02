@@ -183,6 +183,204 @@ class TaskController extends Controller
     }
 
     /**
+     * Show edit form for a task owner/admin.
+     */
+    public function edit(Task $task)
+    {
+        $user = Auth::user();
+        $isAdmin = (bool) ($user->is_admin ?? false);
+
+        if (!$isAdmin && (int) $task->user_id !== (int) $user->id) {
+            abort(403, 'You are not authorized to edit this task.');
+        }
+
+        return view('tasks.edit', compact('task'));
+    }
+
+    /**
+     * Show analytics for a task owner/admin.
+     */
+    public function analytics(Task $task)
+    {
+        $user = Auth::user();
+        $isAdmin = (bool) ($user->is_admin ?? false);
+
+        if (!$isAdmin && (int) $task->user_id !== (int) $user->id) {
+            abort(403, 'You are not authorized to view analytics for this task.');
+        }
+
+        $completions = TaskCompletion::where('task_id', $task->id)
+            ->with('user')
+            ->latest()
+            ->get();
+
+        $stats = [
+            'total_submissions' => $completions->count(),
+            'pending' => $completions->where('status', TaskCompletion::STATUS_PENDING)->count(),
+            'approved' => $completions->where('status', TaskCompletion::STATUS_APPROVED)->count(),
+        ];
+
+        return view('tasks.analytics', compact('task', 'completions', 'stats'));
+    }
+
+    /**
+     * Update task editable fields.
+     */
+    public function update(Request $request, Task $task)
+    {
+        $user = Auth::user();
+        $isAdmin = (bool) ($user->is_admin ?? false);
+
+        if (!$isAdmin && (int) $task->user_id !== (int) $user->id) {
+            abort(403, 'You are not authorized to update this task.');
+        }
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string|max:5000',
+            'proof_type' => 'required|string|in:' . implode(',', array_keys(Task::PROOF_TYPES)),
+        ]);
+
+        $task->update($validated);
+
+        return redirect()->route('tasks.edit', $task)->with('success', 'Task updated successfully.');
+    }
+
+    /**
+     * Pause an active task.
+     */
+    public function pause(Task $task)
+    {
+        $user = Auth::user();
+        $isAdmin = (bool) ($user->is_admin ?? false);
+
+        if (!$isAdmin && (int) $task->user_id !== (int) $user->id) {
+            abort(403, 'You are not authorized to pause this task.');
+        }
+
+        $task->update(['is_active' => false]);
+
+        return back()->with('success', 'Task paused successfully.');
+    }
+
+    /**
+     * Resume a paused task.
+     */
+    public function resume(Task $task)
+    {
+        $user = Auth::user();
+        $isAdmin = (bool) ($user->is_admin ?? false);
+
+        if (!$isAdmin && (int) $task->user_id !== (int) $user->id) {
+            abort(403, 'You are not authorized to resume this task.');
+        }
+
+        $task->update(['is_active' => true]);
+
+        return back()->with('success', 'Task resumed successfully.');
+    }
+
+    /**
+     * Delete a task.
+     */
+    public function destroy(Task $task)
+    {
+        $user = Auth::user();
+        $isAdmin = (bool) ($user->is_admin ?? false);
+
+        if (!$isAdmin && (int) $task->user_id !== (int) $user->id) {
+            abort(403, 'You are not authorized to delete this task.');
+        }
+
+        $task->delete();
+
+        return redirect()->route('tasks.my-tasks')->with('success', 'Task deleted successfully.');
+    }
+
+    /**
+     * Review a specific submission for a task owner/admin.
+     */
+    public function submissionReview(TaskCompletion $completion)
+    {
+        $user = Auth::user();
+        $task = $completion->task;
+
+        if (!$task) {
+            return redirect()->route('tasks.my-tasks')->with('error', 'Submission task was not found.');
+        }
+
+        $isAdmin = (bool) ($user->is_admin ?? false);
+        if (!$isAdmin && (int) $task->user_id !== (int) $user->id) {
+            abort(403, 'You are not authorized to review this submission.');
+        }
+
+        $completion->loadMissing('user');
+
+        return view('tasks.submission-review', compact('completion', 'task'));
+    }
+
+    /**
+     * Approve a submission from task owner/admin.
+     */
+    public function approve(Request $request, TaskCompletion $completion)
+    {
+        $user = Auth::user();
+        $task = $completion->task;
+
+        if (!$task) {
+            return redirect()->route('tasks.my-tasks')->with('error', 'Submission task was not found.');
+        }
+
+        $isAdmin = (bool) ($user->is_admin ?? false);
+        if (!$isAdmin && (int) $task->user_id !== (int) $user->id) {
+            abort(403, 'You are not authorized to approve this submission.');
+        }
+
+        if (!$completion->isPending()) {
+            return back()->with('error', 'This submission has already been reviewed.');
+        }
+
+        $request->validate([
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        $completion->approve($completion->reward_amount ?: ($task->worker_reward_per_task ?? 0), $request->input('notes'));
+
+        return back()->with('success', 'Submission approved successfully.');
+    }
+
+    /**
+     * Reject a submission from task owner/admin.
+     */
+    public function reject(Request $request, TaskCompletion $completion)
+    {
+        $user = Auth::user();
+        $task = $completion->task;
+
+        if (!$task) {
+            return redirect()->route('tasks.my-tasks')->with('error', 'Submission task was not found.');
+        }
+
+        $isAdmin = (bool) ($user->is_admin ?? false);
+        if (!$isAdmin && (int) $task->user_id !== (int) $user->id) {
+            abort(403, 'You are not authorized to reject this submission.');
+        }
+
+        if (!$completion->isPending()) {
+            return back()->with('error', 'This submission has already been reviewed.');
+        }
+
+        $request->validate([
+            'reason' => 'required|string|in:' . implode(',', array_keys(TaskCompletion::REJECTION_REASONS)),
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        $completion->reject($request->input('reason'), $request->input('notes'));
+
+        return back()->with('success', 'Submission rejected successfully.');
+    }
+
+    /**
      * Show create task form
      */
     public function create()
