@@ -314,6 +314,84 @@ class TaskController extends Controller
     /**
      * Mark a task as completed (worker action)
      */
+    public function submit(Request $request, Task $task)
+    {
+        $user = Auth::user();
+
+        $rules = [
+            'proof_description' => 'required|string|max:2000',
+            'notes' => 'nullable|string|max:1000',
+        ];
+
+        if ($task->proof_type === 'link') {
+            $rules['proof_data.link'] = 'required|url|max:2048';
+        } else {
+            $rules['proof_data.file'] = 'required|file|mimes:jpg,jpeg,png,gif,webp,mp4,mov,avi,mkv,webm|max:65536';
+        }
+
+        $validated = $request->validate($rules);
+
+        if (!$task->canUserPerform($user)) {
+            return back()->with('error', 'You cannot perform this task.');
+        }
+
+        $existingSubmission = TaskCompletion::where('task_id', $task->id)
+            ->where('user_id', $user->id)
+            ->whereIn('status', ['pending', 'approved'])
+            ->first();
+
+        if ($existingSubmission) {
+            return back()->with('error', 'You have already submitted this task.');
+        }
+
+        try {
+            $proofData = [];
+
+            if ($task->proof_type === 'link') {
+                $proofData = [
+                    'type' => 'link',
+                    'link' => $validated['proof_data']['link'],
+                ];
+            } else {
+                $file = $request->file('proof_data.file');
+                $path = $file->store('task-proofs', 'public');
+
+                $proofData = [
+                    'type' => 'file',
+                    'path' => $path,
+                    'original_name' => $file->getClientOriginalName(),
+                    'mime_type' => $file->getClientMimeType(),
+                    'size' => $file->getSize(),
+                ];
+            }
+
+            TaskCompletion::create([
+                'task_id' => $task->id,
+                'user_id' => $user->id,
+                'status' => TaskCompletion::STATUS_PENDING,
+                'proof_data' => json_encode($proofData),
+                'proof_description' => $validated['proof_description'],
+                'worker_notes' => $validated['notes'] ?? null,
+                'submitted_at' => now(),
+                'ip_address' => $request->ip(),
+                'user_agent' => substr((string) $request->userAgent(), 0, 1000),
+            ]);
+
+            return redirect()->route('tasks.show', $task)->with('success', 'Task submitted successfully. Awaiting review.');
+        } catch (\Exception $e) {
+            Log::error('Task submission failed', [
+                'task_id' => $task->id,
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->withInput()->with('error', 'Failed to submit task. Please try again.');
+        }
+    }
+
+    /**
+     * Mark a task as completed (worker action)
+     */
     public function completeTask(Request $request, Task $task)
     {
         $user = Auth::user();

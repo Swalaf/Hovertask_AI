@@ -10,6 +10,18 @@
             <i class="fas fa-arrow-left mr-2"></i> Back to Tasks
         </a>
 
+        @if(session('success'))
+            <div class="mb-4 p-4 rounded-lg bg-emerald-900/20 border border-emerald-700 text-emerald-300">
+                <i class="fas fa-check-circle mr-2"></i>{{ session('success') }}
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="mb-4 p-4 rounded-lg bg-red-900/20 border border-red-700 text-red-300">
+                <i class="fas fa-exclamation-circle mr-2"></i>{{ session('error') }}
+            </div>
+        @endif
+
         <!-- Task Details -->
         <div class="bg-gray-800 rounded-xl shadow-lg p-6 mb-6 border border-gray-700">
             <div class="flex items-center justify-between mb-4">
