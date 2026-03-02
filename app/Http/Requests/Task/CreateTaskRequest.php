@@ -41,7 +41,7 @@ class CreateTaskRequest extends FormRequest
             // Category and type
             'category_id' => ['required', 'integer', Rule::exists('task_categories', 'id')],
             'task_type' => ['required', 'string'],
-            'platform' => ['required', 'string'],
+            'platform' => ['nullable', 'string', 'max:100'],
 
             // Budget and quantity
             'budget' => ['required', 'numeric', 'min:100', 'max:1000000'],

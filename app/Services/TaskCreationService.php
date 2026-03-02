@@ -189,8 +189,10 @@ class TaskCreationService
 
             // Create the task using repository (transaction-safe)
             // Ensure required foreign key is always present.
+            $resolvedPlatform = !empty($data['platform']) ? $data['platform'] : ($category->platform ?? null);
             $taskPayload = array_merge($data, [
                 'user_id' => $user->id,
+                'platform' => $resolvedPlatform,
             ]);
             $task = $this->taskRepository->create($taskPayload);
 
