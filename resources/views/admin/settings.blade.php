@@ -83,7 +83,7 @@
             </a>
 
             <!-- Payments -->
-            <div class="group relative bg-white dark:bg-dark-900 rounded-2xl shadow-lg shadow-gray-200/50 dark:shadow-dark-950/50 border border-gray-100 dark:border-dark-700 p-6 hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300">
+            <a href="{{ route('admin.settings.payment') }}" class="group relative bg-white dark:bg-dark-900 rounded-2xl shadow-lg shadow-gray-200/50 dark:shadow-dark-950/50 border border-gray-100 dark:border-dark-700 p-6 hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300 block">
                 <div class="absolute top-3 right-3">
                     <div class="relative">
                         <button type="button" class="w-6 h-6 rounded-full bg-gray-100 dark:bg-dark-700 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help" data-tooltip-target="tooltip-payment">
@@ -103,10 +103,10 @@
                 </div>
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Payments</h3>
                 <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Payment gateways and payout settings</p>
-            </div>
+            </a>
 
             <!-- Commission -->
-            <div class="group relative bg-white dark:bg-dark-900 rounded-2xl shadow-lg shadow-gray-200/50 dark:shadow-dark-950/50 border border-gray-100 dark:border-dark-700 p-6 hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300">
+            <a href="{{ route('admin.settings.commission') }}" class="group relative bg-white dark:bg-dark-900 rounded-2xl shadow-lg shadow-gray-200/50 dark:shadow-dark-950/50 border border-gray-100 dark:border-dark-700 p-6 hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300 block">
                 <div class="absolute top-3 right-3">
                     <div class="relative">
                         <button type="button" class="w-6 h-6 rounded-full bg-gray-100 dark:bg-dark-700 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help" data-tooltip-target="tooltip-commission">
@@ -126,10 +126,10 @@
                 </div>
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Commission</h3>
                 <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Platform commission and fee settings</p>
-            </div>
+            </a>
 
             <!-- Currency -->
-            <div class="group relative bg-white dark:bg-dark-900 rounded-2xl shadow-lg shadow-gray-200/50 dark:shadow-dark-950/50 border border-gray-100 dark:border-dark-700 p-6 hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300">
+            <a href="{{ route('admin.settings.currency') }}" class="group relative bg-white dark:bg-dark-900 rounded-2xl shadow-lg shadow-gray-200/50 dark:shadow-dark-950/50 border border-gray-100 dark:border-dark-700 p-6 hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300 block">
                 <div class="absolute top-3 right-3">
                     <div class="relative">
                         <button type="button" class="w-6 h-6 rounded-full bg-gray-100 dark:bg-dark-700 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help" data-tooltip-target="tooltip-currency">
@@ -149,10 +149,10 @@
                 </div>
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Currency</h3>
                 <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Manage supported currencies</p>
-            </div>
+            </a>
 
             <!-- Notifications -->
-            <div class="group relative bg-white dark:bg-dark-900 rounded-2xl shadow-lg shadow-gray-200/50 dark:shadow-dark-950/50 border border-gray-100 dark:border-dark-700 p-6 hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300">
+            <a href="{{ route('admin.settings.notification') }}" class="group relative bg-white dark:bg-dark-900 rounded-2xl shadow-lg shadow-gray-200/50 dark:shadow-dark-950/50 border border-gray-100 dark:border-dark-700 p-6 hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300 block">
                 <div class="absolute top-3 right-3">
                     <div class="relative">
                         <button type="button" class="w-6 h-6 rounded-full bg-gray-100 dark:bg-dark-700 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help" data-tooltip-target="tooltip-notification">
@@ -172,10 +172,10 @@
                 </div>
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Notifications</h3>
                 <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Email and in-app notification settings</p>
-            </div>
+            </a>
 
             <!-- Security -->
-            <div class="group relative bg-white dark:bg-dark-900 rounded-2xl shadow-lg shadow-gray-200/50 dark:shadow-dark-950/50 border border-gray-100 dark:border-dark-700 p-6 hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300">
+            <a href="{{ route('admin.settings.security') }}" class="group relative bg-white dark:bg-dark-900 rounded-2xl shadow-lg shadow-gray-200/50 dark:shadow-dark-950/50 border border-gray-100 dark:border-dark-700 p-6 hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300 block">
                 <div class="absolute top-3 right-3">
                     <div class="relative">
                         <button type="button" class="w-6 h-6 rounded-full bg-gray-100 dark:bg-dark-700 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help" data-tooltip-target="tooltip-security">
@@ -195,10 +195,10 @@
                 </div>
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Security</h3>
                 <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Authentication and admin policies</p>
-            </div>
+            </a>
 
             <!-- Registration -->
-            <div class="group relative bg-white dark:bg-dark-900 rounded-2xl shadow-lg shadow-gray-200/50 dark:shadow-dark-950/50 border border-gray-100 dark:border-dark-700 p-6 hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300">
+            <a href="{{ route('admin.settings.registration') }}" class="group relative bg-white dark:bg-dark-900 rounded-2xl shadow-lg shadow-gray-200/50 dark:shadow-dark-950/50 border border-gray-100 dark:border-dark-700 p-6 hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300 block">
                 <div class="absolute top-3 right-3">
                     <div class="relative">
                         <button type="button" class="w-6 h-6 rounded-full bg-gray-100 dark:bg-dark-700 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help" data-tooltip-target="tooltip-registration">
@@ -218,10 +218,10 @@
                 </div>
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Registration</h3>
                 <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">User registration and email verification</p>
-            </div>
+            </a>
 
             <!-- Cron & Jobs -->
-            <div class="group relative bg-white dark:bg-dark-900 rounded-2xl shadow-lg shadow-gray-200/50 dark:shadow-dark-950/50 border border-gray-100 dark:border-dark-700 p-6 hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300">
+            <a href="{{ route('admin.settings.cron') }}" class="group relative bg-white dark:bg-dark-900 rounded-2xl shadow-lg shadow-gray-200/50 dark:shadow-dark-950/50 border border-gray-100 dark:border-dark-700 p-6 hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300 block">
                 <div class="absolute top-3 right-3">
                     <div class="relative">
                         <button type="button" class="w-6 h-6 rounded-full bg-gray-100 dark:bg-dark-700 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help" data-tooltip-target="tooltip-cron">
@@ -241,10 +241,10 @@
                 </div>
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Cron & Jobs</h3>
                 <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Trigger and configure background jobs</p>
-            </div>
+            </a>
 
             <!-- Maintenance -->
-            <div class="group relative bg-white dark:bg-dark-900 rounded-2xl shadow-lg shadow-gray-200/50 dark:shadow-dark-950/50 border border-gray-100 dark:border-dark-700 p-6 hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300">
+            <a href="{{ route('admin.settings.maintenance') }}" class="group relative bg-white dark:bg-dark-900 rounded-2xl shadow-lg shadow-gray-200/50 dark:shadow-dark-950/50 border border-gray-100 dark:border-dark-700 p-6 hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300 block">
                 <div class="absolute top-3 right-3">
                     <div class="relative">
                         <button type="button" class="w-6 h-6 rounded-full bg-gray-100 dark:bg-dark-700 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help" data-tooltip-target="tooltip-maintenance">
@@ -264,7 +264,7 @@
                 </div>
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Maintenance</h3>
                 <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Put the site into maintenance mode</p>
-            </div>
+            </a>
 
             <!-- Task Creation Gate -->
             <a href="{{ route('admin.settings.task-gate') }}" class="group relative bg-white dark:bg-dark-900 rounded-2xl shadow-lg shadow-gray-200/50 dark:shadow-dark-950/50 border border-l-4 border-l-indigo-500 p-6 hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300">
