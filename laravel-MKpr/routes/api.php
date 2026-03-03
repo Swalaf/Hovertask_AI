@@ -1,0 +1,445 @@
+<?php
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Auth\Events\Verified;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Mail;
+use App\Http\Controllers\Api\V1\KYCController;
+use App\Http\Controllers\Api\V1\CartController;
+use App\Http\Controllers\Api\V1\ChatController;
+use App\Http\Controllers\Api\V1\TaskController;
+use App\Http\Controllers\Api\V1\OrderController;
+use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\V1\FollowController;
+use App\Http\Controllers\Api\V1\ReviewController;
+use App\Http\Controllers\Api\V1\WalletController;
+use App\Http\Controllers\Api\V1\AddMeUpController;
+use App\Http\Controllers\Api\V1\ContactController;
+use App\Http\Controllers\Api\V1\ProductController;
+use App\Http\Controllers\Api\V1\CategoryController;
+use App\Http\Controllers\Api\V1\WishlistController;
+use App\Http\Controllers\Api\V1\AdvertiseController;
+use App\Http\Controllers\Api\V1\DashboardController;
+use App\Http\Controllers\Api\V1\NotificationController;
+use App\Http\Controllers\Api\V1\SocialConnectController;
+use App\Http\Controllers\Api\V1\ReferralController;
+use App\Http\Controllers\Api\V1\WithdrawalController;
+use App\Http\Controllers\Api\V1\ResellerConversionController;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use App\Http\Controllers\Api\PaystackController;
+use App\Http\Controllers\Api\V1\TransactionController;
+use App\Http\Controllers\Api\V1\ProductFeedbackController;
+use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\Log;
+
+
+Route::post('/register', [AuthController::class, 'register'])->name('register');
+Route::post('/resend-otp', [AuthController::class, 'resendOtp'])->name('resend.otp');
+Route::post('/login', [AuthController::class, 'login'])->name('login');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/banks', [PaystackController::class, 'banks'])->name('banks.list');
+//Route::post('/send-reset-link', [AuthController::class, 'resetPasswordRequest'])->name('password.reset');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.reset');
+Route::get('/roles', [AuthController::class, 'roles']);
+
+Route::post('/verify-email-code', [AuthController::class, 'verifyEmailCode'])->name('verify.email.code');
+Route::post('/resend-email-code', [AuthController::class, 'resendEmailVerificationCode'])->name('resend.email.code');
+
+Route::get('/test-mail', function () {
+    \Mail::raw('This is a test email', function ($message) {
+        $message->to('barnabas.ykolo@gmail.com')
+                ->subject('Test Email');
+    });
+
+    return 'Test email sent!';
+});
+
+
+Route::get('/ping', function() {
+   return response()->json([
+       
+   ], 200);
+});
+
+// Paystack public webhook endpoint
+Route::post('/webhook/paystack', [\App\Http\Controllers\Api\PaystackWebhookController::class, 'handle']);
+
+
+Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm']);
+Route::post('/password/reset', [AuthController::class, 'resetPasswordPost']);
+//Route::get('/reset-password', [AuthController::class, 'resetPassword'])->name('password.reset');
+
+Route::get('/email/verify', function () {
+    return response()->json(['message' => 'Please verify your email address.'], 403);
+})->middleware('auth:sanctum')->name('verification.notice');
+
+
+// ✅ Send verification email after registration
+Route::post('/email/resend', function (Request $request) {
+    if ($request->user()->hasVerifiedEmail()) {
+        return response()->json(['message' => 'Email already verified.'], 200);
+    }
+
+    $request->user()->sendEmailVerificationNotification();
+    return response()->json(['message' => 'Verification email resent.']);
+})->middleware(['auth:sanctum']);
+
+// ✅ Verify email when user clicks the link
+Route::get('/email/verify/{id}/{hash}', function (Request $request, $id, $hash) {
+    $user = User::find($id);
+
+    if (!$user) {
+        return response()->json(['message' => 'User not found.'], 404);
+    }
+
+    if (!hash_equals((string) $user->getKey(), (string) $id)) {
+        return response()->json(['message' => 'Invalid verification ID.'], 403);
+    }
+
+    if (!hash_equals(sha1($user->getEmailForVerification()), $hash)) {
+        return response()->json(['message' => 'Invalid verification hash.'], 403);
+    }
+
+    if ($user->hasVerifiedEmail()) {
+        return response()->json(['message' => 'Email already verified.'], 200);
+    }
+
+    $user->markEmailAsVerified();
+    event(new Verified($user));
+
+    //return response()->json(['message' => 'Email verified successfully.']);
+    return Redirect::to('https://app.hovertask.com?verified=1');
+})->middleware(['signed'])->name('verification.verify');
+
+
+
+// ✅ Check if user has verified their email
+Route::get('/email/check', function (Request $request) {
+    return response()->json(['verified' => $request->user()->hasVerifiedEmail()]);
+})->middleware(['auth:sanctum']);
+
+Route::get('/wallet/verify-payment/{reference}', [WalletController::class, 'verifyPayment'])->name('wallet.verify');
+    Route::get('/payment/verify-payment/{reference}', [OrderController::class, 'verify']);
+
+// Broadcasting auth endpoint for token-based SPA (Bearer token)
+Route::post('/broadcasting/auth', function (Request $request) {
+    Log::info('API Broadcasting auth attempt', ['ip' => $request->ip(), 'headers' => $request->headers->all(), 'body' => $request->all()]);
+    return Broadcast::auth($request);
+})->middleware('auth:sanctum');
+
+
+//landing page route
+Route::get('/show-product-landing-page/{id}', [ProductController::class, 'show'])->name('product.show');
+Route::get('/landing-page-products/all', [ProductController::class, 'showAll'])->name('product.showAll');
+Route::get('/landing-page-track-conversion/{productId}', [ResellerConversionController::class, 'track']);
+    
+//Dashboard Routes
+Route::prefix('v1')->group(function () {
+    
+    Route::prefix('dashboard')->middleware(['auth:sanctum'])->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
+        Route::get('/user', [DashboardController::class, 'userData'])->name('user.data');
+        Route::post('/change-password', [AuthController::class, 'changePassword'])->name('change.password');
+        Route::post('/bank', [AuthController::class, 'banks'])->name('change.bank');
+        Route::post('/update-profile', [AuthController::class, 'updateProfile'])->name('update.profile');
+        Route::put('/update-password', [AuthController::class, 'updatePassword'])->name('update.password');
+    });
+
+    Route::prefix('wallet')->middleware(['auth:sanctum'])->group(function () {
+        Route::post('/initialize-payment', [WalletController::class, 'initializePayment'])->name('wallet.initialize');
+        //Route::get('/verify-payment', [WalletController::class, 'verifyPayment'])->name('wallet.verify');
+        Route::get('/balance', [WalletController::class, 'getBalance'])->name('wallet.balance');
+    });
+
+    Route::prefix('payment')->middleware(['auth:sanctum'])->group(function () {
+        Route::post('/initialize-payment', [OrderController::class, 'pay']);
+        //Route::post('/create-order', [OrderController::class, 'createOrder']);
+    });
+
+
+    Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/referrals', [ReferralController::class, 'index'])->name('api.referrals.index');
+});
+ 
+   
+   Route::middleware('auth:sanctum')->group(function () {
+   Route::post('/withdraw', [WithdrawalController::class, 'withdraw']);
+});
+
+Route::get('/banks', [PaystackController::class, 'banks'])->name('banks.list');
+
+
+// Resolve account endpoint (auth required)
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/resolve-account', [\App\Http\Controllers\Api\PaystackController::class, 'resolve']);
+});
+
+    //create order is automated when pay is called
+
+    // Route::prefix('order')->middleware('auth:sanctum')->group(function (){
+    //     Route::post('/create-order', [OrderController::class, 'createOrder']);
+    // });
+});
+
+//protected routes TASK
+Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
+    Route::prefix('tasks')->group(function () {
+        Route::post('/create-task', [TaskController::class, 'createTask'])->name('create.task');
+        Route::post('/update-task/{id}', [TaskController::class, 'updateTask'])->name('update.task');
+        Route::get('/show-all-task', [TaskController::class, 'showAll'])->name('show.all');
+        Route::get('/show-task/{id}', [TaskController::class, 'show'])->name('show.task');
+        Route::get('/authusertasks', [TaskController::class, 'authUserTasks'])->name('task.authUserTasks');
+        Route::get('/show-task-perfrmance/{id}', [TaskController::class, 'showTaskPerformance'])->name('advertise.show');
+        Route::post('/submit-task/{id}', [TaskController::class, 'submitTask'])->name('submit.task');
+        Route::post('/approve-task/{id}', [TaskController::class, 'approveTask'])->name('approve.task');
+        Route::post('/approve-completed-task/{id}', [TaskController::class, 'approveCompletedTask'])->name('approve.completed.task');
+        Route::get('/pending-task', [TaskController::class, 'pendingTask'])->name('pending.task');
+        Route::get('/completed-task', [TaskController::class, 'completedTask'])->name('completed.task');
+        Route::get('/rejected-task', [TaskController::class, 'rejectTask'])->name('reject.task');
+        Route::get('/task-history', [TaskController::class, 'taskHistory'])->name('task.history');
+        Route::get('/completed-task-history', [TaskController::class, 'getTasks'])->name('completed.task.history');
+        Route::delete('/delete-task/{id}', [TaskController::class, 'deleteTask'])->name('delete.task');
+    });
+
+    //product routes
+    Route::prefix('products')->group(function () {
+        Route::get('/', [ProductController::class, 'index'])->name('product.index');
+        Route::post('/create-product', [ProductController::class, 'store'])->name('product.store');
+        Route::get('/auth-user-product', [ProductController::class, 'authUserProducts'])->name('product.authUserProduct');
+        Route::post('/update-product/{id}', [ProductController::class, 'update'])->name('product.update');
+        Route::post('/approve-product/{id}', [ProductController::class, 'approveProduct'])->name('product.approve');
+        Route::get('/show-product/{id}', [ProductController::class, 'show'])->name('product.show');
+        Route::get('/show-all-product', [ProductController::class, 'showAll'])->name('product.showAll');
+        Route::get('/location/{location}', [ProductController::class, 'productByLocation'])->name('product.location');
+        //generate link
+        Route::post('/reseller-link/{id}', [ProductController::class, 'resellerLink'])->name('product.resellerLink');
+        Route::post('/contact-seller/{id}', [ProductController::class, 'contactSeller'])->name('product.contactSeller');
+    });
+
+    //reseller conversion tracking route
+    Route::get('/track-conversion/{productId}', [ResellerConversionController::class, 'track']);
+    Route::get('/reseller/conversions', [ResellerConversionController::class, 'getConversionsForReseller']);
+    
+    
+    Route::prefix('wishlists')->group(function () {
+        Route::post('/add/{product}', [WishlistController::class, 'add'])->name('wishlist.add');
+        Route::delete('/remove/{product}', [WishlistController::class, 'remove'])->name('wishlist.remove');
+        Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
+    });
+    Route::prefix('cart')->group(function () {
+        Route::post('/add/{product}', [CartController::class, 'addToCart'])->name('cart.add');
+        Route::delete('/remove/{product}', [CartController::class, 'removeFromCart'])->name('cart.remove');
+        Route::get('/cartitems', [CartController::class, 'getCartItems'])->name('cart.getCartItems');
+    });
+   
+
+    Route::prefix('reviews')->group(function () {
+        Route::post('/reviews', [ReviewController::class, 'store']);
+        Route::get('/reviews/{productId}', [ReviewController::class, 'getReviews']);
+    });
+
+    Route::prefix('follow')->group(function () {
+        Route::post('/follow/{user}', [FollowController::class, 'follow'])->name('follow');
+        Route::post('/unfollow/{user}', [FollowController::class, 'unfollow'])->name('unfollow');
+    });
+
+    Route::prefix('socials')->group(function () {
+        //Route::get('/facebook-data', [SocialConnectController::class, 'getFacebookData']);
+        Route::get('/facebook', [SocialConnectController::class, 'redirectToFacebook']);
+        Route::get('/auth/facebook/callback', [SocialConnectController::class, 'handleFacebookCallback']);
+        
+        // TikTok routes
+        Route::get('/auth/tiktok/url', [SocialConnectController::class, 'getTikTokAuthUrl']);
+        Route::post('/auth/tiktok/callback', [SocialConnectController::class, 'handleTikTokCallback']);
+
+        Route::get('/auth/tiktok', [SocialConnectController::class, 'connectTikTok'])->name('tiktok.connect');
+        Route::get('/auth/tiktok/callback', [SocialConnectController::class, 'tiktokCallback'])->name('tiktok.callback');
+        Route::get('/tiktok/profile', [SocialConnectController::class, 'getTikTokProfile'])->name('tiktok.profile');
+        Route::get('/tiktok/videos', [SocialConnectController::class, 'getTikTokVideos'])->name('tiktok.videos');
+        Route::post('/tiktok/disconnect', [SocialConnectController::class, 'disconnectTikTok'])->name('tiktok.disconnect');
+
+        Route::post('/manual-connect', [SocialConnectController::class, 'manualconnection'])->name('manual.connect');
+        
+    });
+    
+    //Route::get('/get-product/{id}', [ProductController::class, 'show'])->name('product.show');
+    Route::prefix('contact')->group(function () {
+        Route::post('/create-contact', [ContactController::class, 'createContact'])->name('contact.create');
+        Route::post('/create-group', [ContactController::class, 'createGroup'])->name('group.create');
+    });
+
+    Route::prefix('chat')->group(function () {
+        Route::get('/conversations', [ChatController::class, 'index']);
+        Route::get('/conversations/{recipientId}/messages', [ChatController::class, 'getMessages']);
+        Route::post('/messages', [ChatController::class, 'sendMessage']);
+    });
+
+    Route::prefix('addmeup')->group(function () {
+        Route::get('/all', [AddMeUpController::class, 'index'])->name('addmeup.index');
+        Route::post('/create', [AddMeUpController::class, 'create'])->name('addmeup.create');
+        Route::get('/mylist', [AddMeUpController::class, 'myList'])->name('addmeup.list');
+        Route::post('/listcontact', [AddMeUpController::class, 'listContact'])->name('addmeup.listcontact');
+        Route::post('/listgroup', [AddMeUpController::class, 'listGroup'])->name('addmeup.listgroup');
+        Route::post('/addmeup/{added_user_id}', [AddMeUpController::class, 'addMeUp'])->name('addmeup.addmeup');
+
+    });
+
+    Route::prefix('advertise')->group(function () {
+        Route::get('/all', [AdvertiseController::class, 'index'])->name('advertise.index');
+        Route::get('/show/{id}', [AdvertiseController::class, 'show'])->name('advertise.show');
+        Route::post('/create', [AdvertiseController::class, 'create'])->name('advertise.create');
+        Route::put('/update/{id}', [AdvertiseController::class, 'updateAds'])->name('advertise.update');
+        Route::get('/authuserads', [AdvertiseController::class, 'authUserAds'])->name('advertise.authUserAds');
+        Route::put('/approveads/{id}', [AdvertiseController::class, 'approveAds'])->name('advertise.approveAds');
+        Route::delete('/deleteAds/{id}', [AdvertiseController::class, 'destroy'])->name('advertise.deleteAds');
+        Route::post('/pay-setup-fee', [AdvertiseController::class, 'payAdvertFee'])->name('setup.fee');
+        Route::get('/show-all-advert', [AdvertiseController::class, 'showAll'])->name('advertise.showall');
+        Route::post('/showAds', [AdvertiseController::class, 'showAds'])->name('advertise.showads');
+        Route::post('/submit-advert/{id}', [AdvertiseController::class, 'submitAdvert'])->name('advertise.submitAdvert');
+        Route::post('/approve-completed-advert/{id}', [TaskController::class, 'approveCompletedAdvert'])->name('approve.completed.advert');
+
+
+
+    });
+
+
+   // Update participant status route
+    Route::patch('advert/participants/{id}/status', [AdvertiseController::class, 'updateParticipantStatus']);
+    Route::patch('engagement/participants/{id}/status', [TaskController::class, 'updateParticipantStatus']);
+
+
+
+    
+
+
+        Route::prefix('notification')->group(function () {
+            Route::get('/notifications', [NotificationController::class, 'index']);
+            Route::get('/notifications/{id}', [NotificationController::class, 'show']);
+            Route::post('/notifications/read/{id}', [NotificationController::class, 'viewNotification']);
+        });
+
+
+    Route::prefix('kyc')->group(function () {
+        Route::post('/create', [KYCController::class, 'submit'])->name('kyc.create');
+        Route::get('/show/{id}', [KYCController::class, 'show'])->name('kyc.show');
+        Route::put('/update/{id}', [KYCController::class, 'update'])->name('kyc.update');
+        Route::put('/approve/{id}', [KYCController::class, 'approve'])->name('kyc.approve');
+        Route::put('/reject/{id}', [KYCController::class, 'reject'])->name('kyc.reject');
+    });
+
+
+
+
+    // Route::middleware('auth:sanctum')->prefix('api/v1')->group(function () {
+    //     Route::get('/products/show-product/{id}', [ProductController::class, 'show']);
+    // });
+
+
+    //Categories routes
+    Route::prefix('categories')->group(function () {
+        Route::post('/create', [CategoryController::class, 'create'])->name('category.create');
+        Route::get('/all-categories', [CategoryController::class, 'index'])->name('category.index');
+        //Route::post('/create-product', [CategoryController::class, 'store'])->name('product.store');
+    });
+});
+
+//transaction routes
+Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
+    Route::get('/transactions', [TransactionController::class, 'index']);
+    Route::get('/transactions/{id}', [TransactionController::class, 'show']);
+});
+
+
+//product feedback routes for athenticated user
+
+Route::prefix('v1')->group(function () {
+   Route::prefix('products')->group(function () { 
+    Route::get('{productId}/feedback', [ProductFeedbackController::class, 'list']);
+
+    Route::post('{productId}/feedback-list', [ProductFeedbackController::class, 'store']);
+   });
+});
+
+
+//product routes
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
+});
+
+// Admin routes
+Route::prefix('v1')->group(function () {
+ Route::prefix('admin')->middleware(['auth:sanctum', 'role:superadministrator'])->group(function () {
+    // Dashboard
+    Route::get('dashboard', [\App\Http\Controllers\Api\V1\Admin\AdminDashboardController::class, 'index']);
+    Route::get('/user', [DashboardController::class, 'userData'])->name('user.data');
+    // Users
+    Route::apiResource('users', \App\Http\Controllers\Api\V1\Admin\AdminUserController::class);
+    Route::post('users/{id}/ban', [\App\Http\Controllers\Api\V1\Admin\AdminUserController::class, 'ban']);
+    Route::post('users/{id}/unban', [\App\Http\Controllers\Api\V1\Admin\AdminUserController::class, 'unban']);
+    Route::get('users/role/{role}', [\App\Http\Controllers\Api\V1\Admin\AdminUserController::class, 'getByRole']);
+
+    // Products
+    Route::apiResource('products', \App\Http\Controllers\Api\V1\Admin\AdminProductController::class);
+    Route::get('products/category/{categoryId}', [\App\Http\Controllers\Api\V1\Admin\AdminProductController::class, 'getByCategory']);
+    Route::get('products/user/{userId}', [\App\Http\Controllers\Api\V1\Admin\AdminProductController::class, 'getByUser']);
+
+    // Orders
+    Route::apiResource('orders', \App\Http\Controllers\Api\V1\Admin\AdminOrderController::class);
+    Route::get('orders/status/{status}', [\App\Http\Controllers\Api\V1\Admin\AdminOrderController::class, 'getByStatus']);
+    Route::get('orders/user/{userId}', [\App\Http\Controllers\Api\V1\Admin\AdminOrderController::class, 'getByUser']);
+
+    // Categories
+    Route::apiResource('categories', \App\Http\Controllers\Api\V1\Admin\AdminCategoryController::class);
+    Route::get('categories/parent/{parentId}', [\App\Http\Controllers\Api\V1\Admin\AdminCategoryController::class, 'getByParent']);
+
+    // Withdrawals
+    Route::apiResource('withdrawals', \App\Http\Controllers\Api\V1\Admin\AdminWithdrawalController::class);
+    Route::get('withdrawals/status/{status}', [\App\Http\Controllers\Api\V1\Admin\AdminWithdrawalController::class, 'getByStatus']);
+    Route::get('withdrawals/user/{userId}', [\App\Http\Controllers\Api\V1\Admin\AdminWithdrawalController::class, 'getByUser']);
+
+    // Transactions
+    Route::apiResource('transactions', \App\Http\Controllers\Api\V1\Admin\AdminTransactionController::class);
+    Route::get('transactions/type/{type}', [\App\Http\Controllers\Api\V1\Admin\AdminTransactionController::class, 'getByType']);
+    Route::get('transactions/user/{userId}', [\App\Http\Controllers\Api\V1\Admin\AdminTransactionController::class, 'getByUser']);
+
+    // Advertises
+    Route::apiResource('advertises', \App\Http\Controllers\Api\V1\Admin\AdminAdvertiseController::class);
+    Route::post('advertises/{id}/approve', [\App\Http\Controllers\Api\V1\Admin\AdminAdvertiseController::class, 'approve']);
+    Route::post('advertises/{id}/reject', [\App\Http\Controllers\Api\V1\Admin\AdminAdvertiseController::class, 'reject']);
+    Route::get('advertises/status/{status}', [\App\Http\Controllers\Api\V1\Admin\AdminAdvertiseController::class, 'getByStatus']);
+    Route::get('advertises/user/{userId}', [\App\Http\Controllers\Api\V1\Admin\AdminAdvertiseController::class, 'getByUser']);
+
+    // Tasks
+    Route::apiResource('tasks', \App\Http\Controllers\Api\V1\Admin\AdminTaskController::class);
+    Route::get('tasks/status/{status}', [\App\Http\Controllers\Api\V1\Admin\AdminTaskController::class, 'getByStatus']);
+    Route::get('tasks/user/{userId}', [\App\Http\Controllers\Api\V1\Admin\AdminTaskController::class, 'getByUser']);
+    Route::get('tasks/type/{type}', [\App\Http\Controllers\Api\V1\Admin\AdminTaskController::class, 'getByType']);
+
+    // Completed Tasks
+    Route::apiResource('completed-tasks', \App\Http\Controllers\Api\V1\Admin\AdminCompletedTaskController::class);
+    Route::post('completed-tasks/{id}/approve', [\App\Http\Controllers\Api\V1\Admin\AdminCompletedTaskController::class, 'approve']);
+    Route::post('completed-tasks/{id}/reject', [\App\Http\Controllers\Api\V1\Admin\AdminCompletedTaskController::class, 'reject']);
+    Route::get('completed-tasks/status/{status}', [\App\Http\Controllers\Api\V1\Admin\AdminCompletedTaskController::class, 'getByStatus']);
+    Route::get('completed-tasks/user/{userId}', [\App\Http\Controllers\Api\V1\Admin\AdminCompletedTaskController::class, 'getByUser']);
+    Route::get('completed-tasks/advert/{advertId}', [\App\Http\Controllers\Api\V1\Admin\AdminCompletedTaskController::class, 'getByAdvert']);
+
+    // Referrals
+    Route::apiResource('referrals', \App\Http\Controllers\Api\V1\Admin\AdminReferralController::class);
+    Route::post('referrals/{id}/mark-paid', [\App\Http\Controllers\Api\V1\Admin\AdminReferralController::class, 'markAsPaid']);
+    Route::get('referrals/status/{status}', [\App\Http\Controllers\Api\V1\Admin\AdminReferralController::class, 'getByStatus']);
+    Route::get('referrals/referrer/{referrerId}', [\App\Http\Controllers\Api\V1\Admin\AdminReferralController::class, 'getByReferrer']);
+    Route::get('referrals/referee/{refereeId}', [\App\Http\Controllers\Api\V1\Admin\AdminReferralController::class, 'getByReferee']);
+
+    // Reseller Conversions
+    Route::apiResource('reseller-conversions', \App\Http\Controllers\Api\V1\Admin\AdminResellerConversionController::class);
+    Route::get('reseller-conversions/reseller/{resellerId}', [\App\Http\Controllers\Api\V1\Admin\AdminResellerConversionController::class, 'getByReseller']);
+    Route::get('reseller-conversions/product/{productId}', [\App\Http\Controllers\Api\V1\Admin\AdminResellerConversionController::class, 'getByProduct']);
+
+    // Reseller Links
+    Route::apiResource('reseller-links', \App\Http\Controllers\Api\V1\Admin\AdminResellerLinkController::class);
+    Route::get('reseller-links/user/{userId}', [\App\Http\Controllers\Api\V1\Admin\AdminResellerLinkController::class, 'getByUser']);
+    Route::get('reseller-links/product/{productId}', [\App\Http\Controllers\Api\V1\Admin\AdminResellerLinkController::class, 'getByProduct']);
+});
+});
