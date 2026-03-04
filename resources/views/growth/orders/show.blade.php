@@ -116,14 +116,14 @@
                     <h3 class="font-semibold text-white mb-4">Actions</h3>
                     <div class="space-y-3">
                         @if(in_array($order->status, ['delivered', 'revision']))
-                        <form action="{{ route('growth.orders.approve', $order) }}" method="POST">
+                        <form action="{{ route('growth.orders.approve', $order) }}" method="POST" class="action-form">
                             @csrf
                             <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg transition-colors">
                                 <i class="fas fa-check mr-2"></i>Approve Delivery
                             </button>
                         </form>
 
-                        <form action="{{ route('growth.orders.revision', $order) }}" method="POST">
+                        <form action="{{ route('growth.orders.revision', $order) }}" method="POST" class="action-form">
                             @csrf
                             <input type="text" name="notes" required placeholder="Revision notes" class="w-full mb-2 px-3 py-2 rounded bg-dark-800 border border-dark-700 text-gray-200 text-sm">
                             <button type="submit" class="w-full bg-yellow-600/20 hover:bg-yellow-600/30 text-yellow-400 py-2 rounded-lg transition-colors">
@@ -131,7 +131,7 @@
                             </button>
                         </form>
                         @endif
-                        <form action="{{ route('growth.orders.cancel', $order) }}" method="POST">
+                        <form action="{{ route('growth.orders.cancel', $order) }}" method="POST" class="action-form">
                             @csrf
                             <button type="submit" class="w-full bg-red-600/20 hover:bg-red-600/30 text-red-400 py-2 rounded-lg transition-colors" onclick="return confirm('Are you sure you want to cancel this order?')">
                                 <i class="fas fa-times mr-2"></i>Cancel Order
@@ -144,4 +144,28 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    document.querySelectorAll('.action-form').forEach((form) => {
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const response = await fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: new FormData(form)
+            });
+            const data = await response.json();
+            if (data.success) {
+                window.location.reload();
+                return;
+            }
+            alert(data.message || 'Action failed.');
+        });
+    });
+</script>
+@endpush
 @endsection
