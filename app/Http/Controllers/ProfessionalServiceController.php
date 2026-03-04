@@ -163,7 +163,43 @@ class ProfessionalServiceController extends Controller
         );
 
         if (!$result['success']) {
+            if (isset($result['required'], $result['available'])) {
+                $requiredTopup = max(0, (float) $result['required'] - (float) $result['available']);
+                session([
+                    'pending_service_checkout' => [
+                        'service_id' => $serviceId,
+                        'addon_ids' => $validated['addon_ids'] ?? [],
+                        'requirements' => $validated['requirements'],
+                    ],
+                    'deposit_success_redirect' => route('professional-services.checkout.resume'),
+                    'insufficient_balance_required' => $requiredTopup,
+                ]);
+
+                $result['redirect'] = route('wallet.deposit', ['required' => $requiredTopup]);
+                $result['message'] = 'Insufficient wallet balance. Deposit and you will be returned to complete this order.';
+            }
+
             return response()->json($result, 400);
+        }
+
+        try {
+            $conversation = MarketplaceConversation::findOrCreate(
+                'professional_service',
+                $result['order']->service_id,
+                $result['order']->buyer_id,
+                $result['order']->seller_id
+            );
+
+            MarketplaceMessage::create([
+                'conversation_id' => $conversation->id,
+                'sender_id' => $result['order']->buyer_id,
+                'message' => 'New order placed for "' . ($result['order']->service->title ?? 'Professional Service') . '". Requirements: ' . ($result['order']->requirements ?? 'N/A'),
+                'is_read' => false,
+            ]);
+
+            $conversation->update(['last_message_at' => now()]);
+        } catch (\Exception $e) {
+            Log::warning('Failed to create professional order conversation', ['error' => $e->getMessage()]);
         }
 
         return response()->json([
@@ -172,6 +208,67 @@ class ProfessionalServiceController extends Controller
             'order' => $result['order'],
             'redirect' => route('professional-services.orders.show', $result['order']->id),
         ]);
+    }
+
+    /**
+     * Resume professional service checkout after successful deposit
+     */
+    public function resumeCheckout(Request $request)
+    {
+        $pending = session('pending_service_checkout');
+
+        if (!$pending || empty($pending['service_id'])) {
+            return redirect()->route('professional-services.index')->with('error', 'No pending service checkout found to resume.');
+        }
+
+        $result = $this->service->createOrder(
+            Auth::user(),
+            (int) $pending['service_id'],
+            (array) ($pending['addon_ids'] ?? []),
+            (string) ($pending['requirements'] ?? '')
+        );
+
+        if (!$result['success']) {
+            if (isset($result['required'], $result['available'])) {
+                $requiredTopup = max(0, (float) $result['required'] - (float) $result['available']);
+                session([
+                    'deposit_success_redirect' => route('professional-services.checkout.resume'),
+                    'insufficient_balance_required' => $requiredTopup,
+                ]);
+
+                return redirect()
+                    ->route('wallet.deposit', ['required' => $requiredTopup])
+                    ->with('error', 'Your balance is still insufficient. Please complete your deposit to continue.');
+            }
+
+            return redirect()->route('professional-services.show', (int) $pending['service_id'])
+                ->with('error', $result['message'] ?? 'Failed to resume service checkout.');
+        }
+
+        try {
+            $conversation = MarketplaceConversation::findOrCreate(
+                'professional_service',
+                $result['order']->service_id,
+                $result['order']->buyer_id,
+                $result['order']->seller_id
+            );
+
+            MarketplaceMessage::create([
+                'conversation_id' => $conversation->id,
+                'sender_id' => $result['order']->buyer_id,
+                'message' => 'Checkout resumed and order confirmed for "' . ($result['order']->service->title ?? 'Professional Service') . '".',
+                'is_read' => false,
+            ]);
+
+            $conversation->update(['last_message_at' => now()]);
+        } catch (\Exception $e) {
+            Log::warning('Failed to create professional resume conversation', ['error' => $e->getMessage()]);
+        }
+
+        session()->forget(['pending_service_checkout', 'deposit_success_redirect', 'insufficient_balance_required']);
+
+        return redirect()->route('professional-services.orders.show', $result['order']->id)
+            ->with('success', 'Service order completed successfully after deposit.');
     }
 
     /**
@@ -467,6 +564,7 @@ class ProfessionalServiceController extends Controller
     {
         $validated = $request->validate([
             'recipient_id' => 'required|exists:users,id',
+            'service_id' => 'nullable|exists:professional_services,id',
             'subject' => 'required|string|min:3|max:255',
             'message' => 'required|string|min:10|max:5000',
         ]);
@@ -507,7 +605,7 @@ class ProfessionalServiceController extends Controller
 
             $conversation = MarketplaceConversation::findOrCreate(
                 'professional_service',
-                0,
+                (int) ($validated['service_id'] ?? 0),
                 $sender->id,
                 $recipient->id
             );

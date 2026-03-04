@@ -46,10 +46,16 @@
                                 </div>
                             </div>
                             <div class="mt-3">
-                                <a href="{{ route('professional-services.orders.show', $order->id) }}" 
-                                    class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300">
-                                    Manage Order →
-                                </a>
+                                <div class="flex items-center gap-4">
+                                    <a href="{{ route('professional-services.orders.show', $order->id) }}" 
+                                        class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300">
+                                        Manage Order →
+                                    </a>
+                                    <a href="{{ route('chat.open', ['type' => 'professional_service', 'referenceId' => $order->service_id, 'participantId' => $order->buyer_id]) }}"
+                                        class="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300">
+                                        Go to Messages →
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     @endforeach
@@ -67,6 +73,10 @@
                                     <h3 class="font-semibold text-lg text-gray-900 dark:text-gray-100">{{ $order->service->title ?? 'Service' }}</h3>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Buyer: {{ $order->buyer->name ?? 'Unknown' }}</p>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Order #{{ $order->id }}</p>
+                                    <a href="{{ route('chat.open', ['type' => 'professional_service', 'referenceId' => $order->service_id, 'participantId' => $order->buyer_id]) }}"
+                                        class="inline-block mt-2 text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300">
+                                        Go to Messages →
+                                    </a>
                                 </div>
                                 <div class="text-left sm:text-right">
                                     <p class="text-lg font-bold text-gray-900 dark:text-gray-100">₦{{ number_format($order->total_amount ?? 0) }}</p>

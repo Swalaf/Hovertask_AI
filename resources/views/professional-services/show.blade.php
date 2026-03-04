@@ -328,6 +328,7 @@
         <form id="contact-form" class="p-6 space-y-6">
             @csrf
             <input type="hidden" name="recipient_id" value="{{ $service->user_id }}">
+            <input type="hidden" name="service_id" value="{{ $service->id }}">
             
             <div>
                 <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
@@ -422,6 +423,11 @@
         })
         .then(response => response.json())
         .then(data => {
+            if (!data.success && data.redirect) {
+                window.location.href = data.redirect;
+                return;
+            }
+
             if (data.redirect) {
                 window.location.href = data.redirect;
             } else if (data.message) {
@@ -479,6 +485,9 @@
             if (data.success) {
                 hideContactModal();
                 document.getElementById('contact-form').reset();
+                if (data.chat_url) {
+                    window.location.href = data.chat_url;
+                }
             }
         })
         .catch(error => {

@@ -305,6 +305,7 @@ Route::middleware(['auth', 'verified', 'logout.inactive'])->group(function () {
     // Chat/Messaging routes
     Route::prefix('chat')->name('chat.')->group(function () {
         Route::get('/', [ChatController::class, 'index'])->name('index');
+        Route::get('/open/{type}/{referenceId}/{participantId}', [ChatController::class, 'open'])->name('open');
         Route::get('/{conversation}', [ChatController::class, 'show'])->name('show');
         Route::post('/message', [ChatController::class, 'store'])->name('message');
         Route::get('/{conversation}/messages', [ChatController::class, 'apiMessages'])->name('messages');
@@ -337,6 +338,7 @@ Route::prefix('services')->name('professional-services.')->group(function () {
         
         // Order
         Route::post('/{service}/order', [ProfessionalServiceController::class, 'createOrder'])->name('order');
+        Route::get('/checkout/resume', [ProfessionalServiceController::class, 'resumeCheckout'])->name('checkout.resume');
         
         // My orders (buyer)
         Route::get('/orders', [ProfessionalServiceController::class, 'myOrders'])->name('orders.index');
@@ -379,6 +381,7 @@ Route::prefix('growth')->name('growth.')->group(function () {
         
         // Order
         Route::post('/{listing}/order', [GrowthController::class, 'createOrder'])->name('order');
+        Route::get('/checkout/resume', [GrowthController::class, 'resumeCheckout'])->name('checkout.resume');
         
         // Orders (buyer)
         Route::get('/orders', [GrowthController::class, 'myOrders'])->name('orders.index');
@@ -422,6 +425,7 @@ Route::prefix('products')->name('digital-products.')->group(function () {
         
         // Purchase
         Route::post('/{product}/purchase', [DigitalProductController::class, 'purchase'])->name('purchase');
+        Route::get('/purchase/resume', [DigitalProductController::class, 'resumePurchase'])->name('purchase.resume');
         
         // My purchases
         Route::get('/purchases', [DigitalProductController::class, 'myPurchases'])->name('my-purchases');

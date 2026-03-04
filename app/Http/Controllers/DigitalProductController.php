@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\DigitalProduct;
 use App\Models\DigitalProductOrder;
 use App\Models\DigitalProductReview;
+use App\Models\MarketplaceConversation;
+use App\Models\MarketplaceMessage;
 use App\Models\MarketplaceCategory;
 use App\Services\DigitalProductService;
 use Illuminate\Http\Request;
@@ -192,8 +194,51 @@ class DigitalProductController extends Controller
             return back()->with('error', 'This product is not available.');
         }
 
+        if (!$product->is_free) {
+            $user = Auth::user();
+            $wallet = $user->wallet;
+            $available = (float) ($wallet->withdrawable_balance ?? 0) + (float) ($wallet->promo_credit_balance ?? 0);
+            $required = (float) $product->current_price;
+
+            if ($available < $required) {
+                $requiredTopup = max(0, $required - $available);
+
+                session([
+                    'pending_product_checkout' => [
+                        'product_id' => $product->id,
+                    ],
+                    'deposit_success_redirect' => route('digital-products.purchase.resume'),
+                    'insufficient_balance_required' => $requiredTopup,
+                ]);
+
+                return redirect()
+                    ->route('wallet.deposit', ['required' => $requiredTopup])
+                    ->with('error', 'Insufficient wallet balance. Deposit and you will be returned to complete this purchase.');
+            }
+        }
+
         try {
             $order = $this->service->purchaseProduct($product, Auth::id());
+
+            try {
+                $conversation = MarketplaceConversation::findOrCreate(
+                    'digital_product',
+                    $product->id,
+                    $order->buyer_id,
+                    $product->user_id
+                );
+
+                MarketplaceMessage::create([
+                    'conversation_id' => $conversation->id,
+                    'sender_id' => $order->buyer_id,
+                    'message' => 'I just purchased "' . $product->title . '" (Order: ' . $order->order_number . ').',
+                    'is_read' => false,
+                ]);
+
+                $conversation->update(['last_message_at' => now()]);
+            } catch (\Exception $e) {
+                Log::warning('Failed to create digital purchase conversation', ['error' => $e->getMessage()]);
+            }
 
             if ($product->is_free) {
                 return redirect()->route('digital-products.download', $order)
@@ -217,6 +262,85 @@ class DigitalProductController extends Controller
             ]);
             
             return back()->with('error', $message ?: 'An error occurred while processing your purchase. Please try again.');
+        }
+    }
+
+    public function resumePurchase(Request $request)
+    {
+        $pending = session('pending_product_checkout');
+
+        if (!$pending || empty($pending['product_id'])) {
+            return redirect()->route('digital-products.index')->with('error', 'No pending product purchase found to resume.');
+        }
+
+        $product = DigitalProduct::find($pending['product_id']);
+
+        if (!$product || !$product->is_active) {
+            session()->forget(['pending_product_checkout', 'deposit_success_redirect', 'insufficient_balance_required']);
+            return redirect()->route('digital-products.index')->with('error', 'The selected product is no longer available.');
+        }
+
+        if ($product->user_id === Auth::id()) {
+            session()->forget(['pending_product_checkout', 'deposit_success_redirect', 'insufficient_balance_required']);
+            return redirect()->route('digital-products.show', $product)->with('error', 'You cannot purchase your own product.');
+        }
+
+        try {
+            $order = $this->service->purchaseProduct($product, Auth::id());
+
+            try {
+                $conversation = MarketplaceConversation::findOrCreate(
+                    'digital_product',
+                    $product->id,
+                    $order->buyer_id,
+                    $product->user_id
+                );
+
+                MarketplaceMessage::create([
+                    'conversation_id' => $conversation->id,
+                    'sender_id' => $order->buyer_id,
+                    'message' => 'I just completed checkout for "' . $product->title . '" (Order: ' . $order->order_number . ').',
+                    'is_read' => false,
+                ]);
+
+                $conversation->update(['last_message_at' => now()]);
+            } catch (\Exception $e) {
+                Log::warning('Failed to create resumed digital purchase conversation', ['error' => $e->getMessage()]);
+            }
+
+            session()->forget(['pending_product_checkout', 'deposit_success_redirect', 'insufficient_balance_required']);
+
+            if ($product->is_free) {
+                return redirect()->route('digital-products.download', $order)
+                    ->with('success', 'Download started!');
+            }
+
+            return redirect()->route('digital-products.my-purchases')
+                ->with('success', 'Purchase completed successfully after deposit.');
+        } catch (\Exception $e) {
+            if (str_contains(strtolower($e->getMessage()), 'insufficient')) {
+                $user = Auth::user();
+                $wallet = $user->wallet;
+                $available = (float) ($wallet->withdrawable_balance ?? 0) + (float) ($wallet->promo_credit_balance ?? 0);
+                $requiredTopup = max(0, (float) $product->current_price - $available);
+
+                session([
+                    'deposit_success_redirect' => route('digital-products.purchase.resume'),
+                    'insufficient_balance_required' => $requiredTopup,
+                ]);
+
+                return redirect()->route('wallet.deposit', ['required' => $requiredTopup])
+                    ->with('error', 'Your balance is still insufficient. Please complete your deposit to continue.');
+            }
+
+            Log::error('Failed to resume digital purchase', [
+                'product_id' => $product->id,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->route('digital-products.show', $product)
+                ->with('error', 'Failed to complete resumed purchase. Please try again.');
         }
     }
 

@@ -137,6 +137,7 @@
         <form id="contact-form" class="p-6 space-y-6">
             @csrf
             <input type="hidden" name="recipient_id" value="{{ $listing->user_id }}">
+            <input type="hidden" name="listing_id" value="{{ $listing->id }}">
             
             <div>
                 <label class="block text-sm font-semibold text-gray-300 mb-2">
@@ -184,18 +185,18 @@ async function createOrder() {
         });
         
         const data = await response.json();
+        if (!data.success && data.redirect) {
+            window.location.href = data.redirect;
+            return;
+        }
+
         if(data.success) {
             alert('Order placed successfully!');
             window.location.href = data.redirect;
         } else {
             // Check if it's an insufficient balance error
             if(data.message && data.message.toLowerCase().includes('insufficient')) {
-                if(confirm(data.message + '\n\nWould you like to deposit funds now?')) {
-                    // Store the current page to return to after deposit
-                    sessionStorage.setItem('return_after_deposit', window.location.href);
-                    sessionStorage.setItem('deposit_amount', {{ $listing->price }});
-                    window.location.href = '{{ route("wallet.deposit") }}';
-                }
+                alert(data.message);
             } else {
                 if ((response.status === 422 || data.errors || data.error_list) && window.SwiftkudiFormFeedback && form) {
                     window.SwiftkudiFormFeedback.showValidationErrors(form, data, {
@@ -258,6 +259,9 @@ document.getElementById('contact-form').addEventListener('submit', function(e) {
         if (data.success) {
             hideContactModal();
             document.getElementById('contact-form').reset();
+            if (data.chat_url) {
+                window.location.href = data.chat_url;
+            }
         }
     })
     .catch(error => {

@@ -138,7 +138,41 @@ class GrowthController extends Controller
         $result = $this->service->createOrder($user, $listingId);
 
         if (!$result['success']) {
+            if (isset($result['required'], $result['available'])) {
+                $requiredTopup = max(0, (float) $result['required'] - (float) $result['available']);
+                session([
+                    'pending_growth_checkout' => [
+                        'listing_id' => $listingId,
+                    ],
+                    'deposit_success_redirect' => route('growth.checkout.resume'),
+                    'insufficient_balance_required' => $requiredTopup,
+                ]);
+
+                $result['redirect'] = route('wallet.deposit', ['required' => $requiredTopup]);
+                $result['message'] = 'Insufficient wallet balance. Deposit and you will be returned to complete this order.';
+            }
+
             return response()->json($result, 400);
+        }
+
+        try {
+            $conversation = MarketplaceConversation::findOrCreate(
+                'growth_service',
+                $result['order']->listing_id,
+                $result['order']->buyer_id,
+                $result['order']->seller_id
+            );
+
+            MarketplaceMessage::create([
+                'conversation_id' => $conversation->id,
+                'sender_id' => $result['order']->buyer_id,
+                'message' => 'New order placed for "' . ($result['order']->listing->title ?? 'Growth Listing') . '". Please review and begin delivery.',
+                'is_read' => false,
+            ]);
+
+            $conversation->update(['last_message_at' => now()]);
+        } catch (\Exception $e) {
+            Log::warning('Failed to create growth order conversation', ['error' => $e->getMessage()]);
         }
 
         return response()->json([
@@ -147,6 +181,62 @@ class GrowthController extends Controller
             'order' => $result['order'],
             'redirect' => route('growth.orders.show', $result['order']->id),
         ]);
+    }
+
+    /**
+     * Resume growth checkout after successful deposit
+     */
+    public function resumeCheckout(Request $request)
+    {
+        $pending = session('pending_growth_checkout');
+
+        if (!$pending || empty($pending['listing_id'])) {
+            return redirect()->route('growth.index')->with('error', 'No pending growth order found to resume.');
+        }
+
+        $result = $this->service->createOrder(Auth::user(), (int) $pending['listing_id']);
+
+        if (!$result['success']) {
+            if (isset($result['required'], $result['available'])) {
+                $requiredTopup = max(0, (float) $result['required'] - (float) $result['available']);
+                session([
+                    'deposit_success_redirect' => route('growth.checkout.resume'),
+                    'insufficient_balance_required' => $requiredTopup,
+                ]);
+
+                return redirect()
+                    ->route('wallet.deposit', ['required' => $requiredTopup])
+                    ->with('error', 'Your balance is still insufficient. Please complete your deposit to continue.');
+            }
+
+            return redirect()->route('growth.show', (int) $pending['listing_id'])
+                ->with('error', $result['message'] ?? 'Failed to resume growth checkout.');
+        }
+
+        try {
+            $conversation = MarketplaceConversation::findOrCreate(
+                'growth_service',
+                $result['order']->listing_id,
+                $result['order']->buyer_id,
+                $result['order']->seller_id
+            );
+
+            MarketplaceMessage::create([
+                'conversation_id' => $conversation->id,
+                'sender_id' => $result['order']->buyer_id,
+                'message' => 'Checkout resumed and order confirmed for "' . ($result['order']->listing->title ?? 'Growth Listing') . '".',
+                'is_read' => false,
+            ]);
+
+            $conversation->update(['last_message_at' => now()]);
+        } catch (\Exception $e) {
+            Log::warning('Failed to create growth resume conversation', ['error' => $e->getMessage()]);
+        }
+
+        session()->forget(['pending_growth_checkout', 'deposit_success_redirect', 'insufficient_balance_required']);
+
+        return redirect()->route('growth.orders.show', $result['order']->id)
+            ->with('success', 'Growth order completed successfully after deposit.');
     }
 
     /**
@@ -278,6 +368,7 @@ class GrowthController extends Controller
     {
         $validated = $request->validate([
             'recipient_id' => 'required|exists:users,id',
+            'listing_id' => 'nullable|exists:growth_listings,id',
             'subject' => 'required|string|min:3|max:255',
             'message' => 'required|string|min:10|max:5000',
         ]);
@@ -318,7 +409,7 @@ class GrowthController extends Controller
 
             $conversation = MarketplaceConversation::findOrCreate(
                 'growth_service',
-                0,
+                (int) ($validated['listing_id'] ?? 0),
                 $sender->id,
                 $recipient->id
             );

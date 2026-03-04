@@ -44,6 +44,32 @@ class ChatController extends Controller
         return view('chat.show', compact('conversation', 'otherUser'));
     }
 
+    public function open(string $type, int $referenceId, int $participantId)
+    {
+        $user = Auth::user();
+
+        $allowedTypes = ['task', 'professional_service', 'growth_service', 'digital_product', 'job'];
+        if (!in_array($type, $allowedTypes, true)) {
+            abort(404);
+        }
+
+        if ($participantId === $user->id) {
+            return redirect()->route('chat.index')->with('error', 'Cannot open chat with yourself.');
+        }
+
+        $buyerId = $user->id;
+        $sellerId = $participantId;
+
+        $conversation = MarketplaceConversation::findOrCreate(
+            $type,
+            $referenceId,
+            $buyerId,
+            $sellerId
+        );
+
+        return redirect()->route('chat.show', $conversation);
+    }
+
     public function store(Request $request)
     {
         $request->validate([
