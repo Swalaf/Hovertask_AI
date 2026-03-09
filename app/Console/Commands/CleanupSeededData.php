@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -14,6 +15,10 @@ class CleanupSeededData extends Command
 
     public function handle(): int
     {
+        if (!$this->ensureDatabaseConnection()) {
+            return self::FAILURE;
+        }
+
         $dryRun = (bool) $this->option('dry-run');
 
         $protectedEmails = [
@@ -86,7 +91,7 @@ class CleanupSeededData extends Command
                     'reviewed_by', 'referrer_id', 'referred_user_id',
                 ];
 
-                $tables = Schema::getTableListing();
+                $tables = $this->getTableListing();
                 $skipTables = ['users', 'migrations'];
 
                 foreach ($tables as $table) {
@@ -139,6 +144,25 @@ class CleanupSeededData extends Command
         return self::SUCCESS;
     }
 
+    private function ensureDatabaseConnection(): bool
+    {
+        try {
+            DB::connection()->getPdo();
+            return true;
+        } catch (QueryException | \PDOException | \Throwable $e) {
+            $connection = (string) config('database.default', 'unknown');
+            $host = (string) config('database.connections.' . $connection . '.host', 'unknown');
+            $port = (string) config('database.connections.' . $connection . '.port', 'unknown');
+            $database = (string) config('database.connections.' . $connection . '.database', 'unknown');
+
+            $this->error('Database connection failed.');
+            $this->line("Connection: {$connection} | Host: {$host}:{$port} | DB: {$database}");
+            $this->line('Start your database service and verify DB_* values in .env, then run: php artisan config:clear');
+
+            return false;
+        }
+    }
+
     private function deleteByIn(string $table, string $column, array $ids, array &$summary, bool $dryRun = false): void
     {
         if (empty($ids) || !Schema::hasTable($table) || !Schema::hasColumn($table, $column)) {
@@ -156,5 +180,40 @@ class CleanupSeededData extends Command
             $key = $table . '.' . $column;
             $summary[$key] = ($summary[$key] ?? 0) + $count;
         }
+    }
+
+    private function getTableListing(): array
+    {
+        $connection = DB::connection();
+        $driver = $connection->getDriverName();
+
+        if ($driver === 'mysql') {
+            $rows = $connection->select('SHOW TABLES');
+            return collect($rows)
+                ->map(function ($row) {
+                    $values = array_values((array) $row);
+                    return (string) ($values[0] ?? '');
+                })
+                ->filter()
+                ->values()
+                ->all();
+        }
+
+        if ($driver === 'pgsql') {
+            $rows = $connection->select("SELECT tablename FROM pg_tables WHERE schemaname = 'public'");
+            return collect($rows)->pluck('tablename')->map(fn ($t) => (string) $t)->all();
+        }
+
+        if ($driver === 'sqlite') {
+            $rows = $connection->select("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'");
+            return collect($rows)->pluck('name')->map(fn ($t) => (string) $t)->all();
+        }
+
+        if ($driver === 'sqlsrv') {
+            $rows = $connection->select("SELECT TABLE_NAME as table_name FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'");
+            return collect($rows)->pluck('table_name')->map(fn ($t) => (string) $t)->all();
+        }
+
+        return [];
     }
 }
