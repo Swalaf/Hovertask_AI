@@ -104,7 +104,7 @@ class NotificationDispatchService
     protected function resolveEmailTemplate(?string $settingKey, string $title, string $message, User $user, array $data = []): array
     {
         if (!$settingKey) {
-            return [$title, $message];
+            return $this->normalizeEmailContent($title, $message);
         }
 
         $templateMap = [
@@ -118,7 +118,7 @@ class NotificationDispatchService
 
         $mapping = $templateMap[$settingKey] ?? null;
         if (!$mapping) {
-            return [$title, $message];
+            return $this->normalizeEmailContent($title, $message);
         }
 
         $subjectTemplate = (string) SystemSetting::get($mapping['subject'], $title);
@@ -141,10 +141,15 @@ class NotificationDispatchService
             '{{task_url}}' => (string) ($data['action_url'] ?? ''),
         ];
 
-        return [
-            strtr($subjectTemplate, $replacements),
-            strtr($bodyTemplate, $replacements),
-        ];
+        $resolvedSubject = trim(strtr($subjectTemplate, $replacements));
+        $resolvedBody = trim(strtr($bodyTemplate, $replacements));
+
+        [$demoSubject, $demoBody] = $this->getDemoNotificationContent($settingKey, $title, $message);
+
+        return $this->normalizeEmailContent(
+            $resolvedSubject !== '' ? $resolvedSubject : $demoSubject,
+            $resolvedBody !== '' ? $resolvedBody : $demoBody
+        );
     }
 
     protected function sendInApp(User $user, string $title, string $message, string $type, array $data = []): void
@@ -160,11 +165,14 @@ class NotificationDispatchService
 
         try {
             $this->applyMailConfigFromSettings();
+            [$subject, $message] = $this->normalizeEmailContent($subject, $message);
+            $html = $this->buildHtmlEmail($subject, $message, $user);
 
-            Mail::raw($message, function ($mail) use ($user, $subject) {
+            Mail::send([], [], function ($mail) use ($user, $subject, $html) {
                 $mail->from(config('mail.from.address'), config('mail.from.name'))
                     ->to($user->email)
-                    ->subject($subject);
+                    ->subject($subject)
+                    ->setBody($html, 'text/html');
             });
         } catch (\Throwable $e) {
             Log::warning('Email notification dispatch failed', [
@@ -174,6 +182,92 @@ class NotificationDispatchService
                 'error' => $e->getMessage(),
             ]);
         }
+    }
+
+    protected function normalizeEmailContent(string $subject, string $message): array
+    {
+        $subject = trim($subject);
+        $message = trim($message);
+
+        if ($subject === '') {
+            $subject = 'SwiftKudi Notification Update';
+        }
+
+        if ($message === '') {
+            $message = "Hello,\n\nThis is a notification update from " . config('app.name', 'SwiftKudi') . ".\n\nPlease log in to your dashboard for full details.";
+        }
+
+        return [$subject, $message];
+    }
+
+    protected function getDemoNotificationContent(?string $settingKey, string $fallbackTitle, string $fallbackMessage): array
+    {
+        $siteName = (string) config('app.name', 'SwiftKudi');
+
+        $map = [
+            'notify_task_created' => [
+                'subject' => 'Your Task Has Been Created Successfully!',
+                'body' => "Hello,\n\nYour task has been created successfully on {$siteName}.\n\nYou can now monitor submissions from your dashboard.",
+            ],
+            'notify_task_bundle' => [
+                'subject' => 'New Task Bundle Available',
+                'body' => "Hello,\n\nA new task bundle is now available on {$siteName}.\n\nLog in now and start earning.",
+            ],
+            'notify_task_approval' => [
+                'subject' => 'Task Submission Approved',
+                'body' => "Hello,\n\nGreat news! Your task submission has been approved.\n\nKeep up the great work.",
+            ],
+            'notify_task_rejection' => [
+                'subject' => 'Task Submission Rejected',
+                'body' => "Hello,\n\nYour task submission was rejected.\n\nPlease check the feedback and resubmit.",
+            ],
+            'notify_withdrawal' => [
+                'subject' => 'Withdrawal Status Update',
+                'body' => "Hello,\n\nThere is an update on your withdrawal request.\n\nPlease check your wallet page for details.",
+            ],
+            'notify_referral_bonus' => [
+                'subject' => 'Referral Bonus Earned',
+                'body' => "Hello,\n\nCongratulations! You earned a referral bonus on {$siteName}.\n\nKeep sharing your referral link.",
+            ],
+        ];
+
+        $entry = $settingKey && isset($map[$settingKey]) ? $map[$settingKey] : null;
+
+        return [
+            (string) ($entry['subject'] ?? $fallbackTitle),
+            (string) ($entry['body'] ?? $fallbackMessage),
+        ];
+    }
+
+    protected function buildHtmlEmail(string $subject, string $message, User $user): string
+    {
+        $siteName = e((string) config('app.name', 'SwiftKudi'));
+        $recipientName = e((string) ($user->name ?: 'there'));
+        $safeSubject = e($subject);
+        $safeMessage = nl2br(e($message));
+        $dashboardUrl = e((string) url('/dashboard'));
+        $year = date('Y');
+
+        return '<!doctype html>' .
+            '<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>' .
+            '<body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;color:#111827;">' .
+            '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6;padding:24px 12px;">' .
+            '<tr><td align="center">' .
+            '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:620px;background:#ffffff;border-radius:12px;overflow:hidden;">' .
+            '<tr><td style="background:#4f46e5;padding:20px 24px;color:#ffffff;font-size:20px;font-weight:700;">' . $siteName . '</td></tr>' .
+            '<tr><td style="padding:24px;">' .
+            '<h2 style="margin:0 0 12px 0;font-size:20px;line-height:1.3;color:#111827;">' . $safeSubject . '</h2>' .
+            '<p style="margin:0 0 14px 0;font-size:14px;color:#374151;">Hello ' . $recipientName . ',</p>' .
+            '<div style="font-size:15px;line-height:1.7;color:#111827;">' . $safeMessage . '</div>' .
+            '<div style="margin-top:24px;">' .
+            '<a href="' . $dashboardUrl . '" style="display:inline-block;background:#4f46e5;color:#ffffff;text-decoration:none;padding:10px 16px;border-radius:8px;font-size:14px;font-weight:600;">Open Dashboard</a>' .
+            '</div>' .
+            '</td></tr>' .
+            '<tr><td style="padding:16px 24px;background:#f9fafb;font-size:12px;color:#6b7280;">© ' . $year . ' ' . $siteName . '. This is an automated notification email.</td></tr>' .
+            '</table>' .
+            '</td></tr>' .
+            '</table>' .
+            '</body></html>';
     }
 
     protected function applyMailConfigFromSettings(): void
