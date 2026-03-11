@@ -410,6 +410,26 @@ class DigitalProductController extends Controller
         return back()->with('success', 'Review submitted successfully!');
     }
 
+    public function confirmReceipt(Request $request, DigitalProductOrder $order)
+    {
+        if ($order->buyer_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'required|string|min:10|max:1000',
+        ]);
+
+        $result = $this->service->confirmReceiptAndReleaseWithReview($order, Auth::id(), $validated);
+
+        if (!$result['success']) {
+            return back()->with('error', $result['message'] ?? 'Failed to confirm receipt.');
+        }
+
+        return back()->with('success', $result['message']);
+    }
+
     public function feature(DigitalProduct $product)
     {
         $this->authorize('feature', $product);

@@ -2,6 +2,16 @@
 
 @section('title', 'My Purchases - SwiftKudi')
 
+@push('styles')
+<style>
+    tr:target {
+        outline: 2px solid rgb(79 70 229);
+        outline-offset: -2px;
+        background-color: rgba(79, 70, 229, 0.12);
+    }
+</style>
+@endpush
+
 @section('content')
 <div class="py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -89,7 +99,7 @@
                     </thead>
                     <tbody class="bg-white dark:bg-dark-900 divide-y divide-gray-200 dark:divide-dark-700">
                         @foreach($orders as $order)
-                            <tr class="hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors">
+                            <tr id="order-{{ $order->id }}" class="hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors">
                                 <td class="px-6 py-4">
                                     <div>
                                         <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ $order->order_number }}</span>
@@ -142,7 +152,7 @@
                                     <span class="text-sm text-gray-900 dark:text-white">{{ $order->download_count }}</span>
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <div class="flex justify-end gap-2">
+                                    <div class="flex justify-end gap-2 items-center flex-wrap">
                                         <a href="{{ route('digital-products.show', $order->product) }}" class="p-2 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" title="View">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -154,12 +164,29 @@
                                                 Chat
                                             </a>
                                         @endif
-                                        @if($order->status === 'completed')
-                                            <a href="#" class="p-2 text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors" title="Download">
+                                        @if(in_array($order->status, ['pending', 'completed']))
+                                            <a href="{{ route('digital-products.download', $order) }}" class="p-2 text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors" title="Download">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                                                 </svg>
                                             </a>
+                                        @endif
+                                        @if($order->status === 'pending')
+                                            <form action="{{ route('digital-products.confirm-receipt', $order) }}" method="POST" class="inline-flex items-center gap-2 flex-wrap">
+                                                @csrf
+                                                <select name="rating" required class="px-2 py-1 text-xs rounded-lg border border-gray-300 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-gray-100">
+                                                    <option value="">Rating</option>
+                                                    <option value="5">5</option>
+                                                    <option value="4">4</option>
+                                                    <option value="3">3</option>
+                                                    <option value="2">2</option>
+                                                    <option value="1">1</option>
+                                                </select>
+                                                <input type="text" name="comment" minlength="10" required placeholder="Review before payout" class="px-2 py-1 text-xs rounded-lg border border-gray-300 dark:border-dark-700 bg-white dark:bg-dark-800 text-gray-900 dark:text-gray-100">
+                                                <button type="submit" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-green-600 hover:bg-green-700 text-white transition-colors">
+                                                    Confirm & Release
+                                                </button>
+                                            </form>
                                         @endif
                                     </div>
                                 </td>

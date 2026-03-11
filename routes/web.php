@@ -430,6 +430,7 @@ Route::prefix('products')->name('digital-products.')->group(function () {
         // My purchases
         Route::get('/purchases', [DigitalProductController::class, 'myPurchases'])->name('my-purchases');
         Route::get('/orders/{order}/download', [DigitalProductController::class, 'download'])->name('download');
+        Route::post('/orders/{order}/confirm', [DigitalProductController::class, 'confirmReceipt'])->name('confirm-receipt');
         
         // Reviews
         Route::post('/{product}/review', [DigitalProductController::class, 'review'])->name('review');
@@ -473,9 +474,12 @@ Route::prefix('jobs')->name('jobs.')->group(function () {
 Route::prefix('escrow')->name('escrow.')->group(function () {
     Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', [EscrowController::class, 'index'])->name('index');
-        Route::get('/{transaction}', [EscrowController::class, 'show'])->name('show');
-        Route::post('/{transaction}/release', [EscrowController::class, 'release'])->name('release');
-        Route::post('/{transaction}/cancel', [EscrowController::class, 'cancel'])->name('cancel');
+        Route::get('/active', [EscrowController::class, 'active'])->name('active');
+        Route::get('/released', [EscrowController::class, 'released'])->name('released');
+        Route::get('/disputed', [EscrowController::class, 'disputed'])->name('disputed');
+        Route::get('/{escrow}', [EscrowController::class, 'show'])->name('show');
+        Route::post('/{escrow}/release', [EscrowController::class, 'release'])->name('release');
+        Route::post('/{escrow}/cancel', [EscrowController::class, 'cancel'])->name('cancel');
     });
 });
 

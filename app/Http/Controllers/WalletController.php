@@ -454,15 +454,25 @@ class WalletController extends Controller
     public function escrow()
     {
         $user = auth()->user();
-        
-        // Get escrow transactions where user is payer or payee
-        $escrowTransactions = \App\Models\EscrowTransaction::where('payer_id', $user->id)
+
+        $escrows = \App\Models\EscrowTransaction::with(['payer', 'payee', 'order'])
+            ->where('payer_id', $user->id)
             ->orWhere('payee_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->paginate(15);
-        
+
+        $totalInEscrow = \App\Models\EscrowTransaction::where('payer_id', $user->id)
+            ->whereIn('status', [\App\Models\EscrowTransaction::STATUS_PENDING, \App\Models\EscrowTransaction::STATUS_FUNDED])
+            ->sum('total_amount');
+
+        $totalReleased = \App\Models\EscrowTransaction::where('payee_id', $user->id)
+            ->where('status', \App\Models\EscrowTransaction::STATUS_RELEASED)
+            ->sum('amount');
+
         return view('escrow.index', [
-            'transactions' => $escrowTransactions,
+            'escrows' => $escrows,
+            'totalInEscrow' => $totalInEscrow,
+            'totalReleased' => $totalReleased,
         ]);
     }
 }

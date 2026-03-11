@@ -229,12 +229,6 @@ class DigitalProductService
 
     public function processDownload(DigitalProductOrder $order): ?string
     {
-        // First download finalizes pending paid purchase and releases seller payout
-        if ($order->status === 'pending') {
-            $this->completePurchase($order);
-            $order->refresh();
-        }
-
         if (!$order->can_download) {
             return null;
         }
@@ -244,6 +238,75 @@ class DigitalProductService
         $product = $order->product;
 
         return Storage::url($product->file_path);
+    }
+
+    public function confirmReceiptAndReleaseWithReview(DigitalProductOrder $order, int $userId, array $reviewData): array
+    {
+        try {
+            return DB::transaction(function () use ($order, $userId, $reviewData) {
+                if ($order->buyer_id !== $userId) {
+                    return ['success' => false, 'message' => 'Unauthorized'];
+                }
+
+                if (!in_array($order->status, ['pending', 'completed'], true)) {
+                    return ['success' => false, 'message' => 'Order cannot be confirmed in current status'];
+                }
+
+                $existingReview = DigitalProductReview::where('product_id', $order->product_id)
+                    ->where('user_id', $userId)
+                    ->first();
+
+                if ($existingReview) {
+                    return ['success' => false, 'message' => 'You already reviewed this product'];
+                }
+
+                if ($order->status === 'pending') {
+                    $this->completePurchase($order);
+                    $order->refresh();
+                }
+
+                $review = $this->addReview($order->product, $userId, $reviewData);
+
+                $product = $order->product;
+                $seller = $product->user;
+
+                app(\App\Services\NotificationDispatchService::class)->sendToUser(
+                    $seller,
+                    'Product Payment Released',
+                    'Buyer confirmed receipt and reviewed "' . ($product->title ?? 'your product') . '". Your payout has been released.',
+                    \App\Models\Notification::TYPE_SYSTEM,
+                    [
+                        'order_id' => $order->id,
+                        'product_id' => $product->id,
+                        'action_url' => route('digital-products.my-purchases') . '#order-' . $order->id,
+                    ],
+                    'notify_product_orders',
+                    true
+                );
+
+                app(\App\Services\NotificationDispatchService::class)->sendToUser(
+                    \App\Models\User::findOrFail($userId),
+                    'Product Confirmed Successfully',
+                    'You confirmed receipt and submitted your review. Payment has now been released to the creator.',
+                    \App\Models\Notification::TYPE_SYSTEM,
+                    [
+                        'order_id' => $order->id,
+                        'product_id' => $product->id,
+                        'action_url' => route('digital-products.my-purchases') . '#order-' . $order->id,
+                    ],
+                    'notify_product_orders'
+                );
+
+                return [
+                    'success' => true,
+                    'message' => 'Product confirmed, review submitted, and payout released to creator.',
+                    'order' => $order,
+                    'review' => $review,
+                ];
+            });
+        } catch (\Exception $e) {
+            return ['success' => false, 'message' => 'Failed to confirm receipt: ' . $e->getMessage()];
+        }
     }
 
     public function addReview(DigitalProduct $product, int $userId, array $data): DigitalProductReview

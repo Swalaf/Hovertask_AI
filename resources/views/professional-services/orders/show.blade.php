@@ -117,14 +117,24 @@
                 </div>
 
                 @if(in_array($order->status, ['paid', 'delivered', 'revision']))
-                <div class="bg-dark-900 rounded-2xl shadow-lg border border-dark-700 p-4 lg:p-6 space-y-3">
+                <div id="order-actions" class="bg-dark-900 rounded-2xl shadow-lg border border-dark-700 p-4 lg:p-6 space-y-3">
                     <h3 class="font-semibold text-white mb-4">Actions</h3>
 
                     @if(in_array($order->status, ['delivered', 'revision']))
                     <form action="{{ route('professional-services.orders.approve', $order) }}" method="POST" class="action-form">
                         @csrf
+                        <label class="block text-xs text-gray-400 mb-1">Rating (1-5)</label>
+                        <select name="rating" required class="w-full mb-2 px-3 py-2 rounded bg-dark-800 border border-dark-700 text-gray-200 text-sm">
+                            <option value="">Select rating</option>
+                            <option value="5">5 - Excellent</option>
+                            <option value="4">4 - Good</option>
+                            <option value="3">3 - Okay</option>
+                            <option value="2">2 - Poor</option>
+                            <option value="1">1 - Bad</option>
+                        </select>
+                        <textarea name="comment" required minlength="10" placeholder="Leave a quick review before releasing payment" class="w-full mb-2 px-3 py-2 rounded bg-dark-800 border border-dark-700 text-gray-200 text-sm"></textarea>
                         <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg transition-colors">
-                            <i class="fas fa-check mr-2"></i>Approve Delivery
+                            <i class="fas fa-check mr-2"></i>Confirm Service & Release Payment
                         </button>
                     </form>
 

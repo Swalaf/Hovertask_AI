@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\EscrowTransaction;
+use App\Models\Wallet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class EscrowController extends Controller
 {
@@ -14,25 +16,34 @@ class EscrowController extends Controller
     public function index()
     {
         $user = Auth::user();
-        
-        $escrows = EscrowTransaction::with(['task', 'service', 'growthListing', 'digitalProduct'])
+
+        $escrows = EscrowTransaction::with(['payer', 'payee', 'order'])
             ->where(function ($query) use ($user) {
-                $query->where('buyer_id', $user->id)
-                    ->orWhere('seller_id', $user->id);
+                $query->where('payer_id', $user->id)
+                    ->orWhere('payee_id', $user->id);
             })
             ->latest()
             ->paginate(15);
 
-        // Calculate totals
-        $totalInEscrow = EscrowTransaction::where('buyer_id', $user->id)
-            ->where('status', 'held')
-            ->sum('amount');
-            
-        $totalReleased = EscrowTransaction::where('seller_id', $user->id)
-            ->where('status', 'released')
+        $totalInEscrow = EscrowTransaction::where('payer_id', $user->id)
+            ->whereIn('status', [EscrowTransaction::STATUS_PENDING, EscrowTransaction::STATUS_FUNDED])
+            ->sum('total_amount');
+
+        $totalReleased = EscrowTransaction::where('payee_id', $user->id)
+            ->where('status', EscrowTransaction::STATUS_RELEASED)
             ->sum('amount');
 
         return view('escrow.index', compact('escrows', 'totalInEscrow', 'totalReleased'));
+    }
+
+    public function show(EscrowTransaction $escrow)
+    {
+        $userId = (int) Auth::id();
+        if ($escrow->payer_id !== $userId && $escrow->payee_id !== $userId) {
+            abort(403);
+        }
+
+        return view('escrow.show', compact('escrow'));
     }
 
     /**
@@ -41,17 +52,17 @@ class EscrowController extends Controller
     public function active()
     {
         $user = Auth::user();
-        
-        $escrows = EscrowTransaction::with(['task', 'service', 'growthListing', 'digitalProduct'])
+
+        $escrows = EscrowTransaction::with(['payer', 'payee', 'order'])
             ->where(function ($query) use ($user) {
-                $query->where('buyer_id', $user->id)
-                    ->orWhere('seller_id', $user->id);
+                $query->where('payer_id', $user->id)
+                    ->orWhere('payee_id', $user->id);
             })
-            ->where('status', 'held')
+            ->whereIn('status', [EscrowTransaction::STATUS_PENDING, EscrowTransaction::STATUS_FUNDED])
             ->latest()
             ->paginate(15);
 
-        return view('escrow.active', compact('escrows'));
+        return view('escrow.index', compact('escrows'));
     }
 
     /**
@@ -60,17 +71,17 @@ class EscrowController extends Controller
     public function released()
     {
         $user = Auth::user();
-        
-        $escrows = EscrowTransaction::with(['task', 'service', 'growthListing', 'digitalProduct'])
+
+        $escrows = EscrowTransaction::with(['payer', 'payee', 'order'])
             ->where(function ($query) use ($user) {
-                $query->where('buyer_id', $user->id)
-                    ->orWhere('seller_id', $user->id);
+                $query->where('payer_id', $user->id)
+                    ->orWhere('payee_id', $user->id);
             })
-            ->where('status', 'released')
+            ->where('status', EscrowTransaction::STATUS_RELEASED)
             ->latest()
             ->paginate(15);
 
-        return view('escrow.released', compact('escrows'));
+        return view('escrow.index', compact('escrows'));
     }
 
     /**
@@ -79,17 +90,17 @@ class EscrowController extends Controller
     public function disputed()
     {
         $user = Auth::user();
-        
-        $escrows = EscrowTransaction::with(['task', 'service', 'growthListing', 'digitalProduct'])
+
+        $escrows = EscrowTransaction::with(['payer', 'payee', 'order'])
             ->where(function ($query) use ($user) {
-                $query->where('buyer_id', $user->id)
-                    ->orWhere('seller_id', $user->id);
+                $query->where('payer_id', $user->id)
+                    ->orWhere('payee_id', $user->id);
             })
-            ->where('status', 'disputed')
+            ->where('status', EscrowTransaction::STATUS_DISPUTED)
             ->latest()
             ->paginate(15);
 
-        return view('escrow.disputed', compact('escrows'));
+        return view('escrow.index', compact('escrows'));
     }
 
     /**
@@ -98,26 +109,70 @@ class EscrowController extends Controller
     public function release(EscrowTransaction $escrow)
     {
         $user = Auth::user();
-        
-        // Only buyer can release
-        if ($escrow->buyer_id !== $user->id) {
+
+        if ($escrow->payer_id !== $user->id) {
             abort(403);
         }
 
-        if ($escrow->status !== 'held') {
+        if (!in_array($escrow->status, [EscrowTransaction::STATUS_PENDING, EscrowTransaction::STATUS_FUNDED], true)) {
             return back()->with('error', 'This escrow cannot be released.');
         }
 
-        $escrow->status = 'released';
-        $escrow->released_at = now();
-        $escrow->save();
+        DB::transaction(function () use ($escrow) {
+            $payeeWallet = Wallet::firstOrCreate(
+                ['user_id' => $escrow->payee_id],
+                [
+                    'withdrawable_balance' => 0,
+                    'promo_credit_balance' => 0,
+                    'total_earned' => 0,
+                    'total_spent' => 0,
+                    'pending_balance' => 0,
+                    'escrow_balance' => 0,
+                ]
+            );
 
-        // Update the seller's wallet
-        $seller = $escrow->seller;
-        $seller->wallet->withdrawable_balance += $escrow->amount;
-        $seller->wallet->save();
+            $payeeWallet->addWithdrawable((float) $escrow->amount, 'escrow_release');
+
+            $escrow->status = EscrowTransaction::STATUS_RELEASED;
+            $escrow->released_at = now();
+            $escrow->save();
+        });
 
         return back()->with('success', 'Payment released successfully!');
+    }
+
+    public function cancel(EscrowTransaction $escrow)
+    {
+        $user = Auth::user();
+
+        if ($escrow->payer_id !== $user->id) {
+            abort(403);
+        }
+
+        if (!in_array($escrow->status, [EscrowTransaction::STATUS_PENDING, EscrowTransaction::STATUS_FUNDED], true)) {
+            return back()->with('error', 'This escrow cannot be cancelled.');
+        }
+
+        DB::transaction(function () use ($escrow) {
+            $payerWallet = Wallet::firstOrCreate(
+                ['user_id' => $escrow->payer_id],
+                [
+                    'withdrawable_balance' => 0,
+                    'promo_credit_balance' => 0,
+                    'total_earned' => 0,
+                    'total_spent' => 0,
+                    'pending_balance' => 0,
+                    'escrow_balance' => 0,
+                ]
+            );
+
+            $payerWallet->addWithdrawable((float) $escrow->total_amount, 'escrow_refund');
+
+            $escrow->status = EscrowTransaction::STATUS_CANCELLED;
+            $escrow->save();
+        });
+
+        return back()->with('success', 'Escrow cancelled and funds refunded.');
     }
 
     /**
@@ -126,9 +181,8 @@ class EscrowController extends Controller
     public function dispute(Request $request, EscrowTransaction $escrow)
     {
         $user = Auth::user();
-        
-        // Must be buyer or seller
-        if ($escrow->buyer_id !== $user->id && $escrow->seller_id !== $user->id) {
+
+        if ($escrow->payer_id !== $user->id && $escrow->payee_id !== $user->id) {
             abort(403);
         }
 
@@ -136,10 +190,7 @@ class EscrowController extends Controller
             'reason' => 'required|string|min:20',
         ]);
 
-        $escrow->status = 'disputed';
-        $escrow->dispute_reason = $request->reason;
-        $escrow->disputed_at = now();
-        $escrow->disputer_id = $user->id;
+        $escrow->status = EscrowTransaction::STATUS_DISPUTED;
         $escrow->save();
 
         return back()->with('success', 'Dispute raised. Our team will review and mediate.');

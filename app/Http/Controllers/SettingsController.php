@@ -720,7 +720,22 @@ class SettingsController extends Controller
                 $password = config('services.turbosmtp.password', $password);
             }
 
-            $encryption = SystemSetting::get('smtp_encryption', config('mail.mailers.smtp.encryption'));
+            $encryption = strtolower((string) SystemSetting::get('smtp_encryption', config('mail.mailers.smtp.encryption')));
+            if (in_array($encryption, ['', 'none', 'null'], true)) {
+                $encryption = null;
+            }
+
+            $port = (int) $port;
+            if ($port <= 0) {
+                $port = $encryption === 'ssl' ? 465 : 587;
+            }
+
+            if ($encryption === 'ssl' && $port === 587) {
+                $port = 465;
+            }
+            if (($encryption === 'tls' || $encryption === null) && $port === 465) {
+                $port = 587;
+            }
 
             $fromAddress = SystemSetting::get('smtp_from_email', config('mail.from.address'));
             if (empty($fromAddress) && $isTurbo) {
@@ -738,7 +753,9 @@ class SettingsController extends Controller
                 Config::set('mail.mailers.smtp.port', $port);
                 Config::set('mail.mailers.smtp.username', $username);
                 Config::set('mail.mailers.smtp.password', $password);
-                Config::set('mail.mailers.smtp.encryption', $encryption === 'none' ? null : $encryption);
+                Config::set('mail.mailers.smtp.encryption', $encryption);
+                Config::set('mail.mailers.smtp.timeout', 30);
+                Config::set('mail.mailers.smtp.auth_mode', null);
                 Config::set('mail.from.address', $fromAddress);
                 Config::set('mail.from.name', $fromName);
 
@@ -785,7 +802,13 @@ class SettingsController extends Controller
 
             return redirect()->back()->with('success', 'Test email sent successfully to ' . $request->test_email);
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to send test email: ' . $e->getMessage());
+            $hint = '';
+            $message = $e->getMessage();
+            if (str_contains($message, 'Expected response code 250 but got an empty response')) {
+                $hint = ' SMTP server closed the connection. Check host, port/encryption pairing (587+tls or 465+ssl), username/password, and ensure outbound SMTP is allowed on your server/firewall.';
+            }
+
+            return redirect()->back()->with('error', 'Failed to send test email: ' . $message . $hint);
         }
     }
 }

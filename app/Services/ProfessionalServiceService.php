@@ -274,6 +274,102 @@ class ProfessionalServiceService
         }
     }
 
+    public function approveDeliveryWithReview(ProfessionalServiceOrder $order, User $buyer, int $rating, string $comment): array
+    {
+        try {
+            return DB::transaction(function () use ($order, $buyer, $rating, $comment) {
+                if ($order->buyer_id !== $buyer->id) {
+                    return ['success' => false, 'message' => 'Unauthorized'];
+                }
+
+                if (!in_array($order->status, [ProfessionalServiceOrder::STATUS_DELIVERED, ProfessionalServiceOrder::STATUS_REVISION])) {
+                    return ['success' => false, 'message' => 'Order cannot be completed in current status'];
+                }
+
+                $existingReview = ProfessionalServiceReview::where('order_id', $order->id)
+                    ->where('reviewer_id', $buyer->id)
+                    ->first();
+
+                if ($existingReview) {
+                    return ['success' => false, 'message' => 'You already reviewed this order'];
+                }
+
+                $seller = User::find($order->seller_id);
+                if ($seller) {
+                    $sellerWallet = $seller->wallet ?? Wallet::firstOrCreate(
+                        ['user_id' => $seller->id],
+                        [
+                            'withdrawable_balance' => 0,
+                            'promo_credit_balance' => 0,
+                            'total_earned' => 0,
+                            'total_spent' => 0,
+                            'pending_balance' => 0,
+                            'escrow_balance' => 0,
+                        ]
+                    );
+                    $sellerWallet->addWithdrawable($order->seller_payout, 'service_order_complete');
+                }
+
+                $order->update([
+                    'status' => ProfessionalServiceOrder::STATUS_COMPLETED,
+                    'completed_at' => now(),
+                ]);
+
+                $review = ProfessionalServiceReview::create([
+                    'order_id' => $order->id,
+                    'reviewer_id' => $buyer->id,
+                    'reviewee_id' => $order->seller_id,
+                    'rating' => $rating,
+                    'comment' => $comment,
+                ]);
+
+                $review->updateSellerRating();
+
+                $profile = ServiceProviderProfile::where('user_id', $order->seller_id)->first();
+                if ($profile) {
+                    $profile->increment('total_orders_completed');
+                }
+
+                if ($seller) {
+                    app(\App\Services\NotificationDispatchService::class)->sendToUser(
+                        $seller,
+                        'Service Payment Released',
+                        'Buyer confirmed satisfaction for "' . ($order->service->title ?? 'your service') . '". Payment has been released to your wallet.',
+                        \App\Models\Notification::TYPE_SYSTEM,
+                        [
+                            'order_id' => $order->id,
+                            'action_url' => route('professional-services.orders.show', $order->id) . '#order-actions',
+                        ],
+                        'notify_service_orders',
+                        true
+                    );
+                }
+
+                app(\App\Services\NotificationDispatchService::class)->sendToUser(
+                    $buyer,
+                    'Service Confirmed Successfully',
+                    'You confirmed delivery and submitted a review. Payment has been released to the provider.',
+                    \App\Models\Notification::TYPE_SYSTEM,
+                    [
+                        'order_id' => $order->id,
+                        'action_url' => route('professional-services.orders.show', $order->id) . '#order-actions',
+                    ],
+                    'notify_service_orders'
+                );
+
+                return [
+                    'success' => true,
+                    'message' => 'Service confirmed, review submitted, and payment released to seller.',
+                    'order' => $order,
+                    'review' => $review,
+                ];
+            });
+        } catch (\Exception $e) {
+            Log::error('Error approving delivery with review: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Failed to confirm and release payment'];
+        }
+    }
+
     /**
      * Request revision
      */

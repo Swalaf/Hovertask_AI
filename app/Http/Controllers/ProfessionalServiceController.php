@@ -400,10 +400,20 @@ class ProfessionalServiceController extends Controller
      */
     public function approveOrder(int $orderId)
     {
+        request()->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'required|string|min:10|max:1000',
+        ]);
+
         $order = ProfessionalServiceOrder::findOrFail($orderId);
         $user = Auth::user();
 
-        $result = $this->service->approveDelivery($order, $user);
+        $result = $this->service->approveDeliveryWithReview(
+            $order,
+            $user,
+            (int) request('rating'),
+            (string) request('comment')
+        );
 
         return response()->json($result, $result['success'] ? 200 : 400);
     }

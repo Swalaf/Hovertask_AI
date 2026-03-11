@@ -115,7 +115,23 @@ class AppServiceProvider extends ServiceProvider
                     $password = config('services.turbosmtp.password', $password);
                 }
 
-                $encryption = SystemSetting::get('smtp_encryption', config('mail.mailers.smtp.encryption'));
+                $encryption = strtolower((string) SystemSetting::get('smtp_encryption', config('mail.mailers.smtp.encryption')));
+                if (in_array($encryption, ['', 'none', 'null'], true)) {
+                    $encryption = null;
+                }
+
+                $port = (int) $port;
+                if ($port <= 0) {
+                    $port = $encryption === 'ssl' ? 465 : 587;
+                }
+
+                if ($encryption === 'ssl' && $port === 587) {
+                    $port = 465;
+                }
+                if (($encryption === 'tls' || $encryption === null) && $port === 465) {
+                    $port = 587;
+                }
+
                 $fromAddress = SystemSetting::get('smtp_from_email', config('mail.from.address'));
                 if (empty($fromAddress) && $isTurbo) {
                     $fromAddress = config('services.turbosmtp.from_address', $fromAddress);
@@ -131,7 +147,9 @@ class AppServiceProvider extends ServiceProvider
                 Config::set('mail.mailers.smtp.port', $port);
                 Config::set('mail.mailers.smtp.username', $username);
                 Config::set('mail.mailers.smtp.password', $password);
-                Config::set('mail.mailers.smtp.encryption', $encryption === 'none' ? null : $encryption);
+                Config::set('mail.mailers.smtp.encryption', $encryption);
+                Config::set('mail.mailers.smtp.timeout', 30);
+                Config::set('mail.mailers.smtp.auth_mode', null);
                 Config::set('mail.from.address', $fromAddress);
                 Config::set('mail.from.name', $fromName);
 

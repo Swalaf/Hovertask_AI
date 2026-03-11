@@ -65,7 +65,7 @@ class DigitalProductOrder extends Model
 
     public function getCanDownloadAttribute(): bool
     {
-        if ($this->status !== 'completed') {
+        if (!in_array($this->status, ['pending', 'completed'], true)) {
             return false;
         }
         if ($this->download_count >= $this->max_downloads) {

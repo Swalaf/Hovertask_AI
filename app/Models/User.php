@@ -18,10 +18,20 @@ class User extends Authenticatable implements MustVerifyEmail
             if ($user->isAdmin() && empty($user->email_verified_at)) {
                 $user->email_verified_at = now();
             }
+
+            $isGoogleLinked = ($user->provider === 'google') || !empty($user->google_id) || (($user->provider ?? null) === 'google' && !empty($user->provider_id));
+            if ($isGoogleLinked && empty($user->email_verified_at)) {
+                $user->email_verified_at = now();
+            }
         });
 
         static::updating(function (self $user): void {
             if ($user->isAdmin() && empty($user->email_verified_at)) {
+                $user->email_verified_at = now();
+            }
+
+            $isGoogleLinked = ($user->provider === 'google') || !empty($user->google_id) || (($user->provider ?? null) === 'google' && !empty($user->provider_id));
+            if ($isGoogleLinked && empty($user->email_verified_at)) {
                 $user->email_verified_at = now();
             }
         });

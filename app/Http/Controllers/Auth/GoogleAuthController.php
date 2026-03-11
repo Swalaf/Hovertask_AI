@@ -54,6 +54,10 @@ class GoogleAuthController extends Controller
                         'provider_id' => $googleUser->getId(),
                     ]);
                 }
+
+                if (empty($user->email_verified_at)) {
+                    $user->forceFill(['email_verified_at' => now()])->save();
+                }
             } else {
                 // Create new user
                 $user = User::create([
@@ -139,6 +143,10 @@ class GoogleAuthController extends Controller
                         'provider' => 'google',
                         'provider_id' => $payload['sub'],
                     ]);
+                }
+
+                if (empty($user->email_verified_at)) {
+                    $user->forceFill(['email_verified_at' => now()])->save();
                 }
             } else {
                 // Create new user
