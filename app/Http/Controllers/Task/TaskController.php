@@ -82,6 +82,12 @@ class TaskController extends Controller
         ]);
 
         $user = Auth::user();
+        if (!$user instanceof \App\Models\User) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Authentication required.',
+            ], 401);
+        }
 
         // Ensure user has wallet (activation is optional)
         if (!$user->wallet) {

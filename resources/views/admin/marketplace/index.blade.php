@@ -126,8 +126,8 @@
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
                                     @if($category->icon)
-                                        <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background-color: {{ $category->color }}20">
-                                            <i class="{{ $category->icon }}" style="color: {{ $category->color }}"></i>
+                                        <div class="js-category-icon-bg w-10 h-10 rounded-lg flex items-center justify-center" data-color="{{ $category->color }}">
+                                            <i class="js-category-icon {{ $category->icon }}" data-color="{{ $category->color }}"></i>
                                         </div>
                                     @endif
                                     <div>
@@ -199,4 +199,19 @@
         </div>
     </div>
 </div>
+<script>
+document.querySelectorAll('.js-category-icon-bg').forEach((element) => {
+    const color = element.dataset.color || '';
+    if (color) {
+        element.style.backgroundColor = `${color}20`;
+    }
+});
+
+document.querySelectorAll('.js-category-icon').forEach((element) => {
+    const color = element.dataset.color || '';
+    if (color) {
+        element.style.color = color;
+    }
+});
+</script>
 @endsection

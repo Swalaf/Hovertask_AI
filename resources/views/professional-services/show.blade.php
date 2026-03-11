@@ -375,8 +375,21 @@
 </div>
 @endif
 
+<div
+    id="service-show-config"
+    data-order-url="{{ route('professional-services.order', $service->id) }}"
+    data-contact-url="{{ route('professional-services.contact') }}"
+    data-base-price="{{ $service->price }}"
+></div>
+
 @push('scripts')
 <script>
+    const serviceConfig = document.getElementById('service-show-config');
+    const orderUrl = serviceConfig?.dataset?.orderUrl || '';
+    const contactUrl = serviceConfig?.dataset?.contactUrl || '';
+    const basePrice = Number(serviceConfig?.dataset?.basePrice || 0);
+    const canContact = !!document.getElementById('contact-modal');
+
     function showOrderModal() {
         document.getElementById('order-modal').classList.remove('hidden');
         document.body.style.overflow = 'hidden';
@@ -387,22 +400,23 @@
         document.body.style.overflow = '';
     }
 
-    @auth
     function showContactModal() {
-        document.getElementById('contact-modal').classList.remove('hidden');
+        const modal = document.getElementById('contact-modal');
+        if (!modal) return;
+        modal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     }
 
     function hideContactModal() {
-        document.getElementById('contact-modal').classList.add('hidden');
+        const modal = document.getElementById('contact-modal');
+        if (!modal) return;
+        modal.classList.add('hidden');
         document.body.style.overflow = '';
     }
-    @endauth
 
     // Calculate add-ons total
     const addonCheckboxes = document.querySelectorAll('.addon-checkbox');
-    const basePrice = {{ $service->price }};
-    
+
     addonCheckboxes.forEach(checkbox => {
         checkbox.addEventListener('change', updateTotal);
     });
@@ -425,7 +439,7 @@
         const form = this;
         const formData = new FormData(form);
         
-        fetch('{{ route("professional-services.order", $service->id) }}', {
+        fetch(orderUrl, {
             method: 'POST',
             body: formData,
             headers: {
@@ -470,13 +484,13 @@
     });
 
     // Handle contact form submission
-    @auth
-    document.getElementById('contact-form').addEventListener('submit', function(e) {
+    if (canContact) {
+    document.getElementById('contact-form')?.addEventListener('submit', function(e) {
         e.preventDefault();
         const form = this;
         const formData = new FormData(form);
         
-        fetch('{{ route("professional-services.contact") }}', {
+        fetch(contactUrl, {
             method: 'POST',
             body: formData,
             headers: {
@@ -515,15 +529,13 @@
             }
         });
     });
-    @endauth
+    }
 
     // Close modal on escape key
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             hideOrderModal();
-            @auth
-            hideContactModal();
-            @endauth
+            if (canContact) hideContactModal();
         }
     });
 
@@ -534,13 +546,11 @@
         }
     });
     
-    @auth
     document.getElementById('contact-modal')?.addEventListener('click', function(e) {
         if (e.target === this) {
             hideContactModal();
         }
     });
-    @endauth
 </script>
 @endpush
 @endsection

@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\SystemSetting;
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,6 +24,9 @@ class CheckTaskCreationGate
         }
 
         $user = Auth::user();
+        if (!$user instanceof User) {
+            return $next($request);
+        }
 
         // Skip if user is admin
         if ($user->is_admin) {

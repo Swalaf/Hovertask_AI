@@ -147,7 +147,7 @@ class CleanupSeededData extends Command
     private function ensureDatabaseConnection(): bool
     {
         try {
-            DB::connection()->getPdo();
+            DB::getPdo();
             return true;
         } catch (QueryException | \PDOException | \Throwable $e) {
             $connection = (string) config('database.default', 'unknown');
@@ -184,11 +184,10 @@ class CleanupSeededData extends Command
 
     private function getTableListing(): array
     {
-        $connection = DB::connection();
-        $driver = $connection->getDriverName();
+        $driver = DB::getDriverName();
 
         if ($driver === 'mysql') {
-            $rows = $connection->select('SHOW TABLES');
+            $rows = DB::select('SHOW TABLES');
             return collect($rows)
                 ->map(function ($row) {
                     $values = array_values((array) $row);
@@ -200,17 +199,17 @@ class CleanupSeededData extends Command
         }
 
         if ($driver === 'pgsql') {
-            $rows = $connection->select("SELECT tablename FROM pg_tables WHERE schemaname = 'public'");
+            $rows = DB::select("SELECT tablename FROM pg_tables WHERE schemaname = 'public'");
             return collect($rows)->pluck('tablename')->map(fn ($t) => (string) $t)->all();
         }
 
         if ($driver === 'sqlite') {
-            $rows = $connection->select("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'");
+            $rows = DB::select("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'");
             return collect($rows)->pluck('name')->map(fn ($t) => (string) $t)->all();
         }
 
         if ($driver === 'sqlsrv') {
-            $rows = $connection->select("SELECT TABLE_NAME as table_name FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'");
+            $rows = DB::select("SELECT TABLE_NAME as table_name FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'");
             return collect($rows)->pluck('table_name')->map(fn ($t) => (string) $t)->all();
         }
 

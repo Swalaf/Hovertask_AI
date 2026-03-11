@@ -135,7 +135,15 @@
         </div>
     </div>
 
+    <div
+        id="new-task-show-config"
+        class="hidden"
+        data-submit-url="{{ route('new-tasks.submit', $task->id) }}"
+    ></div>
+
     <script>
+        const taskShowConfig = document.getElementById('new-task-show-config');
+        const submitUrl = taskShowConfig?.dataset.submitUrl || '';
         const submitBtn = document.getElementById('submit-work-btn');
         const modal = document.getElementById('submit-modal');
         const cancelBtn = document.getElementById('cancel-submit');
@@ -167,11 +175,11 @@
             }
             
             try {
-                const response = await fetch('{{ route('new-tasks.submit', $task->id) }}', {
+                const response = await fetch(submitUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
                     },
                     body: JSON.stringify({
                         proof_data: parsedProof,

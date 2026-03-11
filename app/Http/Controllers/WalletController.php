@@ -84,7 +84,7 @@ class WalletController extends Controller
             'total_earned' => $wallet->total_earned,
             'total_spent' => $wallet->total_spent,
             'pending_balance' => $wallet->pending_balance,
-            'can_withdraw' => $user->canWithdraw(),
+            'can_withdraw' => $user instanceof User ? $user->canWithdraw() : false,
             'minimum_withdrawal' => User::getMinimumWithdrawal(),
         ];
 
@@ -317,7 +317,7 @@ class WalletController extends Controller
         }
 
         $minimumWithdrawal = User::getMinimumWithdrawal();
-        $canWithdraw = $user->canWithdraw();
+        $canWithdraw = $user instanceof User ? $user->canWithdraw() : false;
 
         return view('wallet.withdraw', compact(
             'wallet',
@@ -338,11 +338,24 @@ class WalletController extends Controller
         ]);
 
         $user = Auth::user();
+        if (!$user instanceof User) {
+            return redirect()->route('login')->with('error', 'Authentication required.');
+        }
+
+        $wallet = $user->wallet;
+        if (!$wallet) {
+            return redirect()->route('wallet.index')->with('error', 'Wallet not found');
+        }
+
+        if (!$user->canWithdraw()) {
+            return redirect()->route('wallet.withdraw')->with('error', 'You are not eligible to withdraw yet.');
+        }
+
         $amount = floatval($request->amount);
         $method = $request->method;
         $instant = $request->boolean('instant', false);
 
-        $result = $this->earnDeskService->processWithdrawal($user, $amount, $method, $instant);
+        $result = $wallet->processWithdrawal($amount, $instant);
 
         if ($result['success']) {
             return redirect()->route('wallet.index')

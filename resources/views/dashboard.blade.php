@@ -87,7 +87,7 @@
                 <div class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ number_format($user->experience_points) }} XP</div>
                 <div class="mt-3">
                     <div class="w-full bg-gray-200 dark:bg-dark-700 rounded-full h-2.5">
-                        <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-2.5 rounded-full" style="width: {{ $levelProgress['percentage'] }}%"></div>
+                        <div id="dashboard-level-progress" class="bg-gradient-to-r from-indigo-500 to-purple-500 h-2.5 rounded-full" data-progress="{{ (float) ($levelProgress['percentage'] ?? 0) }}"></div>
                     </div>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ number_format($levelProgress['xp_progress']) }} / {{ number_format($levelProgress['xp_needed']) }} XP to Level {{ $levelProgress['next_level'] }}</p>
                 </div>
@@ -298,6 +298,12 @@
 </div>
 
 <script>
+const levelProgressBar = document.getElementById('dashboard-level-progress');
+if (levelProgressBar) {
+    const progress = Number(levelProgressBar.dataset.progress || 0);
+    levelProgressBar.style.width = `${Math.min(100, Math.max(0, progress))}%`;
+}
+
 function copyReferralLink() {
     const input = document.querySelector('input[readonly][value*="ref="]');
     if (input) {

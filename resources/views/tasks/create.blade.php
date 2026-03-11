@@ -347,11 +347,32 @@
     </div>
 </div>
 
+<div
+    id="task-create-config"
+    data-create-store-url="{{ route('tasks.create.store') }}"
+    data-my-tasks-url="{{ route('tasks.my-tasks') }}"
+    data-wallet-deposit-url="{{ route('wallet.deposit') }}"
+    data-save-draft-url="{{ route('tasks.create.save-draft') }}"
+    data-initial-category-id="{{ old('category_id', isset($prefillData['category_id']) ? $prefillData['category_id'] : '') }}"
+    data-session-lifetime="{{ (int) config('session.lifetime') }}"
+></div>
+<script id="task-category-config" type="application/json">@json($categoryConfig)</script>
+<script id="task-raw-categories" type="application/json">@json($categories->toArray())</script>
+<script id="task-platform-names" type="application/json">@json(\App\Models\Task::PLATFORMS)</script>
+
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const configEl = document.getElementById('task-create-config');
+    const createStoreUrl = configEl?.dataset?.createStoreUrl || '';
+    const myTasksUrl = configEl?.dataset?.myTasksUrl || '';
+    const walletDepositUrl = configEl?.dataset?.walletDepositUrl || '';
+    const saveDraftUrl = configEl?.dataset?.saveDraftUrl || '';
+    const initialCategoryIdFromServer = configEl?.dataset?.initialCategoryId || '';
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
     // Handle form submission via AJAX to support redirect responses
-    const form = document.querySelector('form[action="{{ route('tasks.create.store') }}"]');
+    const form = document.querySelector(`form[action="${createStoreUrl}"]`);
     if (form) {
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -442,7 +463,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (data.redirect) {
                         window.location.href = data.redirect;
                     } else if (data.task_id) {
-                        window.location.href = '{{ route('tasks.my-tasks') }}';
+                        window.location.href = myTasksUrl;
                     } else {
                         window.location.reload();
                     }
@@ -480,9 +501,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    const categoryConfig = @json($categoryConfig);
-    const rawCategories = @json($categories->toArray());
-    const platformNames = @json(\App\Models\Task::PLATFORMS);
+    const categoryConfig = JSON.parse(document.getElementById('task-category-config')?.textContent || '{}');
+    const rawCategories = JSON.parse(document.getElementById('task-raw-categories')?.textContent || '[]');
+    const platformNames = JSON.parse(document.getElementById('task-platform-names')?.textContent || '{}');
 
     const categoryIdInput = document.getElementById('category_id');
     const platformInput = document.getElementById('platform');
@@ -754,15 +775,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // expose save and deposit helper to save form to session then redirect to deposit
     async function saveFormAndGoToDeposit() {
         const btn = document.getElementById('add-funds-btn');
-        if (!btn) return window.location = '{{ route('wallet.deposit') }}';
+        if (!btn) return window.location = walletDepositUrl;
         try {
             btn.disabled = true;
             btn.textContent = 'Saving...';
 
             // Collect form values similar to server saveDraft fields
-            const formEl = document.querySelector('form[action="{{ route('tasks.create.store') }}"]');
+            const formEl = document.querySelector(`form[action="${createStoreUrl}"]`);
             const data = {};
-            if (!formEl) return window.location = '{{ route('wallet.deposit') }}';
+            if (!formEl) return window.location = walletDepositUrl;
             ensurePlatformAndCategorySync();
             ['title','description','platform','task_type','category_id','target_url','target_account','hashtag','instructions','proof_type','budget','quantity','min_followers','expires_at'].forEach(name => {
                 const el = formEl.querySelector('[name="' + name + '"]');
@@ -771,11 +792,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 else data[name] = el.value;
             });
 
-            const resp = await fetch('{{ route('tasks.create.save-draft') }}', {
+            const resp = await fetch(saveDraftUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-CSRF-TOKEN': csrfToken,
                     'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify(data),
@@ -783,10 +804,10 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             // redirect to deposit page regardless of response (deposit controller will resume)
-            window.location = '{{ route('wallet.deposit') }}';
+            window.location = walletDepositUrl;
         } catch (e) {
             console.warn('Failed to save draft before deposit:', e);
-            window.location = '{{ route('wallet.deposit') }}';
+            window.location = walletDepositUrl;
         }
     }
 
@@ -797,7 +818,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize from any prefilled category (old input or server prefill)
     (function initializePrefill() {
         try {
-            const initialCategoryId = (categoryIdInput && categoryIdInput.value) ? categoryIdInput.value : '{{ old('category_id', isset($prefillData['category_id']) ? $prefillData['category_id'] : '') }}';
+            const initialCategoryId = (categoryIdInput && categoryIdInput.value) ? categoryIdInput.value : initialCategoryIdFromServer;
             if (!initialCategoryId) return;
 
             // find category data from rawCategories
@@ -868,7 +889,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const KEEP_ALIVE_MS = 3 * 60 * 1000; // 3m
     const warnBeforeMs = 2 * 60 * 1000; // warn 2m before expiry
 
-    const form = document.querySelector('form[action="{{ route('tasks.create.store') }}"]');
+    const configEl = document.getElementById('task-create-config');
+    const createStoreUrl = configEl?.dataset?.createStoreUrl || '';
+    const sessionLifetimeMinutesConfig = Number(configEl?.dataset?.sessionLifetime || 120);
+    const form = document.querySelector(`form[action="${createStoreUrl}"]`);
     if (!form) return;
 
     // Restore draft
@@ -951,7 +975,7 @@ document.addEventListener('DOMContentLoaded', function() {
     keepAlivePing();
 
     // Session expiry warning UI
-    const sessionLifetimeMinutes = parseInt('{{ config('session.lifetime') }}',10) || 120;
+    const sessionLifetimeMinutes = Number(sessionLifetimeMinutesConfig) || 120;
     const sessionMs = sessionLifetimeMinutes * 60 * 1000;
     const warnAt = Math.max(0, sessionMs - warnBeforeMs);
 

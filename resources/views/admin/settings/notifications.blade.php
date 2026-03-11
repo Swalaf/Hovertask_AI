@@ -44,6 +44,68 @@
             </div>
             
             <div class="p-6">
+                @php
+                    $templateOpen = '{' . '{';
+                    $templateClose = '}' . '}';
+                    $templateVar = fn (string $name): string => '@' . $templateOpen . $name . $templateClose;
+                    $notificationDefaults = [
+                        'welcome_subject' => 'Welcome to ' . $templateVar('site_name') . '!',
+                        'welcome_body' => implode("\n\n", [
+                            'Hello ' . $templateVar('user_name') . ',',
+                            'Welcome to ' . $templateVar('site_name') . "! We're excited to have you on board.",
+                            'Your referral code: ' . $templateVar('referral_code'),
+                            'Get started by completing your profile and exploring available tasks.',
+                        ]),
+                        'task_approved_body' => implode("\n\n", [
+                            'Hello ' . $templateVar('user_name') . ',',
+                            'Great news! Your task "' . $templateVar('task_title') . '" has been approved.',
+                            'Earnings: ' . $templateVar('earnings'),
+                            'Keep up the great work!',
+                        ]),
+                        'task_rejected_body' => implode("\n\n", [
+                            'Hello ' . $templateVar('user_name') . ',',
+                            'Your task "' . $templateVar('task_title') . '" was not approved.',
+                            'Reason: ' . $templateVar('rejection_reason'),
+                            'Please review the feedback and resubmit if needed.',
+                        ]),
+                        'earnings_unlocked_body' => implode("\n\n", [
+                            'Hello ' . $templateVar('user_name') . ',',
+                            'Great news! Your earnings of ' . $templateVar('amount') . ' have been unlocked and are now available in your wallet.',
+                            'You can withdraw these funds or use them for premium tasks.',
+                            'Current Balance: ' . $templateVar('wallet_balance'),
+                        ]),
+                        'activation_reminder_body' => implode("\n\n", [
+                            'Hello ' . $templateVar('user_name') . ',',
+                            'This is a friendly reminder to complete your wallet activation.',
+                            'Activate now to unlock your earnings and start withdrawing!',
+                            'Activation Fee: ' . $templateVar('activation_fee'),
+                        ]),
+                        'password_reset_body' => implode("\n\n", [
+                            'Hello ' . $templateVar('user_name') . ',',
+                            'You requested a password reset. Click the link below to reset your password:',
+                            $templateVar('reset_link'),
+                            'This link expires in 60 minutes.',
+                        ]),
+                        'email_verify_body' => implode("\n\n", [
+                            'Hello ' . $templateVar('user_name') . ',',
+                            'Please verify your email address by clicking the link below:',
+                            $templateVar('verify_link'),
+                            'If you did not create an account, please ignore this email.',
+                        ]),
+                        'withdrawal_body' => implode("\n\n", [
+                            'Hello ' . $templateVar('user_name') . ',',
+                            'Your withdrawal of ' . $templateVar('amount') . ' has been processed successfully.',
+                            'Withdrawal Method: ' . $templateVar('method'),
+                            'Amount Received: ' . $templateVar('net_amount'),
+                        ]),
+                        'referral_bonus_body' => implode("\n\n", [
+                            'Hello ' . $templateVar('user_name') . ',',
+                            'Congratulations! You earned a referral bonus of ' . $templateVar('bonus_amount') . '!',
+                            'Your referral ' . $templateVar('referred_user') . ' has completed their first task.',
+                            'Share your referral code to earn more: ' . $templateVar('referral_code'),
+                        ]),
+                    ];
+                @endphp
                 <form action="{{ route('admin.settings.update', 'notification') }}" method="POST">
                     @csrf
                     @method('PUT')
@@ -60,7 +122,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Subject</label>
-                                <input type="text" name="notif_welcome_subject" value="{{ old('notif_welcome_subject', $settingsByKey['notif_welcome_subject'] ?? 'Welcome to @{{site_name}}!') }}" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                                <input type="text" name="notif_welcome_subject" value="{{ old('notif_welcome_subject', $settingsByKey['notif_welcome_subject'] ?? $notificationDefaults['welcome_subject']) }}" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Sender Name</label>
@@ -69,7 +131,7 @@
                         </div>
                         <div class="mt-4">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Message Body</label>
-                            <textarea name="notif_welcome_body" rows="4" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:ring-indigo-500 focus:border-indigo-500">{{ old('notif_welcome_body', $settingsByKey['notif_welcome_body'] ?? 'Hello @{{user_name}},\n\nWelcome to @{{site_name}}! We\'re excited to have you on board.\n\nYour referral code: @{{referral_code}}\n\nGet started by completing your profile and exploring available tasks.') }}</textarea>
+                            <textarea name="notif_welcome_body" rows="4" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:ring-indigo-500 focus:border-indigo-500">{{ old('notif_welcome_body', $settingsByKey['notif_welcome_body'] ?? $notificationDefaults['welcome_body']) }}</textarea>
                             <p class="text-xs text-gray-500 mt-1">Available variables: @{{site_name}}, @{{user_name}}, @{{email}}, @{{referral_code}}</p>
                         </div>
                     </div>
@@ -95,7 +157,7 @@
                         </div>
                         <div class="mt-4">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Message Body</label>
-                            <textarea name="notif_task_approved_body" rows="4" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:ring-indigo-500 focus:border-indigo-500">{{ old('notif_task_approved_body', $settingsByKey['notif_task_approved_body'] ?? 'Hello @{{user_name}},\n\nGreat news! Your task "@{{task_title}}" has been approved.\n\nEarnings: @{{earnings}}\n\nKeep up the great work!') }}</textarea>
+                            <textarea name="notif_task_approved_body" rows="4" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:ring-indigo-500 focus:border-indigo-500">{{ old('notif_task_approved_body', $settingsByKey['notif_task_approved_body'] ?? $notificationDefaults['task_approved_body']) }}</textarea>
                             <p class="text-xs text-gray-500 mt-1">Available variables: @{{site_name}}, @{{user_name}}, @{{task_title}}, @{{earnings}}, @{{task_url}}</p>
                         </div>
                     </div>
@@ -121,7 +183,7 @@
                         </div>
                         <div class="mt-4">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Message Body</label>
-                            <textarea name="notif_task_rejected_body" rows="4" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:ring-indigo-500 focus:border-indigo-500">{{ old('notif_task_rejected_body', $settingsByKey['notif_task_rejected_body'] ?? 'Hello @{{user_name}},\n\nYour task "@{{task_title}}" was not approved.\n\nReason: @{{rejection_reason}}\n\nPlease review the feedback and resubmit if needed.') }}</textarea>
+                            <textarea name="notif_task_rejected_body" rows="4" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:ring-indigo-500 focus:border-indigo-500">{{ old('notif_task_rejected_body', $settingsByKey['notif_task_rejected_body'] ?? $notificationDefaults['task_rejected_body']) }}</textarea>
                             <p class="text-xs text-gray-500 mt-1">Available variables: @{{site_name}}, @{{user_name}}, @{{task_title}}, @{{rejection_reason}}</p>
                         </div>
                     </div>
@@ -147,7 +209,7 @@
                         </div>
                         <div class="mt-4">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Message Body</label>
-                            <textarea name="notif_earnings_unlocked_body" rows="4" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:ring-indigo-500 focus:border-indigo-500">{{ old('notif_earnings_unlocked_body', $settingsByKey['notif_earnings_unlocked_body'] ?? 'Hello @{{user_name}},\n\nGreat news! Your earnings of @{{amount}} have been unlocked and are now available in your wallet.\n\nYou can withdraw these funds or use them for premium tasks.\n\nCurrent Balance: @{{wallet_balance}}') }}</textarea>
+                            <textarea name="notif_earnings_unlocked_body" rows="4" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:ring-indigo-500 focus:border-indigo-500">{{ old('notif_earnings_unlocked_body', $settingsByKey['notif_earnings_unlocked_body'] ?? $notificationDefaults['earnings_unlocked_body']) }}</textarea>
                             <p class="text-xs text-gray-500 mt-1">Available variables: @{{site_name}}, @{{user_name}}, @{{amount}}, @{{wallet_balance}}</p>
                         </div>
                     </div>
@@ -173,7 +235,7 @@
                         </div>
                         <div class="mt-4">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Message Body</label>
-                            <textarea name="notif_activation_reminder_body" rows="4" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:ring-indigo-500 focus:border-indigo-500">{{ old('notif_activation_reminder_body', $settingsByKey['notif_activation_reminder_body'] ?? 'Hello @{{user_name}},\n\nThis is a friendly reminder to complete your wallet activation.\n\nActivate now to unlock your earnings and start withdrawing!\n\nActivation Fee: @{{activation_fee}}') }}</textarea>
+                            <textarea name="notif_activation_reminder_body" rows="4" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:ring-indigo-500 focus:border-indigo-500">{{ old('notif_activation_reminder_body', $settingsByKey['notif_activation_reminder_body'] ?? $notificationDefaults['activation_reminder_body']) }}</textarea>
                             <p class="text-xs text-gray-500 mt-1">Available variables: @{{site_name}}, @{{user_name}}, @{{activation_fee}}, @{{activation_url}}</p>
                         </div>
                     </div>
@@ -199,7 +261,7 @@
                         </div>
                         <div class="mt-4">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Message Body</label>
-                            <textarea name="notif_password_reset_body" rows="4" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:ring-indigo-500 focus:border-indigo-500">{{ old('notif_password_reset_body', $settingsByKey['notif_password_reset_body'] ?? 'Hello @{{user_name}},\n\nYou requested a password reset. Click the link below to reset your password:\n\n@{{reset_link}}\n\nThis link expires in 60 minutes.') }}</textarea>
+                            <textarea name="notif_password_reset_body" rows="4" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:ring-indigo-500 focus:border-indigo-500">{{ old('notif_password_reset_body', $settingsByKey['notif_password_reset_body'] ?? $notificationDefaults['password_reset_body']) }}</textarea>
                             <p class="text-xs text-gray-500 mt-1">Available variables: @{{site_name}}, @{{user_name}}, @{{reset_link}}</p>
                         </div>
                     </div>
@@ -225,7 +287,7 @@
                         </div>
                         <div class="mt-4">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Message Body</label>
-                            <textarea name="notif_email_verify_body" rows="4" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:ring-indigo-500 focus:border-indigo-500">{{ old('notif_email_verify_body', $settingsByKey['notif_email_verify_body'] ?? 'Hello @{{user_name}},\n\nPlease verify your email address by clicking the link below:\n\n@{{verify_link}}\n\nIf you did not create an account, please ignore this email.') }}</textarea>
+                            <textarea name="notif_email_verify_body" rows="4" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:ring-indigo-500 focus:border-indigo-500">{{ old('notif_email_verify_body', $settingsByKey['notif_email_verify_body'] ?? $notificationDefaults['email_verify_body']) }}</textarea>
                             <p class="text-xs text-gray-500 mt-1">Available variables: @{{site_name}}, @{{user_name}}, @{{verify_link}}</p>
                         </div>
                     </div>
@@ -251,7 +313,7 @@
                         </div>
                         <div class="mt-4">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Message Body</label>
-                            <textarea name="notif_withdrawal_body" rows="4" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:ring-indigo-500 focus:border-indigo-500">{{ old('notif_withdrawal_body', $settingsByKey['notif_withdrawal_body'] ?? 'Hello @{{user_name}},\n\nYour withdrawal of @{{amount}} has been processed successfully.\n\nWithdrawal Method: @{{method}}\n\nAmount Received: @{{net_amount}}') }}</textarea>
+                            <textarea name="notif_withdrawal_body" rows="4" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:ring-indigo-500 focus:border-indigo-500">{{ old('notif_withdrawal_body', $settingsByKey['notif_withdrawal_body'] ?? $notificationDefaults['withdrawal_body']) }}</textarea>
                             <p class="text-xs text-gray-500 mt-1">Available variables: @{{site_name}}, @{{user_name}}, @{{amount}}, @{{method}}, @{{net_amount}}</p>
                         </div>
                     </div>
@@ -277,7 +339,7 @@
                         </div>
                         <div class="mt-4">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Message Body</label>
-                            <textarea name="notif_referral_bonus_body" rows="4" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:ring-indigo-500 focus:border-indigo-500">{{ old('notif_referral_bonus_body', $settingsByKey['notif_referral_bonus_body'] ?? 'Hello @{{user_name}},\n\nCongratulations! You earned a referral bonus of @{{bonus_amount}}!\n\nYour referral @{{referred_user}} has completed their first task.\n\nShare your referral code to earn more: @{{referral_code}}') }}</textarea>
+                            <textarea name="notif_referral_bonus_body" rows="4" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:ring-indigo-500 focus:border-indigo-500">{{ old('notif_referral_bonus_body', $settingsByKey['notif_referral_bonus_body'] ?? $notificationDefaults['referral_bonus_body']) }}</textarea>
                             <p class="text-xs text-gray-500 mt-1">Available variables: @{{site_name}}, @{{user_name}}, @{{bonus_amount}}, @{{referred_user}}, @{{referral_code}}</p>
                         </div>
                     </div>

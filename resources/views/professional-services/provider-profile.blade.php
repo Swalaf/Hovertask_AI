@@ -190,26 +190,44 @@
 </div>
 @endif
 
+<div
+    id="provider-profile-config"
+    class="hidden"
+    data-contact-url="{{ route('professional-services.contact') }}"
+    data-can-contact="{{ auth()->check() ? '1' : '0' }}"
+></div>
+
 @push('scripts')
 <script>
+    const providerProfileConfig = document.getElementById('provider-profile-config');
+    const contactUrl = providerProfileConfig?.dataset.contactUrl || '';
+    const canContact = providerProfileConfig?.dataset.canContact === '1';
+
     function showContactModal() {
-        document.getElementById('contact-modal').classList.remove('hidden');
+        if (!canContact) {
+            return;
+        }
+
+        document.getElementById('contact-modal')?.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     }
 
     function hideContactModal() {
-        document.getElementById('contact-modal').classList.add('hidden');
+        document.getElementById('contact-modal')?.classList.add('hidden');
         document.body.style.overflow = '';
     }
 
     // Handle form submission
-    @auth
-    document.getElementById('contact-form').addEventListener('submit', function(e) {
+    document.getElementById('contact-form')?.addEventListener('submit', function(e) {
+        if (!canContact || !contactUrl) {
+            return;
+        }
+
         e.preventDefault();
         const form = this;
         const formData = new FormData(form);
         
-        fetch('{{ route("professional-services.contact") }}', {
+        fetch(contactUrl, {
             method: 'POST',
             body: formData,
             headers: {
@@ -260,7 +278,6 @@
             hideContactModal();
         }
     });
-    @endauth
 </script>
 @endpush
 @endsection

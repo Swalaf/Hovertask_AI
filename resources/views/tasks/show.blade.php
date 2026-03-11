@@ -189,11 +189,12 @@
 {{-- Client-side validation for file uploads --}}
 <script>
     (function(){
+        const taskShowConfig = document.getElementById('task-show-config');
         const form = document.querySelector('form[action*="/submit"]');
         if (!form) return;
 
         const fileInput = document.querySelector('input[type="file"][name^="proof_data"]');
-        const maxMB = {{ $clientMaxMB ?? 64 }}; // client-side limit (MB) driven by server-side variable
+        const maxMB = Number(taskShowConfig?.dataset.maxFileMb || 64); // client-side limit (MB) driven by server-side variable
         const maxBytes = maxMB * 1024 * 1024;
 
         function showError(msg) {
@@ -242,5 +243,11 @@
         }
     })();
 </script>
+
+<div
+    id="task-show-config"
+    class="hidden"
+    data-max-file-mb="{{ (int) ($clientMaxMB ?? 64) }}"
+></div>
 
 @endsection

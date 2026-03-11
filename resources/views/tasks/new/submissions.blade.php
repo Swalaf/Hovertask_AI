@@ -53,8 +53,10 @@
                                         Approve
                                     </button>
                                 </form>
-                                <button onclick="showRejectModal({{ $submission->id }})" 
-                                        class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+                                <button
+                                        type="button"
+                                        data-submission-id="{{ $submission->id }}"
+                                        class="js-reject-submission bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
                                     Reject
                                 </button>
                             </div>
@@ -167,7 +169,25 @@
     </div>
 </div>
 
+<div
+    id="new-task-submissions-config"
+    class="hidden"
+    data-base-path="{{ route('new-tasks.show', $task->id) }}"
+></div>
+
 <script>
+const submissionsConfig = document.getElementById('new-task-submissions-config');
+const submissionsBasePath = submissionsConfig?.dataset.basePath || '';
+
+document.querySelectorAll('.js-reject-submission').forEach((button) => {
+    button.addEventListener('click', () => {
+        const submissionId = button.dataset.submissionId;
+        if (submissionId) {
+            showRejectModal(submissionId);
+        }
+    });
+});
+
 function showRejectModal(submissionId) {
     document.getElementById('submission-id').value = submissionId;
     document.getElementById('reject-modal').classList.remove('hidden');
@@ -184,11 +204,11 @@ document.getElementById('reject-form')?.addEventListener('submit', async (e) => 
     const submissionId = formData.get('submission_id');
     
     try {
-        const response = await fetch(`/new-tasks/{{ $task->id }}/submissions/${submissionId}/reject`, {
+        const response = await fetch(`${submissionsBasePath}/submissions/${submissionId}/reject`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
             },
             body: JSON.stringify({
                 reason: formData.get('reason')

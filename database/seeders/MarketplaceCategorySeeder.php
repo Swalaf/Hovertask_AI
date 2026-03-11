@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\MarketplaceCategory;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class MarketplaceCategorySeeder extends Seeder
@@ -20,9 +21,9 @@ class MarketplaceCategorySeeder extends Seeder
         }
 
         // Clear existing categories to avoid duplicates (disable FK checks temporarily)
-        \DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        DB::statement('SET FOREIGN_KEY_CHECKS=0');
         MarketplaceCategory::truncate();
-        \DB::statement('SET FOREIGN_KEY_CHECKS=1');
+        DB::statement('SET FOREIGN_KEY_CHECKS=1');
 
         // =====================
         // TASK CATEGORIES

@@ -184,11 +184,22 @@
 </div>
 @endif
 
+<div
+    id="growth-show-config"
+    data-order-url="{{ route('growth.order', $listing->id) }}"
+    data-contact-url="{{ route('growth.contact') }}"
+></div>
+
 <script>
+const growthConfig = document.getElementById('growth-show-config');
+const growthOrderUrl = growthConfig?.dataset?.orderUrl || '';
+const growthContactUrl = growthConfig?.dataset?.contactUrl || '';
+const canContactSeller = !!document.getElementById('contact-modal');
+
 async function createOrder() {
     const form = document.querySelector('form');
     try {
-        const response = await fetch('{{ route("growth.order", $listing->id) }}', {
+        const response = await fetch(growthOrderUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -233,24 +244,28 @@ async function createOrder() {
 }
 
 // Contact Seller Modal Functions
-@if(auth()->check())
 function showContactModal() {
-    document.getElementById('contact-modal').classList.remove('hidden');
+    const modal = document.getElementById('contact-modal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 }
 
 function hideContactModal() {
-    document.getElementById('contact-modal').classList.add('hidden');
+    const modal = document.getElementById('contact-modal');
+    if (!modal) return;
+    modal.classList.add('hidden');
     document.body.style.overflow = '';
 }
 
 // Handle contact form submission
-document.getElementById('contact-form').addEventListener('submit', function(e) {
+if (canContactSeller) {
+document.getElementById('contact-form')?.addEventListener('submit', function(e) {
     e.preventDefault();
     const form = this;
     const formData = new FormData(form);
     
-    fetch('{{ route("growth.contact") }}', {
+    fetch(growthContactUrl, {
         method: 'POST',
         body: formData,
         headers: {
@@ -303,6 +318,6 @@ document.getElementById('contact-modal')?.addEventListener('click', function(e) 
         hideContactModal();
     }
 });
-@endif
+}
 </script>
 @endsection
