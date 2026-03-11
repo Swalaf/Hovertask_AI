@@ -274,14 +274,54 @@ class AdminController extends Controller
     public function processWithdrawal(Request $request, Withdrawal $withdrawal)
     {
         $action = $request->get('action');
+        $recipient = $withdrawal->user;
 
         if ($action === 'approve') {
             $withdrawal->markAsCompleted($request->get('notes'));
+
+            if ($recipient) {
+                app(\App\Services\NotificationDispatchService::class)->sendToUser(
+                    $recipient,
+                    'Withdrawal Approved',
+                    'Your withdrawal request of ₦' . number_format((float) $withdrawal->amount, 2) . ' has been approved and processed.',
+                    \App\Models\Notification::TYPE_WITHDRAWAL,
+                    [
+                        'withdrawal_id' => $withdrawal->id,
+                        'amount' => '₦' . number_format((float) $withdrawal->amount, 2),
+                        'net_amount' => '₦' . number_format((float) $withdrawal->net_amount, 2),
+                        'method' => strtoupper((string) $withdrawal->method),
+                        'action_url' => route('wallet.index'),
+                    ],
+                    'notify_withdrawal',
+                    true
+                );
+            }
+
             return redirect()->back()
                 ->with('success', 'Withdrawal approved.');
         } elseif ($action === 'reject') {
             $request->validate(['notes' => 'required|string']);
             $withdrawal->markAsRejected($request->notes);
+
+            if ($recipient) {
+                app(\App\Services\NotificationDispatchService::class)->sendToUser(
+                    $recipient,
+                    'Withdrawal Rejected',
+                    'Your withdrawal request of ₦' . number_format((float) $withdrawal->amount, 2) . ' was rejected and refunded. Reason: ' . (string) $request->notes,
+                    \App\Models\Notification::TYPE_WITHDRAWAL,
+                    [
+                        'withdrawal_id' => $withdrawal->id,
+                        'amount' => '₦' . number_format((float) $withdrawal->amount, 2),
+                        'net_amount' => '₦' . number_format((float) $withdrawal->net_amount, 2),
+                        'method' => strtoupper((string) $withdrawal->method),
+                        'reason' => (string) $request->notes,
+                        'action_url' => route('wallet.index'),
+                    ],
+                    'notify_withdrawal',
+                    true
+                );
+            }
+
             return redirect()->back()
                 ->with('success', 'Withdrawal rejected and refunded.');
         }

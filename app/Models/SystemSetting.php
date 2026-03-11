@@ -794,6 +794,7 @@ class SystemSetting extends Model
             'notify_product_orders' => ['value' => true, 'group' => self::GROUP_NOTIFICATION, 'type' => 'boolean'],
             'notify_chat_messages' => ['value' => true, 'group' => self::GROUP_NOTIFICATION, 'type' => 'boolean'],
             'notify_admin_all_activity' => ['value' => true, 'group' => self::GROUP_NOTIFICATION, 'type' => 'boolean'],
+            'notify_large_withdrawal' => ['value' => true, 'group' => self::GROUP_NOTIFICATION, 'type' => 'boolean'],
             'admin_fraud_alerts' => ['value' => true, 'group' => self::GROUP_NOTIFICATION, 'type' => 'boolean'],
             'large_withdrawal_threshold' => ['value' => 50000, 'group' => self::GROUP_NOTIFICATION, 'type' => 'number'],
 

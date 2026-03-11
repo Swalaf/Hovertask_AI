@@ -529,7 +529,7 @@ class Wallet extends Model
     /**
      * Process withdrawal
      */
-    public function processWithdrawal(float $amount, bool $instant = false): array
+    public function processWithdrawal(float $amount, bool $instant = false, string $method = Withdrawal::METHOD_BANK): array
     {
         $fee = $this->calculateWithdrawalFee($amount, $instant);
         $netAmount = $amount - $fee;
@@ -543,23 +543,26 @@ class Wallet extends Model
         }
         
         // Create withdrawal record
-        Withdrawal::create([
+        $withdrawal = Withdrawal::create([
             'user_id' => $this->user_id,
             'wallet_id' => $this->id,
             'amount' => $amount,
             'fee' => $fee,
             'net_amount' => $netAmount,
             'currency' => $this->currency,
+            'method' => $method,
             'is_instant' => $instant,
             'status' => $instant ? 'processing' : 'pending',
         ]);
         
         return [
             'success' => true,
+            'message' => 'Withdrawal request submitted successfully.',
             'amount' => $amount,
             'fee' => $fee,
             'net_amount' => $netAmount,
             'instant' => $instant,
+            'withdrawal_id' => $withdrawal->id,
             'formatted' => [
                 'amount' => $this->formatCurrency($amount),
                 'fee' => $this->formatCurrency($fee),

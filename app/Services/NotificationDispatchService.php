@@ -60,14 +60,15 @@ class NotificationDispatchService
                 'Activity: ' . $title,
                 $message,
                 array_merge($data, ['target_user_id' => $user->id]),
-                $user->id
+                $user->id,
+                !$notifyAdmins
             );
         }
     }
 
-    public function notifyAdmins(string $title, string $message, array $data = [], ?int $excludeUserId = null): void
+    public function notifyAdmins(string $title, string $message, array $data = [], ?int $excludeUserId = null, bool $respectGlobalSetting = true): void
     {
-        if (!SystemSetting::getBool('notify_admin_all_activity', true)) {
+        if ($respectGlobalSetting && !SystemSetting::getBool('notify_admin_all_activity', true)) {
             return;
         }
 

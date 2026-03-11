@@ -219,6 +219,19 @@
                             <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100">Large Withdrawals</h4>
                             <p class="text-sm text-gray-500 dark:text-gray-400">Notify admin for withdrawals above threshold</p>
                         </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" name="notify_large_withdrawal" value="true"
+                                {{ (data_get($settingsByKey, 'notify_large_withdrawal', true) === 'true' || data_get($settingsByKey, 'notify_large_withdrawal', true)) ? 'checked' : '' }}
+                                class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-200 dark:bg-dark-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-dark-700">
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100">Large Withdrawal Threshold</h4>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Minimum amount that triggers admin large-withdrawal alert</p>
+                        </div>
                         <div class="flex items-center space-x-2">
                             <span class="text-sm text-gray-500 dark:text-gray-400">₦</span>
                             <input type="number" name="large_withdrawal_threshold"

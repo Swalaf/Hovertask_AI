@@ -355,9 +355,45 @@ class WalletController extends Controller
         $method = $request->method;
         $instant = $request->boolean('instant', false);
 
-        $result = $wallet->processWithdrawal($amount, $instant);
+        $result = $wallet->processWithdrawal($amount, $instant, $method);
 
         if ($result['success']) {
+            $withdrawalId = (int) ($result['withdrawal_id'] ?? 0);
+            $withdrawal = $withdrawalId > 0 ? \App\Models\Withdrawal::find($withdrawalId) : null;
+
+            app(\App\Services\NotificationDispatchService::class)->sendToUser(
+                $user,
+                'Withdrawal Request Received',
+                'Your withdrawal request has been received and is being processed.',
+                \App\Models\Notification::TYPE_WITHDRAWAL,
+                [
+                    'withdrawal_id' => $withdrawalId,
+                    'amount' => $result['formatted']['amount'] ?? ('₦' . number_format($result['amount'] ?? 0, 2)),
+                    'net_amount' => $result['formatted']['net'] ?? ('₦' . number_format($result['net_amount'] ?? 0, 2)),
+                    'method' => strtoupper($method),
+                    'action_url' => route('wallet.index'),
+                ],
+                'notify_withdrawal',
+                true
+            );
+
+            $threshold = (float) \App\Models\SystemSetting::getNumber('large_withdrawal_threshold', 50000);
+            $largeWithdrawalAlertEnabled = \App\Models\SystemSetting::getBool('notify_large_withdrawal', true);
+            if ($largeWithdrawalAlertEnabled && $withdrawal && (float) $withdrawal->amount >= $threshold) {
+                app(\App\Services\NotificationDispatchService::class)->notifyAdmins(
+                    'Large Withdrawal Alert',
+                    'A large withdrawal request of ₦' . number_format((float) $withdrawal->amount, 2) . ' was submitted.',
+                    [
+                        'withdrawal_id' => $withdrawal->id,
+                        'user_id' => $user->id,
+                        'amount' => '₦' . number_format((float) $withdrawal->amount, 2),
+                        'action_url' => route('admin.withdrawals'),
+                    ],
+                    null,
+                    false
+                );
+            }
+
             return redirect()->route('wallet.index')
                 ->with('success', $result['message'] . ' Net amount: ₦' . number_format($result['net_amount'], 2));
         }

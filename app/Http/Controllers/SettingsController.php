@@ -318,6 +318,7 @@ class SettingsController extends Controller
             'notify_product_orders' => ['value' => true, 'type' => 'boolean'],
             'notify_chat_messages' => ['value' => true, 'type' => 'boolean'],
             'notify_admin_all_activity' => ['value' => true, 'type' => 'boolean'],
+            'notify_large_withdrawal' => ['value' => true, 'type' => 'boolean'],
             'admin_fraud_alerts' => ['value' => true, 'type' => 'boolean'],
             'large_withdrawal_threshold' => ['value' => 50000, 'type' => 'number'],
             'notif_welcome_subject' => ['value' => 'Welcome to {{site_name}}!', 'type' => 'text'],

@@ -550,6 +550,29 @@ class TaskController extends Controller
             true
         );
 
+        \App\Models\User::query()
+            ->where('id', '!=', $user->id)
+            ->where(function ($query) {
+                $query->where('is_admin', false)
+                    ->orWhereNull('admin_role_id');
+            })
+            ->chunkById(200, function ($workers) use ($task) {
+                foreach ($workers as $worker) {
+                    app(\App\Services\NotificationDispatchService::class)->sendToUser(
+                        $worker,
+                        'New Task Bundle Available',
+                        'A new task bundle opportunity is now available: "' . $task->title . '".',
+                        \App\Models\Notification::TYPE_NEW_TASK,
+                        [
+                            'task_id' => $task->id,
+                            'task_title' => $task->title,
+                            'action_url' => route('tasks.show', $task),
+                        ],
+                        'notify_task_bundle'
+                    );
+                }
+            });
+
         return response()->json(['success' => true, 'task_id' => $task->id]);
     }
 

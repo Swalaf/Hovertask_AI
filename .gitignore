@@ -63,7 +63,7 @@ temp/
 cookies
 login_headers.txt
 SSH
-Settings
+/Settings/
 
 # Development documentation (not needed in production)
 CODE_FLOW_DETAILED.md
