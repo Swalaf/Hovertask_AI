@@ -61,9 +61,9 @@
                     </div>
                     @endif
 
-                    @if($product->tags && count($product->tags) > 0)
+                    @if(count($product->tag_list) > 0)
                     <div class="mt-6 pt-6 border-t border-gray-200 dark:border-dark-700 flex flex-wrap gap-2">
-                        @foreach($product->tags as $tag)
+                        @foreach($product->tag_list as $tag)
                             <span class="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-sm rounded-full font-medium">{{ $tag }}</span>
                         @endforeach
                     </div>

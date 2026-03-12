@@ -27,7 +27,7 @@ class DigitalProductService
         $product->price = $data['price'];
         $product->sale_price = $data['sale_price'] ?? null;
         $product->category_id = $data['category_id'] ?? null;
-        $product->tags = $data['tags'] ?? [];
+        $product->tags = $this->normalizeTags($data['tags'] ?? null);
         $product->license_type = $data['license_type'] ?? 1;
         $product->version = $data['version'] ?? 1;
         $product->changelog = $data['changelog'] ?? null;
@@ -52,6 +52,10 @@ class DigitalProductService
 
     public function updateProduct(DigitalProduct $product, array $data): DigitalProduct
     {
+        if (array_key_exists('tags', $data)) {
+            $data['tags'] = $this->normalizeTags($data['tags']);
+        }
+
         $product->fill($data);
 
         if (isset($data['thumbnail']) && $data['thumbnail'] instanceof UploadedFile) {
@@ -73,6 +77,24 @@ class DigitalProductService
         $product->save();
 
         return $product;
+    }
+
+    private function normalizeTags($tags): array
+    {
+        if (is_array($tags)) {
+            return array_values(array_filter(array_map('trim', $tags)));
+        }
+
+        if (!is_string($tags) || trim($tags) === '') {
+            return [];
+        }
+
+        $decoded = json_decode($tags, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            return array_values(array_filter(array_map('trim', $decoded)));
+        }
+
+        return array_values(array_filter(array_map('trim', explode(',', $tags))));
     }
 
     public function purchaseProduct(DigitalProduct $product, int $buyerId): DigitalProductOrder

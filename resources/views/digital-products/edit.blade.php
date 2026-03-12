@@ -49,7 +49,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Tags</label>
-                        <input type="text" name="tags" value="{{ old('tags', implode(', ', $product->tags ?? [])) }}"
+                        <input type="text" name="tags" value="{{ old('tags', implode(', ', $product->tag_list)) }}"
                             class="w-full px-4 py-3 border border-gray-200 dark:border-dark-700 rounded-xl bg-gray-50 dark:bg-dark-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
                     </div>
                 </div>

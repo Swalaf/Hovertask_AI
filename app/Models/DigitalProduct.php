@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 class DigitalProduct extends Model
 {
@@ -94,5 +95,29 @@ class DigitalProduct extends Model
     public function scopeByCategory($query, $categoryId)
     {
         return $query->where('category_id', $categoryId);
+    }
+
+    public function getTagListAttribute(): array
+    {
+        $tags = $this->getAttribute('tags');
+
+        if ($tags instanceof Collection) {
+            return $tags->map(fn ($tag) => trim((string) $tag))->filter()->values()->all();
+        }
+
+        if (is_array($tags)) {
+            return array_values(array_filter(array_map(fn ($tag) => trim((string) $tag), $tags)));
+        }
+
+        if (!is_string($tags) || trim($tags) === '') {
+            return [];
+        }
+
+        $decoded = json_decode($tags, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            return array_values(array_filter(array_map(fn ($tag) => trim((string) $tag), $decoded)));
+        }
+
+        return array_values(array_filter(array_map('trim', explode(',', $tags))));
     }
 }
