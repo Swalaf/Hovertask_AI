@@ -326,6 +326,19 @@ Route::middleware(['auth', 'verified', 'logout.inactive'])->group(function () {
         // Activations
         Route::delete('/activations/{activation}', [AdminController::class, 'deleteActivation'])->name('activations.delete');
 
+
+        // Bulk delete
+        Route::post('/users/bulk-delete',                [AdminController::class, 'bulkDeleteUsers'])->name('users.bulk-delete');
+        Route::post('/tasks/bulk-delete',                [AdminController::class, 'bulkDeleteTasks'])->name('tasks.bulk-delete');
+        Route::post('/professional-services/bulk-delete',[AdminController::class, 'bulkDeleteProfessionalServices'])->name('professional-services.bulk-delete');
+        Route::post('/growth-listings/bulk-delete',      [AdminController::class, 'bulkDeleteGrowthListings'])->name('growth-listings.bulk-delete');
+        Route::post('/digital-products/bulk-delete',     [AdminController::class, 'bulkDeleteDigitalProducts'])->name('digital-products.bulk-delete');
+        Route::post('/completions/bulk-delete',          [AdminController::class, 'bulkDeleteCompletions'])->name('completions.bulk-delete');
+        Route::post('/fraud-logs/bulk-delete',           [AdminController::class, 'bulkDeleteFraudLogs'])->name('fraud-logs.bulk-delete');
+        Route::post('/referrals/bulk-delete',            [AdminController::class, 'bulkDeleteReferrals'])->name('referrals.bulk-delete');
+        Route::post('/withdrawals/bulk-delete',          [AdminController::class, 'bulkDeleteWithdrawals'])->name('withdrawals.bulk-delete');
+        Route::post('/activations/bulk-delete',          [AdminController::class, 'bulkDeleteActivations'])->name('activations.bulk-delete');
+
          // end admin routes
     });
 

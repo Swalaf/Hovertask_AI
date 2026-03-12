@@ -94,10 +94,20 @@
             <div class="px-6 py-4 border-b border-dark-700">
                 <h3 class="text-lg font-medium text-white">Pending Completions</h3>
             </div>
+            <form id="bulk-form-completions" action="{{ route('admin.completions.bulk-delete') }}" method="POST">@csrf</form>
+            <div id="bulk-toolbar-completions" class="hidden px-6 py-3 bg-red-500/10 border-b border-red-500/20 flex items-center justify-between">
+                <span class="text-sm text-red-400 font-medium"><span id="bulk-count-completions">0</span> selected</span>
+                <button type="button" onclick="submitBulkDelete('completions')" class="px-4 py-1.5 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-lg text-sm font-medium transition-colors">
+                    <i class="fas fa-trash mr-2"></i>Delete Selected
+                </button>
+            </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-dark-700">
                     <thead class="bg-dark-800">
                         <tr>
+                            <th class="px-4 py-3 w-10">
+                                <input type="checkbox" id="select-all-completions" class="bulk-select-all w-4 h-4 rounded cursor-pointer" data-target="bulk-cb-completions">
+                            </th>
                             <th class="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase">#</th>
                             <th class="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Task</th>
                             <th class="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase">User</th>
@@ -108,6 +118,9 @@
                     <tbody class="bg-dark-900 divide-y divide-dark-700">
                         @forelse($completions as $completion)
                         <tr class="hover:bg-dark-800 transition-colors">
+                            <td class="px-4 py-4">
+                                <input type="checkbox" name="ids[]" value="{{ $completion->id }}" class="bulk-cb-completions w-4 h-4 rounded cursor-pointer">
+                            </td>
                             <td class="px-6 py-4 text-sm text-gray-300">{{ $completion->id }}</td>
                             <td class="px-6 py-4 text-sm text-white">{{ optional($completion->task)->title ?? '—' }}</td>
                             <td class="px-6 py-4 text-sm text-white">{{ optional($completion->user)->name ?? '—' }}</td>
@@ -139,7 +152,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-8 text-sm text-gray-400 text-center">
+                            <td colspan="6" class="px-6 py-8 text-sm text-gray-400 text-center">
                                 <div class="flex flex-col items-center">
                                     <i class="fas fa-check-circle text-gray-600 text-2xl mb-2"></i>
                                     No pending completions found.

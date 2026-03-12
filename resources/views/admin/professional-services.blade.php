@@ -188,10 +188,20 @@
             </div>
             
             @if($services->count() > 0)
+                <form id="bulk-form-professional-services" action="{{ route('admin.professional-services.bulk-delete') }}" method="POST">@csrf</form>
+                <div id="bulk-toolbar-professional-services" class="hidden px-6 py-3 bg-red-500/10 border-b border-red-500/20 flex items-center justify-between">
+                    <span class="text-sm text-red-400 font-medium"><span id="bulk-count-professional-services">0</span> selected</span>
+                    <button type="button" onclick="submitBulkDelete('professional-services')" class="px-4 py-1.5 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-trash mr-2"></i>Delete Selected
+                    </button>
+                </div>
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-dark-700">
                         <thead class="bg-dark-800">
                             <tr>
+                                <th class="px-4 py-3 w-10">
+                                    <input type="checkbox" id="select-all-professional-services" class="bulk-select-all w-4 h-4 rounded cursor-pointer" data-target="bulk-cb-professional-services">
+                                </th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Service</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Seller</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Category</th>
@@ -205,6 +215,9 @@
                         <tbody class="bg-dark-900 divide-y divide-dark-700">
                             @foreach($services as $service)
                                 <tr class="hover:bg-dark-800 transition-colors">
+                                    <td class="px-4 py-4">
+                                        <input type="checkbox" name="ids[]" value="{{ $service->id }}" class="bulk-cb-professional-services w-4 h-4 rounded cursor-pointer">
+                                    </td>
                                     <td class="px-6 py-4">
                                         <a href="{{ route('admin.professional-services.show', $service) }}" class="font-medium text-white hover:text-indigo-400 transition-colors">
                                             {{ Str::limit($service->title, 40) }}

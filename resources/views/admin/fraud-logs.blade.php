@@ -97,10 +97,20 @@
 
         <!-- Desktop Table View -->
         <div class="hidden lg:block bg-dark-900 rounded-2xl shadow-lg border border-dark-700 overflow-hidden">
+            <form id="bulk-form-fraud-logs" action="{{ route('admin.fraud-logs.bulk-delete') }}" method="POST">@csrf</form>
+            <div id="bulk-toolbar-fraud-logs" class="hidden px-6 py-3 bg-red-500/10 border-b border-red-500/20 flex items-center justify-between">
+                <span class="text-sm text-red-400 font-medium"><span id="bulk-count-fraud-logs">0</span> selected</span>
+                <button type="button" onclick="submitBulkDelete('fraud-logs')" class="px-4 py-1.5 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-lg text-sm font-medium transition-colors">
+                    <i class="fas fa-trash mr-2"></i>Delete Selected
+                </button>
+            </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-dark-700">
                     <thead class="bg-dark-800">
                         <tr>
+                            <th class="px-4 py-3 w-10">
+                                <input type="checkbox" id="select-all-fraud-logs" class="bulk-select-all w-4 h-4 rounded cursor-pointer" data-target="bulk-cb-fraud-logs">
+                            </th>
                             <th class="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase">#</th>
                             <th class="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase">User</th>
                             <th class="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Description</th>
@@ -113,6 +123,9 @@
                     <tbody class="bg-dark-900 divide-y divide-dark-700">
                         @forelse($logs as $log)
                         <tr class="hover:bg-dark-800 transition-colors">
+                            <td class="px-4 py-4">
+                                <input type="checkbox" name="ids[]" value="{{ $log->id }}" class="bulk-cb-fraud-logs w-4 h-4 rounded cursor-pointer">
+                            </td>
                             <td class="px-6 py-4 text-sm text-gray-300">{{ $log->id }}</td>
                             <td class="px-6 py-4 text-sm text-white">{{ optional($log->user)->name ?? 'System' }}</td>
                             <td class="px-6 py-4 text-sm text-gray-300">{{ Str::limit($log->description ?? $log->message ?? '—', 80) }}</td>
@@ -151,7 +164,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-8 text-sm text-gray-400 text-center">
+                            <td colspan="8" class="px-6 py-8 text-sm text-gray-400 text-center">
                                 <div class="flex flex-col items-center">
                                     <i class="fas fa-shield-alt text-gray-600 text-2xl mb-2"></i>
                                     No fraud logs found.

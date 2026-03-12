@@ -86,10 +86,20 @@
         <!-- Products Table -->
         <div class="bg-white dark:bg-dark-900 rounded-2xl shadow-lg border border-gray-100 dark:border-dark-700 overflow-hidden">
             @if($products->count() > 0)
+                <form id="bulk-form-digital-products" action="{{ route('admin.digital-products.bulk-delete') }}" method="POST">@csrf</form>
+                <div id="bulk-toolbar-digital-products" class="hidden px-6 py-3 bg-red-100 dark:bg-red-500/10 border-b border-red-200 dark:border-red-500/20 flex items-center justify-between">
+                    <span class="text-sm text-red-600 dark:text-red-400 font-medium"><span id="bulk-count-digital-products">0</span> selected</span>
+                    <button type="button" onclick="submitBulkDelete('digital-products')" class="px-4 py-1.5 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-500/30 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-trash mr-2"></i>Delete Selected
+                    </button>
+                </div>
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-gray-50 dark:bg-dark-800">
                             <tr>
+                                <th class="px-4 py-4 w-10">
+                                    <input type="checkbox" id="select-all-digital-products" class="bulk-select-all w-4 h-4 rounded cursor-pointer" data-target="bulk-cb-digital-products">
+                                </th>
                                 <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Product</th>
                                 <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Category</th>
                                 <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Seller</th>
@@ -102,6 +112,9 @@
                         <tbody class="divide-y divide-gray-100 dark:divide-dark-700">
                             @foreach($products as $product)
                                 <tr class="hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors">
+                                    <td class="px-4 py-4">
+                                        <input type="checkbox" name="ids[]" value="{{ $product->id }}" class="bulk-cb-digital-products w-4 h-4 rounded cursor-pointer">
+                                    </td>
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
                                             @if($product->thumbnail)

@@ -1304,4 +1304,127 @@ class AdminController extends Controller
                 ->with('error', 'Unable to delete this activation right now.');
         }
     }
+
+    // ─── Bulk Delete Methods ──────────────────────────────────────────────────
+
+    public function bulkDeleteUsers(Request $request)
+    {
+        $request->validate(['ids' => 'required|array', 'ids.*' => 'integer']);
+        try {
+            $ids = collect($request->ids)->reject(fn($id) => (int)$id === Auth::id())->values()->all();
+            $count = User::whereIn('id', $ids)->delete();
+            return redirect()->back()->with('success', "$count user(s) deleted successfully.");
+        } catch (\Throwable $e) {
+            Log::error('Admin bulk delete users failed', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Bulk delete failed. Please try again.');
+        }
+    }
+
+    public function bulkDeleteTasks(Request $request)
+    {
+        $request->validate(['ids' => 'required|array', 'ids.*' => 'integer']);
+        try {
+            $count = \App\Models\Task::whereIn('id', $request->ids)->delete();
+            return redirect()->back()->with('success', "$count task(s) deleted successfully.");
+        } catch (\Throwable $e) {
+            Log::error('Admin bulk delete tasks failed', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Bulk delete failed. Please try again.');
+        }
+    }
+
+    public function bulkDeleteProfessionalServices(Request $request)
+    {
+        $request->validate(['ids' => 'required|array', 'ids.*' => 'integer']);
+        try {
+            $count = \App\Models\ProfessionalService::whereIn('id', $request->ids)->delete();
+            return redirect()->back()->with('success', "$count service(s) deleted successfully.");
+        } catch (\Throwable $e) {
+            Log::error('Admin bulk delete professional services failed', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Bulk delete failed. Please try again.');
+        }
+    }
+
+    public function bulkDeleteGrowthListings(Request $request)
+    {
+        $request->validate(['ids' => 'required|array', 'ids.*' => 'integer']);
+        try {
+            $count = \App\Models\GrowthListing::whereIn('id', $request->ids)->delete();
+            return redirect()->back()->with('success', "$count listing(s) deleted successfully.");
+        } catch (\Throwable $e) {
+            Log::error('Admin bulk delete growth listings failed', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Bulk delete failed. Please try again.');
+        }
+    }
+
+    public function bulkDeleteDigitalProducts(Request $request)
+    {
+        $request->validate(['ids' => 'required|array', 'ids.*' => 'integer']);
+        try {
+            $count = \App\Models\DigitalProduct::whereIn('id', $request->ids)->delete();
+            return redirect()->back()->with('success', "$count product(s) deleted successfully.");
+        } catch (\Throwable $e) {
+            Log::error('Admin bulk delete digital products failed', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Bulk delete failed. Please try again.');
+        }
+    }
+
+    public function bulkDeleteCompletions(Request $request)
+    {
+        $request->validate(['ids' => 'required|array', 'ids.*' => 'integer']);
+        try {
+            $count = \App\Models\TaskCompletion::whereIn('id', $request->ids)->delete();
+            return redirect()->back()->with('success', "$count completion(s) deleted successfully.");
+        } catch (\Throwable $e) {
+            Log::error('Admin bulk delete completions failed', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Bulk delete failed. Please try again.');
+        }
+    }
+
+    public function bulkDeleteFraudLogs(Request $request)
+    {
+        $request->validate(['ids' => 'required|array', 'ids.*' => 'integer']);
+        try {
+            $count = \App\Models\FraudLog::whereIn('id', $request->ids)->delete();
+            return redirect()->back()->with('success', "$count fraud log(s) deleted successfully.");
+        } catch (\Throwable $e) {
+            Log::error('Admin bulk delete fraud logs failed', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Bulk delete failed. Please try again.');
+        }
+    }
+
+    public function bulkDeleteReferrals(Request $request)
+    {
+        $request->validate(['ids' => 'required|array', 'ids.*' => 'integer']);
+        try {
+            $count = \App\Models\Referral::whereIn('id', $request->ids)->delete();
+            return redirect()->back()->with('success', "$count referral(s) deleted successfully.");
+        } catch (\Throwable $e) {
+            Log::error('Admin bulk delete referrals failed', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Bulk delete failed. Please try again.');
+        }
+    }
+
+    public function bulkDeleteWithdrawals(Request $request)
+    {
+        $request->validate(['ids' => 'required|array', 'ids.*' => 'integer']);
+        try {
+            $count = \App\Models\Withdrawal::whereIn('id', $request->ids)->delete();
+            return redirect()->back()->with('success', "$count withdrawal(s) deleted successfully.");
+        } catch (\Throwable $e) {
+            Log::error('Admin bulk delete withdrawals failed', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Bulk delete failed. Please try again.');
+        }
+    }
+
+    public function bulkDeleteActivations(Request $request)
+    {
+        $request->validate(['ids' => 'required|array', 'ids.*' => 'integer']);
+        try {
+            $count = \App\Models\ActivationLog::whereIn('id', $request->ids)->delete();
+            return redirect()->back()->with('success', "$count activation(s) deleted successfully.");
+        } catch (\Throwable $e) {
+            Log::error('Admin bulk delete activations failed', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Bulk delete failed. Please try again.');
+        }
+    }
 }

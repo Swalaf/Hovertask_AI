@@ -458,5 +458,48 @@
             lucide.createIcons();
         }
     </script>
+
+    {{-- Bulk Delete Shared JS --}}
+    <script>
+    function submitBulkDelete(entity) {
+        var checked = document.querySelectorAll('.bulk-cb-' + entity + ':checked');
+        if (checked.length === 0) { alert('Select at least one item to delete.'); return; }
+        if (!confirm('Delete ' + checked.length + ' selected item(s)? This cannot be undone.')) return;
+        var form = document.getElementById('bulk-form-' + entity);
+        form.querySelectorAll('input[name="ids[]"]').forEach(function(el){ el.remove(); });
+        checked.forEach(function(cb) {
+            var inp = document.createElement('input');
+            inp.type = 'hidden'; inp.name = 'ids[]'; inp.value = cb.value;
+            form.appendChild(inp);
+        });
+        form.submit();
+    }
+    function updateBulkToolbar(entity) {
+        var all = document.querySelectorAll('.bulk-cb-' + entity);
+        var count = document.querySelectorAll('.bulk-cb-' + entity + ':checked').length;
+        var toolbar = document.getElementById('bulk-toolbar-' + entity);
+        var countEl = document.getElementById('bulk-count-' + entity);
+        var sa = document.getElementById('select-all-' + entity);
+        if (toolbar) toolbar.classList.toggle('hidden', count === 0);
+        if (countEl) countEl.textContent = count;
+        if (sa) { sa.indeterminate = count > 0 && count < all.length; sa.checked = all.length > 0 && count === all.length; }
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.bulk-select-all').forEach(function(sa) {
+            var target = sa.dataset.target;
+            sa.addEventListener('change', function() {
+                document.querySelectorAll('.' + target).forEach(function(cb){ cb.checked = sa.checked; });
+                updateBulkToolbar(target.replace('bulk-cb-', ''));
+            });
+        });
+        document.querySelectorAll('[class*="bulk-cb-"]').forEach(function(cb) {
+            cb.addEventListener('change', function() {
+                var m = cb.className.match(/bulk-cb-([\w-]+)/);
+                if (m) updateBulkToolbar(m[1]);
+            });
+        });
+    });
+    </script>
+    @stack('scripts')
 </body>
 </html>

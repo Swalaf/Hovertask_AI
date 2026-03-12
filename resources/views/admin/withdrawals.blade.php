@@ -57,10 +57,20 @@
 
         <!-- Withdrawals Table -->
         <div class="bg-white dark:bg-dark-900 rounded-2xl shadow-lg shadow-gray-200/50 dark:shadow-dark-950/50 border border-gray-100 dark:border-dark-700 overflow-hidden">
+            <form id="bulk-form-withdrawals" action="{{ route('admin.withdrawals.bulk-delete') }}" method="POST">@csrf</form>
+            <div id="bulk-toolbar-withdrawals" class="hidden px-6 py-3 bg-red-100 dark:bg-red-500/10 border-b border-red-200 dark:border-red-500/20 flex items-center justify-between">
+                <span class="text-sm text-red-600 dark:text-red-400 font-medium"><span id="bulk-count-withdrawals">0</span> selected</span>
+                <button type="button" onclick="submitBulkDelete('withdrawals')" class="px-4 py-1.5 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-500/30 rounded-lg text-sm font-medium transition-colors">
+                    <i class="fas fa-trash mr-2"></i>Delete Selected
+                </button>
+            </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-dark-700">
                     <thead class="bg-gray-50 dark:bg-dark-800">
                         <tr>
+                            <th class="px-4 py-4 w-10">
+                                <input type="checkbox" id="select-all-withdrawals" class="bulk-select-all w-4 h-4 rounded cursor-pointer" data-target="bulk-cb-withdrawals">
+                            </th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">User</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Amount</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Bank Details</th>
@@ -72,6 +82,9 @@
                     <tbody class="bg-white dark:bg-dark-900 divide-y divide-gray-200 dark:divide-dark-700">
                         @forelse($withdrawals as $withdrawal)
                         <tr class="hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors">
+                            <td class="px-4 py-4">
+                                <input type="checkbox" name="ids[]" value="{{ $withdrawal->id }}" class="bulk-cb-withdrawals w-4 h-4 rounded cursor-pointer">
+                            </td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-2">
                                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
@@ -136,7 +149,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-12 text-center">
+                            <td colspan="7" class="px-6 py-12 text-center">
                                 <div class="w-16 h-16 rounded-full bg-gray-100 dark:bg-dark-800 flex items-center justify-center mx-auto mb-4">
                                     <i class="fas fa-money-bill-wave text-gray-400 text-2xl"></i>
                                 </div>

@@ -88,9 +88,19 @@
 
         <!-- Referrals Table -->
         <div class="bg-white dark:bg-dark-900 rounded-2xl shadow-lg shadow-gray-200/50 dark:shadow-dark-950/50 border border-gray-100 dark:border-dark-700 overflow-hidden">
+            <form id="bulk-form-referrals" action="{{ route('admin.referrals.bulk-delete') }}" method="POST">@csrf</form>
+            <div id="bulk-toolbar-referrals" class="hidden px-6 py-3 bg-red-100 dark:bg-red-500/10 border-b border-red-200 dark:border-red-500/20 flex items-center justify-between">
+                <span class="text-sm text-red-600 dark:text-red-400 font-medium"><span id="bulk-count-referrals">0</span> selected</span>
+                <button type="button" onclick="submitBulkDelete('referrals')" class="px-4 py-1.5 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-500/30 rounded-lg text-sm font-medium transition-colors">
+                    <i class="fas fa-trash mr-2"></i>Delete Selected
+                </button>
+            </div>
             <table class="min-w-full divide-y divide-gray-200 dark:divide-dark-700">
                 <thead class="bg-gray-50 dark:bg-dark-800">
                     <tr>
+                        <th class="px-4 py-3 w-10">
+                            <input type="checkbox" id="select-all-referrals" class="bulk-select-all w-4 h-4 rounded cursor-pointer" data-target="bulk-cb-referrals">
+                        </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Referrer</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Referred User</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
@@ -103,6 +113,9 @@
                 <tbody class="divide-y divide-gray-200 dark:divide-dark-700">
                     @forelse($referrals as $referral)
                     <tr class="hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors">
+                        <td class="px-4 py-4">
+                            <input type="checkbox" name="ids[]" value="{{ $referral->id }}" class="bulk-cb-referrals w-4 h-4 rounded cursor-pointer">
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
                                 <div class="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
@@ -174,7 +187,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                        <td colspan="8" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                             <i class="fas fa-users text-4xl mb-4 opacity-50"></i>
                             <p>No referrals found</p>
                         </td>
