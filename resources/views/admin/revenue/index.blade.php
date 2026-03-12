@@ -289,10 +289,17 @@
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<div id="revenue-json-data"
+     data-daily='@json($dailyBreakdown)'
+     data-sources='@json($revenueBySource)'
+     class="hidden"></div>
 <script>
+    const revenueJsonNode = document.getElementById('revenue-json-data');
+    const dailyData = revenueJsonNode ? JSON.parse(revenueJsonNode.dataset.daily || '[]') : [];
+    const revenueSources = revenueJsonNode ? JSON.parse(revenueJsonNode.dataset.sources || '{}') : {};
+
     // Revenue vs Expense Chart
     const revenueExpenseCtx = document.getElementById('revenueExpenseChart').getContext('2d');
-    const dailyData = @json($dailyBreakdown);
     
     new Chart(revenueExpenseCtx, {
         type: 'line',
@@ -348,7 +355,6 @@
 
     // Revenue Source Pie Chart
     const revenueSourceCtx = document.getElementById('revenueSourceChart').getContext('2d');
-    const revenueSources = @json($revenueBySource);
     
     new Chart(revenueSourceCtx, {
         type: 'doughnut',
