@@ -676,6 +676,54 @@
                                 $wallet = $authUser->wallet ?? null;
                                 $balance = $wallet ? ($wallet->withdrawable_balance + $wallet->promo_credit_balance) : 0;
                             @endphp
+
+                            <!-- Notification Bell -->
+                            <div class="relative" id="notif-bell-wrapper">
+                                <button id="notif-bell-btn"
+                                    class="relative p-2 md:p-2.5 rounded-xl bg-dark-800 hover:bg-indigo-500/10 text-gray-400 hover:text-indigo-400 transition-all focus:outline-none"
+                                    aria-label="Notifications"
+                                    onclick="toggleNotifDropdown(event)">
+                                    <i class="fas fa-bell text-lg"></i>
+                                    <span id="notif-badge"
+                                        class="absolute -top-1 -right-1 hidden min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-red-500 rounded-full flex items-center justify-center leading-none">
+                                        0
+                                    </span>
+                                </button>
+
+                                <!-- Dropdown -->
+                                <div id="notif-dropdown"
+                                    class="hidden absolute right-0 mt-2 w-80 sm:w-96 bg-dark-900 border border-dark-700 rounded-2xl shadow-2xl shadow-black/40 z-[200] overflow-hidden"
+                                    onclick="event.stopPropagation()">
+
+                                    <!-- Header -->
+                                    <div class="flex items-center justify-between px-4 py-3 border-b border-dark-700">
+                                        <h3 class="text-sm font-semibold text-white">Notifications</h3>
+                                        <div class="flex items-center gap-2">
+                                            <button onclick="markAllNotifRead()"
+                                                class="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">
+                                                Mark all read
+                                            </button>
+                                            <a href="{{ route('notifications.index') }}"
+                                                class="text-xs text-gray-400 hover:text-white transition-colors ml-2">
+                                                View all
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <!-- List -->
+                                    <div id="notif-list" class="max-h-[400px] overflow-y-auto divide-y divide-dark-700">
+                                        <div id="notif-empty" class="hidden px-4 py-8 text-center">
+                                            <i class="fas fa-bell-slash text-2xl text-gray-600 mb-2 block"></i>
+                                            <p class="text-sm text-gray-500">No notifications yet</p>
+                                        </div>
+                                        <div id="notif-loading" class="px-4 py-6 text-center">
+                                            <i class="fas fa-spinner fa-spin text-gray-500"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /Notification Bell -->
+
                             <div class="flex items-center space-x-2 md:space-x-3">
                                 <div class="hidden sm:block text-right">
                                     <p class="text-sm font-semibold text-white">{{ $authUser->name }}</p>
@@ -954,6 +1002,181 @@
             };
         })();
     </script>
+
+    @auth
+    <script>
+    /* =========================================================
+       In-App Notification Bell
+    ========================================================= */
+    (function () {
+        'use strict';
+
+        const FEED_URL         = '{{ route("notifications.feed") }}';
+        const READ_ALL_URL     = '{{ route("notifications.read-all") }}';
+        const CSRF_TOKEN       = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        const POLL_INTERVAL_MS = 30000; // poll every 30 s
+
+        let dropdownOpen = false;
+        let lastFetch    = 0;
+
+        // --- Type → icon / colour ---
+        const typeStyles = {
+            task_approved  : { icon: 'fa-check-circle',   colour: 'text-green-400'  },
+            task_rejected  : { icon: 'fa-times-circle',   colour: 'text-red-400'    },
+            new_task       : { icon: 'fa-tasks',           colour: 'text-indigo-400' },
+            earnings       : { icon: 'fa-coins',           colour: 'text-yellow-400' },
+            withdrawal     : { icon: 'fa-wallet',          colour: 'text-blue-400'   },
+            level_up       : { icon: 'fa-arrow-up',        colour: 'text-purple-400' },
+            badge_earned   : { icon: 'fa-medal',           colour: 'text-yellow-400' },
+            referral       : { icon: 'fa-users',           colour: 'text-green-400'  },
+            system         : { icon: 'fa-bell',            colour: 'text-gray-400'   },
+        };
+
+        function iconFor(type) {
+            const s = typeStyles[type] || typeStyles['system'];
+            return `<i class="fas ${s.icon} ${s.colour}"></i>`;
+        }
+
+        function timeAgo(dateStr) {
+            const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+            if (diff < 60)   return diff + 's ago';
+            if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+            if (diff < 86400)return Math.floor(diff / 3600) + 'h ago';
+            return Math.floor(diff / 86400) + 'd ago';
+        }
+
+        function updateBadge(count) {
+            const badge = document.getElementById('notif-badge');
+            if (!badge) return;
+            if (count > 0) {
+                badge.textContent = count > 99 ? '99+' : count;
+                badge.classList.remove('hidden');
+                badge.classList.add('flex');
+            } else {
+                badge.classList.add('hidden');
+                badge.classList.remove('flex');
+            }
+        }
+
+        function renderNotifications(items) {
+            const list    = document.getElementById('notif-list');
+            const empty   = document.getElementById('notif-empty');
+            const loading = document.getElementById('notif-loading');
+            if (!list) return;
+
+            if (loading) loading.remove();
+
+            // remove old items (keep empty placeholder)
+            list.querySelectorAll('.notif-item').forEach(el => el.remove());
+
+            if (!items || items.length === 0) {
+                if (empty) empty.classList.remove('hidden');
+                return;
+            }
+            if (empty) empty.classList.add('hidden');
+
+            items.forEach(n => {
+                const item = document.createElement('div');
+                item.className = 'notif-item flex items-start gap-3 px-4 py-3 cursor-pointer transition-colors ' +
+                    (n.is_read ? 'hover:bg-dark-800' : 'bg-indigo-500/5 hover:bg-indigo-500/10 border-l-2 border-indigo-500');
+                item.dataset.id = n.id;
+                item.innerHTML =
+                    `<div class="mt-0.5 flex-shrink-0 w-7 h-7 rounded-full bg-dark-800 flex items-center justify-center text-sm">
+                        ${iconFor(n.type)}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-white truncate">${escHtml(n.title)}</p>
+                        <p class="text-xs text-gray-400 line-clamp-2 mt-0.5">${escHtml(n.message)}</p>
+                        <p class="text-[10px] text-gray-600 mt-1">${timeAgo(n.created_at)}</p>
+                    </div>
+                    ${n.is_read ? '' : '<div class="mt-1 flex-shrink-0 w-2 h-2 rounded-full bg-indigo-500"></div>'}`;
+
+                item.addEventListener('click', () => markOneRead(n.id, item));
+                list.appendChild(item);
+            });
+        }
+
+        function escHtml(str) {
+            return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        async function fetchNotifications(force) {
+            const now = Date.now();
+            if (!force && now - lastFetch < 10000) return; // debounce
+            lastFetch = now;
+
+            try {
+                const res  = await fetch(FEED_URL, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } });
+                const data = await res.json();
+                updateBadge(data.unread_count || 0);
+                if (dropdownOpen) {
+                    renderNotifications(data.notifications || []);
+                }
+            } catch (_) { /* silent */ }
+        }
+
+        async function markOneRead(id, itemEl) {
+            // Optimistically update UI
+            if (itemEl) {
+                itemEl.classList.remove('bg-indigo-500/5', 'hover:bg-indigo-500/10', 'border-l-2', 'border-indigo-500');
+                itemEl.classList.add('hover:bg-dark-800');
+                const dot = itemEl.querySelector('.rounded-full.bg-indigo-500');
+                if (dot) dot.remove();
+            }
+
+            try {
+                await fetch('{{ url("/notifications") }}/' + id + '/read', {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': CSRF_TOKEN, 'Accept': 'application/json' },
+                });
+                await fetchNotifications(true);
+            } catch (_) { /* silent */ }
+        }
+
+        window.markAllNotifRead = async function () {
+            try {
+                await fetch(READ_ALL_URL, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': CSRF_TOKEN, 'Accept': 'application/json' },
+                });
+                updateBadge(0);
+                // Remove unread indicators from all items
+                document.querySelectorAll('.notif-item').forEach(el => {
+                    el.classList.remove('bg-indigo-500/5', 'hover:bg-indigo-500/10', 'border-l-2', 'border-indigo-500');
+                    el.classList.add('hover:bg-dark-800');
+                    const dot = el.querySelector('.rounded-full.bg-indigo-500');
+                    if (dot) dot.remove();
+                });
+            } catch (_) { /* silent */ }
+        };
+
+        window.toggleNotifDropdown = function (e) {
+            e.stopPropagation();
+            const dd = document.getElementById('notif-dropdown');
+            if (!dd) return;
+            dropdownOpen = !dropdownOpen;
+            dd.classList.toggle('hidden', !dropdownOpen);
+            if (dropdownOpen) {
+                fetchNotifications(true);
+            }
+        };
+
+        // Close on outside click
+        document.addEventListener('click', function (e) {
+            const wrapper = document.getElementById('notif-bell-wrapper');
+            if (wrapper && !wrapper.contains(e.target)) {
+                dropdownOpen = false;
+                const dd = document.getElementById('notif-dropdown');
+                if (dd) dd.classList.add('hidden');
+            }
+        });
+
+        // Initial fetch + poll
+        fetchNotifications(true);
+        setInterval(() => fetchNotifications(false), POLL_INTERVAL_MS);
+    }());
+    </script>
+    @endauth
 
     @stack('scripts')
 </body>

@@ -56,6 +56,14 @@ Route::post('/auth/google/one-tap', [GoogleAuthController::class, 'oneTap'])->na
 Route::middleware(['auth', 'verified', 'logout.inactive'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // User In-App Notifications
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\UserNotificationController::class, 'page'])->name('index');
+        Route::get('/feed', [\App\Http\Controllers\UserNotificationController::class, 'index'])->name('feed');
+        Route::post('/{id}/read', [\App\Http\Controllers\UserNotificationController::class, 'markRead'])->name('read');
+        Route::post('/read-all', [\App\Http\Controllers\UserNotificationController::class, 'markAllRead'])->name('read-all');
+    });
     
     // Start Your Journey - Mandatory Task Creation Gate Landing Page
     Route::get('/start-your-journey', [StartJourneyController::class, 'index'])->name('start-your-journey');
@@ -179,6 +187,7 @@ Route::middleware(['auth', 'verified', 'logout.inactive'])->group(function () {
 
         // Settings routes - admin.settings index for layouts
         Route::get('/settings', [\App\Http\Controllers\SettingsController::class, 'index'])->name('settings');
+
         Route::get('/settings/general', [\App\Http\Controllers\SettingsController::class, 'group'])->name('settings.general')->defaults('group', 'general');
         Route::get('/settings/registration', [\App\Http\Controllers\SettingsController::class, 'group'])->name('settings.registration')->defaults('group', 'registration');
         Route::get('/settings/commission', [\App\Http\Controllers\SettingsController::class, 'group'])->name('settings.commission')->defaults('group', 'commission');
