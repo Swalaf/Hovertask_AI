@@ -7,6 +7,7 @@ use App\Models\ActivationLog;
 use App\Models\ExpenseLog;
 use App\Models\FinancialTransaction;
 use App\Models\RevenueReport;
+use App\Models\SettingsAuditLog;
 use App\Models\Wallet;
 use App\Services\RevenueAnalyticsService;
 use Carbon\Carbon;
@@ -345,8 +346,14 @@ class RevenueController extends Controller
         ]);
 
         try {
-            DB::transaction(function () {
-                RevenueReport::query()->update([
+            $summary = [
+                'revenue_reports_updated' => 0,
+                'financial_revenue_rows_updated' => 0,
+                'activation_rows_updated' => 0,
+            ];
+
+            DB::transaction(function () use (&$summary) {
+                $summary['revenue_reports_updated'] = RevenueReport::query()->update([
                     'gross_amount' => 0,
                     'gateway_fees' => 0,
                     'refunds' => 0,
@@ -367,16 +374,26 @@ class RevenueController extends Controller
                     'commission_fees' => 0,
                 ]);
 
-                FinancialTransaction::query()
+                $summary['financial_revenue_rows_updated'] = FinancialTransaction::query()
                     ->where('transaction_type', FinancialTransaction::TYPE_REVENUE)
                     ->update(['amount' => 0, 'amount_usd' => 0]);
 
-                ActivationLog::query()->update([
+                $summary['activation_rows_updated'] = ActivationLog::query()->update([
                     'platform_revenue' => 0,
                     'activation_fee' => 0,
                     'referral_bonus' => 0,
                 ]);
             });
+
+            SettingsAuditLog::create([
+                'admin_id' => auth()->id(),
+                'setting_key' => 'revenue.clear_system_revenue',
+                'old_value' => 'N/A',
+                'new_value' => json_encode($summary),
+                'group' => 'revenue',
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
 
             return redirect()->back()->with('success', 'System revenue has been cleared successfully.');
         } catch (\Throwable $e) {
@@ -392,6 +409,16 @@ class RevenueController extends Controller
 
         try {
             $updated = Wallet::query()->update(['total_earned' => 0]);
+
+            SettingsAuditLog::create([
+                'admin_id' => auth()->id(),
+                'setting_key' => 'revenue.clear_total_earned',
+                'old_value' => 'N/A',
+                'new_value' => json_encode(['wallets_updated' => $updated]),
+                'group' => 'revenue',
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
 
             return redirect()->back()->with('success', "Total earned has been reset for {$updated} wallet(s).");
         } catch (\Throwable $e) {
