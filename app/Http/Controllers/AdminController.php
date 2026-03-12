@@ -14,6 +14,7 @@ use App\Models\ActivationLog;
 use App\Models\Currency;
 use App\Models\TaskCategory;
 use App\Models\Badge;
+use App\Services\RevenueAnalyticsService;
 use App\Services\SwiftKudiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -583,15 +584,8 @@ class AdminController extends Controller
     {
         $stats = $this->earnDeskService->getPlatformStats();
 
-        // Revenue calculations
-        $totalCommission = Transaction::where('type', 'task_payment')
-            ->where('status', 'completed')
-            ->sum('amount');
-        
-        $totalFees = Withdrawal::where('status', 'completed')
-            ->sum('fee');
-
-        $platformRevenue = $totalCommission + $totalFees;
+        $revenueSummary = app(RevenueAnalyticsService::class)->getDashboardSummary();
+        $platformRevenue = $revenueSummary['lifetime']['revenue'] ?? 0;
 
         // User growth (last 30 days)
         $newUsers = User::where('created_at', '>=', now()->subDays(30))->count();

@@ -37,7 +37,7 @@
                     </div>
                 </div>
                 <div class="mt-4">
-                    <span class="text-xs text-gray-500">From commissions & withdrawal fees</span>
+                    <span class="text-xs text-gray-500">All recorded system revenue</span>
                 </div>
             </div>
 
@@ -170,7 +170,7 @@
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Financial Summary</h3>
                 <div class="space-y-4">
                     <div class="flex justify-between items-center">
-                        <span class="text-sm text-gray-500">Task Payments</span>
+                        <span class="text-sm text-gray-500">Total Earnings</span>
                         <span class="text-lg font-medium text-gray-900">₦{{ number_format($stats['total_earnings'], 2) }}</span>
                     </div>
                     <div class="flex justify-between items-center">
