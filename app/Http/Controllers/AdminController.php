@@ -1094,4 +1094,124 @@ class AdminController extends Controller
         return redirect()->route('admin.digital-products')
             ->with('success', 'Product rejected.');
     }
+
+    /**
+     * Delete user
+     */
+    public function deleteUser(User $user)
+    {
+        if ($user->id === Auth::id()) {
+            return redirect()->back()
+                ->with('error', 'You cannot delete your own account.');
+        }
+
+        try {
+            $name = $user->name;
+            $user->delete();
+
+            return redirect()->route('admin.users')
+                ->with('success', "User {$name} deleted successfully.");
+        } catch (\Throwable $e) {
+            Log::error('Admin failed to delete user', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()
+                ->with('error', 'Unable to delete this user right now.');
+        }
+    }
+
+    /**
+     * Delete task
+     */
+    public function deleteTask(Task $task)
+    {
+        try {
+            $title = $task->title;
+
+            if ((float) $task->escrow_amount > 0 && $task->user && $task->user->wallet) {
+                $task->user->wallet->refundFromEscrow((float) $task->escrow_amount);
+            }
+
+            $task->delete();
+
+            return redirect()->route('admin.tasks')
+                ->with('success', 'Task deleted successfully: ' . $title);
+        } catch (\Throwable $e) {
+            Log::error('Admin failed to delete task', [
+                'task_id' => $task->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()
+                ->with('error', 'Unable to delete this task right now.');
+        }
+    }
+
+    /**
+     * Delete professional service
+     */
+    public function deleteProfessionalService(\App\Models\ProfessionalService $service)
+    {
+        try {
+            $serviceTitle = $service->title;
+            $service->delete();
+
+            return redirect()->route('admin.professional-services')
+                ->with('success', 'Service deleted successfully: ' . $serviceTitle);
+        } catch (\Throwable $e) {
+            Log::error('Admin failed to delete professional service', [
+                'service_id' => $service->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()
+                ->with('error', 'Unable to delete this service right now.');
+        }
+    }
+
+    /**
+     * Delete growth listing
+     */
+    public function deleteGrowthListing(\App\Models\GrowthListing $listing)
+    {
+        try {
+            $listingTitle = $listing->title;
+            $listing->delete();
+
+            return redirect()->route('admin.growth-listings')
+                ->with('success', 'Growth listing deleted successfully: ' . $listingTitle);
+        } catch (\Throwable $e) {
+            Log::error('Admin failed to delete growth listing', [
+                'listing_id' => $listing->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()
+                ->with('error', 'Unable to delete this listing right now.');
+        }
+    }
+
+    /**
+     * Delete digital product
+     */
+    public function deleteDigitalProduct(\App\Models\DigitalProduct $product)
+    {
+        try {
+            $productTitle = $product->title;
+            $product->delete();
+
+            return redirect()->route('admin.digital-products')
+                ->with('success', 'Digital product deleted successfully: ' . $productTitle);
+        } catch (\Throwable $e) {
+            Log::error('Admin failed to delete digital product', [
+                'product_id' => $product->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()
+                ->with('error', 'Unable to delete this product right now.');
+        }
+    }
 }

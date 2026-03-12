@@ -143,10 +143,19 @@
                                         {{ $product->created_at->format('M d, Y') }}
                                     </td>
                                     <td class="px-6 py-4 text-right">
-                                        <a href="{{ route('admin.digital-products.show', $product) }}" 
-                                           class="inline-flex items-center px-3 py-1.5 bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 rounded-lg text-sm font-medium hover:bg-indigo-200 dark:hover:bg-indigo-500/30 transition-colors">
-                                            <i class="fas fa-eye mr-1"></i> View
-                                        </a>
+                                        <div class="inline-flex items-center gap-2">
+                                            <a href="{{ route('admin.digital-products.show', $product) }}" 
+                                               class="inline-flex items-center px-3 py-1.5 bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 rounded-lg text-sm font-medium hover:bg-indigo-200 dark:hover:bg-indigo-500/30 transition-colors">
+                                                <i class="fas fa-eye mr-1"></i> View
+                                            </a>
+                                            <form action="{{ route('admin.digital-products.delete', $product) }}" method="POST" class="inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300 rounded-lg text-sm font-medium hover:bg-red-200 dark:hover:bg-red-500/30 transition-colors" onclick="return confirm('Delete this product? This action cannot be undone.')">
+                                                    <i class="fas fa-trash mr-1"></i> Delete
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach

@@ -227,6 +227,7 @@ Route::middleware(['auth', 'verified', 'logout.inactive'])->group(function () {
         Route::post('/users/{user}/suspend', [AdminController::class, 'suspendUser'])->name('users.suspend');
         Route::post('/users/{user}/promote', [AdminController::class, 'promoteToAdmin'])->name('users.promote');
         Route::post('/users/{user}/demote', [AdminController::class, 'demoteFromAdmin'])->name('users.demote');
+        Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('users.delete');
 
         // Task management (admin)
         Route::get('/tasks', [AdminController::class, 'tasks'])->name('tasks');
@@ -234,6 +235,7 @@ Route::middleware(['auth', 'verified', 'logout.inactive'])->group(function () {
         Route::post('/tasks/{task}/approve', [AdminController::class, 'approveTask'])->name('tasks.approve');
         Route::post('/tasks/{task}/reject', [AdminController::class, 'rejectTask'])->name('tasks.reject');
         Route::post('/tasks/{task}/feature', [AdminController::class, 'featureTask'])->name('tasks.feature');
+        Route::delete('/tasks/{task}', [AdminController::class, 'deleteTask'])->name('tasks.delete');
 
         // Marketplace Management
         Route::get('/marketplace', [\App\Http\Controllers\Admin\MarketplaceController::class, 'index'])->name('marketplace.index');
@@ -293,18 +295,21 @@ Route::middleware(['auth', 'verified', 'logout.inactive'])->group(function () {
         Route::get('/professional-services/{service}', [AdminController::class, 'professionalServiceDetails'])->name('professional-services.show');
         Route::post('/professional-services/{service}/approve', [AdminController::class, 'approveProfessionalService'])->name('professional-services.approve');
         Route::post('/professional-services/{service}/reject', [AdminController::class, 'rejectProfessionalService'])->name('professional-services.reject');
+        Route::delete('/professional-services/{service}', [AdminController::class, 'deleteProfessionalService'])->name('professional-services.delete');
 
         // Growth Listings management
         Route::get('/growth-listings', [AdminController::class, 'growthListings'])->name('growth-listings');
         Route::get('/growth-listings/{listing}', [AdminController::class, 'growthListingDetails'])->name('growth-listings.show');
         Route::post('/growth-listings/{listing}/approve', [AdminController::class, 'approveGrowthListing'])->name('growth-listings.approve');
         Route::post('/growth-listings/{listing}/reject', [AdminController::class, 'rejectGrowthListing'])->name('growth-listings.reject');
+        Route::delete('/growth-listings/{listing}', [AdminController::class, 'deleteGrowthListing'])->name('growth-listings.delete');
 
         // Digital Products management
         Route::get('/digital-products', [AdminController::class, 'digitalProducts'])->name('digital-products');
         Route::get('/digital-products/{product}', [AdminController::class, 'digitalProductDetails'])->name('digital-products.show');
         Route::post('/digital-products/{product}/approve', [AdminController::class, 'approveDigitalProduct'])->name('digital-products.approve');
         Route::post('/digital-products/{product}/reject', [AdminController::class, 'rejectDigitalProduct'])->name('digital-products.reject');
+        Route::delete('/digital-products/{product}', [AdminController::class, 'deleteDigitalProduct'])->name('digital-products.delete');
 
          // end admin routes
     });

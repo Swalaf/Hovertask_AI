@@ -196,7 +196,7 @@
 
             <!-- Actions -->
             @if($service->status === 'pending')
-                <div class="card border-0 shadow-sm">
+                <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white">
                         <h5 class="mb-0">Actions</h5>
                     </div>
@@ -214,6 +214,21 @@
                     </div>
                 </div>
             @endif
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0 text-danger">Danger Zone</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{{ route('admin.professional-services.delete', $service) }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-outline-danger w-100" onclick="return confirm('Delete this service? This action cannot be undone.')">
+                            <i class="fas fa-trash me-2"></i>Delete Service
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </div>

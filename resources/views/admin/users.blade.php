@@ -94,9 +94,20 @@
                     </div>
                 </div>
                 
-                <a href="{{ route('admin.user-details', $user) }}" class="w-full flex items-center justify-center px-4 py-2.5 bg-indigo-500/10 text-indigo-400 rounded-xl hover:bg-indigo-500/20 transition-colors text-sm font-medium">
-                    <i class="fas fa-eye mr-2"></i>View Details
-                </a>
+                <div class="flex gap-2">
+                    <a href="{{ route('admin.user-details', $user) }}" class="flex-1 flex items-center justify-center px-4 py-2.5 bg-indigo-500/10 text-indigo-400 rounded-xl hover:bg-indigo-500/20 transition-colors text-sm font-medium">
+                        <i class="fas fa-eye mr-2"></i>View Details
+                    </a>
+                    @if($user->id !== auth()->id())
+                    <form action="{{ route('admin.users.delete', $user) }}" method="POST" class="flex-1">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="w-full px-4 py-2.5 bg-red-500/10 text-red-400 rounded-xl hover:bg-red-500/20 transition-colors text-sm font-medium" onclick="return confirm('Delete this user account? This action cannot be undone.')">
+                            <i class="fas fa-trash mr-2"></i>Delete
+                        </button>
+                    </form>
+                    @endif
+                </div>
             </div>
             @endforeach
         </div>
@@ -160,6 +171,15 @@
                                     <a href="{{ route('admin.user-details', $user) }}" class="p-2 text-indigo-400 hover:bg-dark-700 rounded-lg transition-colors" title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </a>
+                                    @if($user->id !== auth()->id())
+                                    <form action="{{ route('admin.users.delete', $user) }}" method="POST" class="inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="p-2 text-red-400 hover:bg-dark-700 rounded-lg transition-colors" title="Delete User" onclick="return confirm('Delete this user account? This action cannot be undone.')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                    @endif
                                     @if($user->is_admin)
                                     <span class="px-2 py-1 text-xs font-semibold bg-purple-500/20 text-purple-400 rounded-lg">
                                         <i class="fas fa-shield-alt mr-1"></i>Admin

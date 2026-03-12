@@ -157,6 +157,17 @@
                         </button>
                     </div>
                 @endif
+
+                <div class="bg-white dark:bg-dark-900 rounded-2xl shadow-lg border border-gray-100 dark:border-dark-700 p-6">
+                    <h3 class="text-lg font-semibold text-red-700 dark:text-red-300 mb-4">Danger Zone</h3>
+                    <form action="{{ route('admin.digital-products.delete', $product) }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="w-full py-3 bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300 font-semibold rounded-xl hover:bg-red-200 dark:hover:bg-red-500/30 transition-colors" onclick="return confirm('Delete this product? This action cannot be undone.')">
+                            <i class="fas fa-trash mr-2"></i>Delete Product
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

@@ -86,6 +86,13 @@
                                     </button>
                                 </form>
                                 @endif
+                                <form action="{{ route('admin.users.delete', $user) }}" method="POST" class="inline ml-2">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-xs px-3 py-1 bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-500/30 transition-colors" onclick="return confirm('Delete this user account? This action cannot be undone.')">
+                                        <i class="fas fa-trash mr-1"></i>Delete User
+                                    </button>
+                                </form>
                             </div>
                             @endif
                         </div>

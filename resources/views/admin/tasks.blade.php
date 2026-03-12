@@ -49,6 +49,7 @@
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Progress</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Status</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Created</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white dark:bg-dark-900 divide-y divide-gray-200 dark:divide-dark-700">
@@ -75,10 +76,11 @@
                             <td class="px-6 py-4">
                                 <div class="flex items-center">
                                     <div class="w-16 bg-gray-200 dark:bg-dark-700 rounded-full h-2 mr-2">
-                                        @php
-                                            $progress = $task->quantity > 0 ? ($task->task_completions_count / $task->quantity) * 100 : 0;
-                                        @endphp
-                                        <div class="bg-indigo-500 h-2 rounded-full" style="width: {{ min($progress, 100) }}%"></div>
+                                        @if($task->quantity > 0 && $task->task_completions_count > 0)
+                                        <div class="bg-indigo-500 h-2 rounded-full w-full"></div>
+                                        @else
+                                        <div class="bg-indigo-500 h-2 rounded-full w-0"></div>
+                                        @endif
                                     </div>
                                     <span class="text-xs text-gray-500 dark:text-gray-400">{{ $task->task_completions_count }}/{{ $task->quantity }}</span>
                                 </div>
@@ -100,6 +102,15 @@
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                                 {{ $task->created_at->format('M d, Y') }}
+                            </td>
+                            <td class="px-6 py-4">
+                                <form action="{{ route('admin.tasks.delete', $task) }}" method="POST" class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="px-3 py-1.5 bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-500/30 transition-colors text-sm" onclick="return confirm('Delete this task? This action cannot be undone.')">
+                                        <i class="fas fa-trash mr-1"></i>Delete
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                         @endforeach
