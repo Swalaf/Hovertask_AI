@@ -332,6 +332,7 @@ Route::middleware(['auth', 'verified', 'logout.inactive'])->group(function () {
         // Bulk delete
         Route::post('/users/bulk-delete',                [AdminController::class, 'bulkDeleteUsers'])->name('users.bulk-delete');
         Route::post('/users/bulk-clear-wallet',          [AdminController::class, 'bulkClearUserWallets'])->name('users.bulk-clear-wallet');
+        Route::post('/users/bulk-reset-total-earned',    [AdminController::class, 'bulkResetUsersTotalEarned'])->name('users.bulk-reset-total-earned');
         Route::post('/tasks/bulk-delete',                [AdminController::class, 'bulkDeleteTasks'])->name('tasks.bulk-delete');
         Route::post('/professional-services/bulk-delete',[AdminController::class, 'bulkDeleteProfessionalServices'])->name('professional-services.bulk-delete');
         Route::post('/growth-listings/bulk-delete',      [AdminController::class, 'bulkDeleteGrowthListings'])->name('growth-listings.bulk-delete');

@@ -1423,6 +1423,27 @@ class AdminController extends Controller
         }
     }
 
+    public function bulkResetUsersTotalEarned(Request $request)
+    {
+        $request->validate(['ids' => 'required|array', 'ids.*' => 'integer']);
+
+        try {
+            $wallets = Wallet::whereIn('user_id', $request->ids)->get();
+            $count = 0;
+
+            foreach ($wallets as $wallet) {
+                $wallet->total_earned = 0;
+                $wallet->save();
+                $count++;
+            }
+
+            return redirect()->back()->with('success', "Total earned reset for {$count} user wallet(s)." );
+        } catch (\Throwable $e) {
+            Log::error('Admin bulk reset total earned failed', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Bulk total earned reset failed. Please try again.');
+        }
+    }
+
     public function bulkDeleteTasks(Request $request)
     {
         $request->validate(['ids' => 'required|array', 'ids.*' => 'integer']);

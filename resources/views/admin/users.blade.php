@@ -45,6 +45,9 @@
             <div class="flex items-center justify-between bg-dark-900 border border-dark-700 rounded-xl p-3">
                 <p class="text-sm text-gray-300">Select users to delete</p>
                 <div class="flex items-center gap-2">
+                    <button type="button" onclick="submitBulkResetTotalEarnedUsers()" class="px-3 py-1.5 bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 rounded-lg text-xs font-medium transition-colors">
+                        <i class="fas fa-chart-line mr-1"></i>Reset Earned
+                    </button>
                     <button type="button" onclick="submitBulkClearWalletUsers()" class="px-3 py-1.5 bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30 rounded-lg text-xs font-medium transition-colors">
                         <i class="fas fa-wallet mr-1"></i>Clear Wallet
                     </button>
@@ -154,9 +157,13 @@
         <div class="hidden lg:block bg-dark-900 rounded-2xl shadow-lg border border-dark-700 overflow-hidden">
             <form id="bulk-form-users" action="{{ route('admin.users.bulk-delete') }}" method="POST">@csrf</form>
             <form id="bulk-form-users-wallet" action="{{ route('admin.users.bulk-clear-wallet') }}" method="POST">@csrf</form>
+            <form id="bulk-form-users-earned" action="{{ route('admin.users.bulk-reset-total-earned') }}" method="POST">@csrf</form>
             <div id="bulk-toolbar-users" class="hidden px-6 py-3 bg-red-500/10 border-b border-red-500/20 flex items-center justify-between">
                 <span class="text-sm text-red-400 font-medium"><span id="bulk-count-users">0</span> selected</span>
                 <div class="flex items-center gap-2">
+                    <button type="button" onclick="submitBulkResetTotalEarnedUsers()" class="px-4 py-1.5 bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-chart-line mr-2"></i>Reset Total Earned
+                    </button>
                     <button type="button" onclick="submitBulkClearWalletUsers()" class="px-4 py-1.5 bg-yellow-500/20 text-yellow-300 hover:bg-yellow-500/30 rounded-lg text-sm font-medium transition-colors">
                         <i class="fas fa-wallet mr-2"></i>Clear Wallets
                     </button>
@@ -290,6 +297,28 @@
 
 @push('scripts')
 <script>
+function submitBulkResetTotalEarnedUsers() {
+    var checked = document.querySelectorAll('.bulk-cb-users:checked');
+    if (checked.length === 0) {
+        alert('Select at least one user.');
+        return;
+    }
+    if (!confirm('Reset TOTAL EARNED for ' + checked.length + ' selected user(s)?')) {
+        return;
+    }
+
+    var form = document.getElementById('bulk-form-users-earned');
+    form.querySelectorAll('input[name="ids[]"]').forEach(function(el){ el.remove(); });
+    checked.forEach(function(cb) {
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'ids[]';
+        input.value = cb.value;
+        form.appendChild(input);
+    });
+    form.submit();
+}
+
 function submitBulkClearWalletUsers() {
     var checked = document.querySelectorAll('.bulk-cb-users:checked');
     if (checked.length === 0) {
