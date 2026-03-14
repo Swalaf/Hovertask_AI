@@ -256,13 +256,17 @@
             <!-- Revenue vs Expense Chart -->
             <div class="bg-white dark:bg-dark-900 rounded-xl shadow-sm border border-gray-200 dark:border-dark-700 p-5">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Revenue vs Expenses</h3>
-                <canvas id="revenueExpenseChart" height="300"></canvas>
+                <div class="h-80">
+                    <canvas id="revenueExpenseChart"></canvas>
+                </div>
             </div>
 
             <!-- Revenue Source Pie Chart -->
             <div class="bg-white dark:bg-dark-900 rounded-xl shadow-sm border border-gray-200 dark:border-dark-700 p-5">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Revenue by Source</h3>
-                <canvas id="revenueSourceChart" height="300"></canvas>
+                <div class="h-80">
+                    <canvas id="revenueSourceChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -349,85 +353,101 @@
     const revenueSources = revenueJsonNode ? JSON.parse(revenueJsonNode.dataset.sources || '{}') : {};
 
     // Revenue vs Expense Chart
-    const revenueExpenseCtx = document.getElementById('revenueExpenseChart').getContext('2d');
-    
-    new Chart(revenueExpenseCtx, {
-        type: 'line',
-        data: {
-            labels: dailyData.map(d => d.date),
-            datasets: [
-                {
-                    label: 'Revenue',
-                    data: dailyData.map(d => d.revenue),
-                    borderColor: '#16a34a',
-                    backgroundColor: 'rgba(22, 163, 74, 0.1)',
-                    fill: true,
-                    tension: 0.4
-                },
-                {
-                    label: 'Expenses',
-                    data: dailyData.map(d => d.expense),
-                    borderColor: '#dc2626',
-                    backgroundColor: 'rgba(220, 38, 38, 0.1)',
-                    fill: true,
-                    tension: 0.4
-                },
-                {
-                    label: 'Profit',
-                    data: dailyData.map(d => d.profit),
-                    borderColor: '#6366f1',
-                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                    fill: true,
-                    tension: 0.4
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                }
+    const revenueExpenseCanvas = document.getElementById('revenueExpenseChart');
+    if (revenueExpenseCanvas) {
+        const existingRevenueExpenseChart = Chart.getChart(revenueExpenseCanvas);
+        if (existingRevenueExpenseChart) {
+            existingRevenueExpenseChart.destroy();
+        }
+
+        const revenueExpenseCtx = revenueExpenseCanvas.getContext('2d');
+
+        new Chart(revenueExpenseCtx, {
+            type: 'line',
+            data: {
+                labels: dailyData.map(d => d.date),
+                datasets: [
+                    {
+                        label: 'Revenue',
+                        data: dailyData.map(d => d.revenue),
+                        borderColor: '#16a34a',
+                        backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Expenses',
+                        data: dailyData.map(d => d.expense),
+                        borderColor: '#dc2626',
+                        backgroundColor: 'rgba(220, 38, 38, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Profit',
+                        data: dailyData.map(d => d.profit),
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }
+                ]
             },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value) {
-                            return '₦' + value.toLocaleString();
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '₦' + value.toLocaleString();
+                            }
                         }
                     }
                 }
             }
-        }
-    });
+        });
+    }
 
     // Revenue Source Pie Chart
-    const revenueSourceCtx = document.getElementById('revenueSourceChart').getContext('2d');
-    
-    new Chart(revenueSourceCtx, {
-        type: 'doughnut',
-        data: {
-            labels: Object.keys(revenueSources).map(k => k.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())),
-            datasets: [{
-                data: Object.values(revenueSources),
-                backgroundColor: [
-                    '#16a34a', '#22c55e', '#4ade80', '#86efac',
-                    '#6366f1', '#8b5cf6', '#a78bfa', '#c4b5fd'
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'right'
+    const revenueSourceCanvas = document.getElementById('revenueSourceChart');
+    if (revenueSourceCanvas) {
+        const existingRevenueSourceChart = Chart.getChart(revenueSourceCanvas);
+        if (existingRevenueSourceChart) {
+            existingRevenueSourceChart.destroy();
+        }
+
+        const revenueSourceCtx = revenueSourceCanvas.getContext('2d');
+
+        new Chart(revenueSourceCtx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(revenueSources).map(k => k.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())),
+                datasets: [{
+                    data: Object.values(revenueSources),
+                    backgroundColor: [
+                        '#16a34a', '#22c55e', '#4ade80', '#86efac',
+                        '#6366f1', '#8b5cf6', '#a78bfa', '#c4b5fd'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    }
                 }
             }
-        }
-    });
+        });
+    }
 
     // Export function
     function exportReport(format) {
