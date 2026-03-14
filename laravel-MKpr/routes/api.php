@@ -21,9 +21,11 @@ use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\WishlistController;
 use App\Http\Controllers\Api\V1\AdvertiseController;
+use App\Http\Controllers\Api\DashboardController as ApiDashboardController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\SocialConnectController;
+use App\Http\Controllers\Api\AuthController as NewAuthController;
 use App\Http\Controllers\Api\V1\ReferralController;
 use App\Http\Controllers\Api\V1\WithdrawalController;
 use App\Http\Controllers\Api\V1\ResellerConversionController;
@@ -39,6 +41,19 @@ Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/resend-otp', [AuthController::class, 'resendOtp'])->name('resend.otp');
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// NEW: Modern Auth Endpoints (Sanctum)
+Route::post('/auth/register', [NewAuthController::class, 'register'])->name('auth.register');
+Route::post('/auth/login', [NewAuthController::class, 'login'])->name('auth.login');
+Route::post('/auth/logout', [NewAuthController::class, 'logout'])->middleware('auth:sanctum')->name('auth.logout');
+Route::get('/auth/user', [NewAuthController::class, 'user'])->middleware('auth:sanctum')->name('auth.user');
+Route::put('/auth/update-profile', [NewAuthController::class, 'updateProfile'])->middleware('auth:sanctum')->name('auth.update-profile');
+Route::post('/auth/change-password', [NewAuthController::class, 'changePassword'])->middleware('auth:sanctum')->name('auth.change-password');
+
+// NEW: Dashboard Routes (Protected)
+Route::get('/dashboard', [ApiDashboardController::class, 'dashboard'])->middleware('auth:sanctum')->name('dashboard');
+Route::get('/dashboard/user', [ApiDashboardController::class, 'user'])->middleware('auth:sanctum')->name('dashboard.user');
+
 Route::get('/banks', [PaystackController::class, 'banks'])->name('banks.list');
 //Route::post('/send-reset-link', [AuthController::class, 'resetPasswordRequest'])->name('password.reset');
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.reset');

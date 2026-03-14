@@ -1,552 +1,136 @@
 /** biome-ignore-all lint/a11y/noStaticElementInteractions: allow static interactive elements */
 import {
-	Bell,
-	BellDot,
-	ChevronDown,
-	CreditCard,
-	Ellipsis,
-	FileText,
-	Info,
-	Lock,
-	LogOut,
-	MapPin,
-	Menu,
-	Moon,
-	Search,
-	Shield,
-	ShoppingCart,
-	User,
-	X,
+  Bell,
+  Search,
+  Menu,
+  User,
+  ChevronDown,
+  LogOut,
+  Settings,
+  Wallet
 } from "lucide-react";
-import { type SetStateAction, useEffect, useState } from "react";
+import { useState } from "react";
 import { useSelector } from "react-redux";
-import { Link, useLocation } from "react-router";
-import type { AuthUserDTO, CartProduct, MenuDropdownProps } from "../../types";
-import useActiveLink from "../hooks/useActiveLink";
-import cn from "../utils/cn";
-import menu from "../utils/menu";
-import ComingSoonModal from "../shared/components/ComingSoonModal";
+import { Link } from "react-router";
+import type { AuthUserDTO } from "../../types";
+import DarkModeToggle from "./DarkModeToggle";
 
 export default function Header() {
-	const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
-	const [comingSoonOpen, setComingSoonOpen] = useState(false);
-	const authUser = useSelector<{ auth: { value: AuthUserDTO } }, AuthUserDTO>(
-		(state) => state.auth.value,
-	);
-	const cartItemsLength = useSelector<
-		{ cart: { value: CartProduct[] } },
-		number
-	>((state) => state.cart.value.length);
-	const requiredMenuItems = [
-		"Dashboard",
-		"Earn",
-		"Advertise",
-		"Marketplace",
-		"Buy Followers",
-	];
-	const activeLink = useActiveLink();
-	const ENABLE_CART_UI = false;
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const authUser = useSelector<{ auth: { value: AuthUserDTO } }, AuthUserDTO>(
+    (state) => state.auth.value,
+  );
 
-	return (
-		<header className="bg-gradient-to-b from-[#4B70F559] to-[#9D9D9D1A] p-4">
-			<div className="max-w-5xl mx-auto space-y-3">
-				<div className="flex items-center justify-between">
-					<div className="flex gap-2 items-center">
-						<button
-							type="button"
-							onClick={() => setIsMobileNavOpen(true)}
-							title="Menu"
-							className="mobile:hidden p-2"
-						>
-							<Menu size={16} />
-						</button>
-						<Link to="/">
-							<img src="/images/logo.png" width={100} alt="Logo" />
-						</Link>
-					</div>
+  return (
+    <header className="h-[72px] bg-white dark:bg-slate-900 border-b border-zinc-200 dark:border-slate-700 sticky top-0 z-50 transition-colors duration-300">
+      <div className="h-full px-4 lg:px-6 flex items-center justify-between">
+        {/* Left - Logo & Mobile Menu */}
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={() => {/* Toggle mobile menu */}}
+            title="Menu"
+            className="lg:hidden p-2 rounded-xl hover:bg-zinc-100 transition-colors"
+          >
+            <Menu size={24} className="text-zinc-700" />
+          </button>
+          <Link to="/" className="flex items-center">
+            <img src="/images/logo.png" width={100} alt="HoverTask" className="hidden sm:block" />
+            <img src="/images/logo.png" width={80} alt="HoverTask" className="sm:hidden" />
+          </Link>
+        </div>
 
-					<div className="flex items-center gap-2 text-sm">
-						<Link to="/notifications">
-							<BellDot size={18} />
-						</Link>
-						<div>
-							<Moon size={18} />
-						</div>
-						{ENABLE_CART_UI && (
-						<Link
-							className="inline-flex gap-1 items-center px-2 py-1 bg-white rounded-2xl relative"
-							to="/marketplace/cart"
-						>
-							<ShoppingCart size={14} />{" "}
-							<span className="max-[380px]:hidden">Cart</span>{" "}
-							{cartItemsLength ? (
-								<span className="absolute h-6 w-6 rounded-full bg-primary text-white text-xs flex items-center justify-center -top-2 -right-2">
-									{cartItemsLength}
-								</span>
-							) : null}
-						</Link>)}
-						<div className="flex gap-1 items-center px-2 py-1 bg-white rounded-2xl">
-							<img
-								src="/images/nigerian-flag.png"
-								width={25}
-								alt="Nigerian flag"
-							/>{" "}
-							<span className="max-[380px]:hidden">
-								{authUser.currency.toUpperCase()}
-							</span>
-						</div>
-						<SecondaryNav isMobile />
-						<div className="max-[500px]:hidden mobile:hidden">
-							<div>
-								{authUser.fname} {authUser.lname}
-							</div>
-							<div className="flex items-center gap-1">
-								@{authUser.username} <ChevronDown size={12} />
-							</div>
-						</div>
-					</div>
-				</div>
+        {/* Center - Search (hidden on mobile) */}
+        <div className="hidden md:flex flex-1 max-w-xl mx-8">
+          <div className="w-full relative">
+            <input
+              type="text"
+              placeholder="Search tasks, products, campaigns..."
+              className="w-full h-10 pl-10 pr-4 bg-zinc-50 border border-zinc-200 rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+            />
+            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+          </div>
+        </div>
 
-				<div className="flex items-center justify-between text-sm gap-4">
-					<ProfileMenu authUser={authUser} />
+        {/* Right - Actions */}
+        <div className="flex items-center gap-2">
+          {/* Dark Mode Toggle */}
+          <DarkModeToggle />
 
-					<div className="flex-1 space-y-3 max-w-[844px]">
-						<nav className="flex items-center justify-between px-3 py-1 rounded-full border-zinc-800 border-b-1 max-[633px]:hidden">
-							{menu.map((menuItem) =>
-								requiredMenuItems.includes(menuItem.label) ? (
-									menuItem.options ? (
-										<MenuOptionDropdown
-											{...menuItem}
-											setIsMenuOpen={setIsMobileNavOpen}
-											setComingSoonOpen={setComingSoonOpen}
-											key={menuItem.label}
-										/>
-									) : menuItem.comingSoon ? (
-										<button
-											key={menuItem.label}
-											type="button"
-											onClick={() => setComingSoonOpen(true)}
-											className="flex items-center gap-3 px-3 py-1.5 rounded-xl hover:text-primary"
-										>
-											{menuItem.icon} {menuItem.label}
-										</button>
-									) : (
-										<Link
-											key={menuItem.label}
-											className={cn(
-												"flex items-center gap-3 px-3 py-1.5 rounded-xl",
-												{
-													"bg-primary text-white":
-														activeLink === menuItem.path,
-												},
-											)}
-											to={menuItem.path}
-										>
-											{menuItem.icon} {menuItem.label}
-										</Link>
-									)
-								) : null,
-							)}
-							<SecondaryNav />
-						</nav>
+          {/* Notifications */}
+          <Link
+            to="/notifications"
+            className="relative p-2.5 rounded-xl hover:bg-zinc-100 dark:hover:bg-slate-800 transition-colors"
+          >
+            <Bell size={20} className="text-zinc-600 dark:text-slate-300" />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+          </Link>
 
-						<div>
-							<form className="bg-white py-2 px-8 rounded-full shadow-sm md:max-w-sm flex items-center gap-4">
-								<input
-									className="flex-1 min-w-0 max-w-none outline-none"
-									type="text"
-								/>
-								<button type="submit" title="Search">
-									<Search size={12} />
-								</button>
-								<button type="button" title="Filter" className="text-primary">
-									<span
-										style={{ fontSize: 14 }}
-										className="material-icons-outlined"
-									>
-										tune
-									</span>
-								</button>
-							</form>
-						</div>
-					</div>
-				</div>
-			</div>
+          {/* Wallet Balance */}
+          <Link
+            to="/fund-wallet"
+            className="hidden sm:flex items-center gap-2 px-3 py-2 bg-primary/10 text-primary rounded-xl hover:bg-primary/20 transition-colors"
+          >
+            <Wallet size={16} />
+            <span className="text-sm font-semibold">₦{authUser.balance.toLocaleString()}</span>
+          </Link>
 
-			<MobileNav
-				setIsOpen={setIsMobileNavOpen}
-				isOpen={isMobileNavOpen}
-				setComingSoonOpen={setComingSoonOpen}
-			/>
-			{/* 🚧 Coming Soon Modal */}
-			<ComingSoonModal
-				isOpen={comingSoonOpen}
-				onClose={() => setComingSoonOpen(false)}
-			/>
-		</header>
-	);
-}
+          {/* User Menu */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className="flex items-center gap-2 p-1.5 pr-3 rounded-xl hover:bg-zinc-100 transition-colors"
+            >
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white">
+                <User size={16} />
+              </div>
+              <span className="hidden md:block text-sm font-medium text-zinc-700">
+                {authUser.fname}
+              </span>
+              <ChevronDown size={16} className="text-zinc-400" />
+            </button>
 
-function MobileNav({
-	setIsOpen,
-	isOpen,
-	setComingSoonOpen,
-}: {
-	setIsOpen: React.Dispatch<SetStateAction<boolean>>;
-	isOpen: boolean;
-	setComingSoonOpen: React.Dispatch<SetStateAction<boolean>>;
-}) {
-	const activeLink = useActiveLink();
-	const authUser = useSelector<{ auth: { value: AuthUserDTO } }, AuthUserDTO>(
-		(state) => state.auth.value,
-	);
-
-	return (
-		<>
-			<div
-				onKeyDown={() => setIsOpen(false)}
-				onClick={() => setIsOpen(false)}
-				data-show={isOpen || undefined}
-				className={cn(
-					"fixed inset-0 backdrop-blur-sm bg-black/20 z-40 hidden",
-					{
-						block: isOpen,
-					},
-				)}
-			/>
-			<nav
-				data-open={isOpen || undefined}
-				className={cn(
-					"fixed top-0 left-0 bottom-0 z-[100] mobile:hidden bg-white pt-3 pb-6 space-y-2 shadow-lg -translate-x-full transition-transform",
-					{
-						"translate-x-0": isOpen,
-					},
-				)}
-			>
-				<button
-					type="button"
-					className="float-right px-4"
-					onClick={() => setIsOpen(false)}
-					title="Close"
-				>
-					<X size={16} />
-				</button>
-				<div className="clear-right" />
-
-				<div className="p-4">
-					<ProfileMenu
-						authUser={authUser}
-						isMobile
-						onLinkClick={() => setIsOpen(false)}
-					/>
-				</div>
-
-				<div className="space-y-2 px-6">
-					{menu.map((menuItem) =>
-						menuItem.options ? (
-							<MenuOptionDropdown
-								{...menuItem}
-								key={menuItem.basePath}
-								setIsMenuOpen={setIsOpen}
-								setComingSoonOpen={setComingSoonOpen}
-							/>
-						) : menuItem.comingSoon ? (
-							<button
-								key={menuItem.label}
-								type="button"
-								onClick={() => setComingSoonOpen(true)}
-								className="flex items-center gap-3 px-3 py-1.5 rounded-xl hover:text-primary"
-							>
-								{menuItem.icon} {menuItem.label}
-							</button>
-						) : (
-							<Link
-								key={menuItem.label}
-								onClick={() => setTimeout(() => setIsOpen(false), 600)}
-								className={cn(
-									"flex items-center gap-3 px-3 py-1.5 rounded-xl",
-									{
-										"bg-primary text-white": activeLink === menuItem.path,
-									},
-								)}
-								to={menuItem.path}
-							>
-								{menuItem.icon} {menuItem.label}
-							</Link>
-						),
-					)}
-				</div>
-			</nav>
-		</>
-	);
-}
-
-function MenuOptionDropdown(
-	props: MenuDropdownProps & {
-		setIsMenuOpen?: React.Dispatch<SetStateAction<boolean>>;
-		setComingSoonOpen?: React.Dispatch<SetStateAction<boolean>>;
-	},
-) {
-	const { pathname } = useLocation();
-	const [isOpen, setIsOpen] = useState(false);
-	const activeLink = useActiveLink();
-
-	useEffect(() => {
-		document.body.style.overflowY = isOpen ? "hidden" : "auto";
-	}, [isOpen]);
-
-	return (
-		<div aria-haspopup="menu" className="relative">
-			<div
-				className={cn("flex items-center w-fit rounded-xl", {
-					"bg-primary text-white": activeLink === props.basePath,
-				})}
-			>
-				<button
-					type="button"
-					onClick={() => setIsOpen(!isOpen)}
-					className="flex items-center transition-all active:scale-90 px-2"
-				>
-					<span className="flex items-center gap-2 px-3 py-1.5">
-						{props.icon} {props.label}
-					</span>
-
-					<ChevronDown
-						className={cn({
-							"rotate-180": isOpen,
-						})}
-						size={13}
-					/>
-				</button>
-			</div>
-
-			{isOpen && (
-				<div
-					className="fixed inset-0"
-					onKeyDown={() => {
-						setIsOpen(false);
-					}}
-					onClick={() => {
-						setIsOpen(false);
-					}}
-				/>
-			)}
-
-			<div
-				aria-live="polite"
-				className={cn(
-					"absolute [top:calc(100%+2px)] p-2 rounded-xl bg-white shadow-lg text-black text-xs transition-all [transform-origin:_top] z-10",
-					{
-						"opacity-0 overflow-hidden scale-0": !isOpen,
-					},
-				)}
-			>
-				{props.options.map((option) =>
-					option.comingSoon ? (
-						<button
-							key={option.label}
-							type="button"
-							onClick={() => {
-								setIsOpen(false);
-								props?.setComingSoonOpen?.(true);
-							}}
-							className="flex items-center gap-3 px-3 py-1.5 rounded-xl whitespace-nowrap hover:text-primary"
-						>
-							{option.icon} {option.label}
-						</button>
-					) : (
-						<Link
-							key={option.label}
-							onClick={() => {
-								setIsOpen(false);
-								props?.setIsMenuOpen?.(false);
-							}}
-							className={cn(
-								"flex items-center gap-3 px-3 py-1.5 rounded-xl whitespace-nowrap",
-								{
-									"bg-primary text-white": option.path === pathname,
-									"hover:text-primary": option.path !== pathname,
-								},
-							)}
-							to={option.path}
-						>
-							{option.icon} {option.label}
-						</Link>
-					),
-				)}
-			</div>
-		</div>
-	);
-}
-
-function ProfileMenu({
-	authUser,
-	isMobile,
-	onLinkClick,
-}: {
-	authUser: AuthUserDTO;
-	isMobile?: boolean;
-	onLinkClick?: () => void;
-}) {
-	const [isOpen, setIsOpen] = useState(false);
-
-	return (
-		<div
-			className={cn("flex items-center gap-3", {
-				"max-mobile:hidden": !isMobile,
-			})}
-		>
-			<div className="w-12 h-12 rounded-full bg-zinc-200 overflow-hidden">
-				<img
-					src={authUser.avatar ?? "/images/default-user.png"}
-					alt="Logged in user avatar"
-				/>
-			</div>
-			<div className="relative">
-				<div>
-					{authUser.fname} {authUser.lname}
-				</div>
-				<button
-					type="button"
-					onClick={() => setIsOpen(true)}
-					className="flex items-center gap-1"
-				>
-					@{authUser.username} <ChevronDown size={12} />
-				</button>
-
-				{/* Overlay */}
-				{isOpen && (
-					<div
-						className="fixed inset-0"
-						onClick={() => setIsOpen(false)}
-						onKeyDown={() => setIsOpen(false)}
-					/>
-				)}
-
-				<div
-					className={cn(
-						"absolute bg-white p-2 space-y-2 flex flex-col text-sm shadow top-full whitespace-nowrap left-1/2 -translate-x-1/2 scale-0 transition-transform rounded-md",
-						{
-							"scale-100": isOpen,
-						},
-					)}
-				>
-					<Link
-						onClick={() => {
-							setIsOpen(false);
-							onLinkClick?.();
-						}}
-						className="flex items-center gap-1 hover:text-primary"
-						to="/edit-profile"
-					>
-						<User size={12} /> Edit Profile
-					</Link>
-					<button
-						className="flex items-center gap-1 hover:text-primary"
-						type="button"
-						onClick={() => {
-							localStorage.removeItem("auth_token");
-							window.location.replace("https://hovertask.com/signin");
-						}}
-					>
-						<LogOut size={12} /> Logout
-					</button>
-				</div>
-			</div>
-		</div>
-	);
-}
-
-function SecondaryNav({ isMobile }: { isMobile?: boolean }) {
-	const [isOpen, setIsOpen] = useState(false);
-	const menuItems = [
-		{
-			icon: <FileText size={14} className="w-5 h-5" />,
-			label: "Transaction History",
-			to: "/transactions-history",
-		},
-		{
-			icon: <Bell size={14} className="w-5 h-5" />,
-			label: "Notifications",
-			to: "/notifications",
-		},
-		{
-			icon: <Lock size={14} />,
-			label: "Manage Password",
-			to: "/change-password",
-		},
-		{
-			icon: <MapPin size={14} />,
-			label: "Manage Location",
-			to: "/update-location",
-		},
-		{
-			icon: <CreditCard size={14} className="w-5 h-5" />,
-			label: "Payment Info",
-			to: "/update-bank-details",
-		},
-		{
-			icon: <Shield size={14} className="w-5 h-5" />,
-			label: "Privacy Policy",
-			to: "/privacy-policy",
-		},
-		{
-			icon: <Info size={14} className="w-5 h-5" />,
-			label: "About Us",
-			to: "/about-us",
-		},
-		{
-			icon: <Shield size={14} className="w-5 h-5" />,
-			label: "Terms of Use",
-			to: "/terms",
-		},
-	];
-
-	return (
-		<div
-			className={cn("relative", {
-				"mobile:hidden": isMobile,
-			})}
-		>
-			<button onClick={() => setIsOpen(true)} type="button">
-				{isMobile ? (
-					<Ellipsis size={16} className="rotate-90" />
-				) : (
-					<Menu size={16} />
-				)}
-			</button>
-
-			{/* Overlay */}
-			{isOpen && (
-				<div
-					className="fixed inset-0"
-					onClick={() => setIsOpen(false)}
-					onKeyDown={() => setIsOpen(false)}
-				/>
-			)}
-
-			<div
-				className={cn(
-					"absolute bg-white p-2 space-y-2 flex flex-col text-sm shadow top-full whitespace-nowrap right-0 scale-0 transition-transform rounded-md [transform-origin:top_right] rounded-tr-none",
-					{
-						"scale-100": isOpen,
-					},
-				)}
-			>
-				<ul className="space-y-5">
-					{menuItems.map((item) => (
-						<Link
-							onClick={() => setIsOpen(false)}
-							to={item.to}
-							key={item.to}
-							className="flex items-center gap-3 text-sm hover:text-primary"
-						>
-							{item.icon}
-							<span>{item.label}</span>
-						</Link>
-					))}
-				</ul>
-			</div>
-		</div>
-	);
+            {/* Dropdown Menu */}
+            {showUserMenu && (
+              <>
+                <div 
+                  className="fixed inset-0 z-40" 
+                  onClick={() => setShowUserMenu(false)} 
+                />
+                <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-lg border border-zinc-200 py-2 z-50">
+                  <div className="px-4 py-2 border-b border-zinc-100">
+                    <p className="text-sm font-semibold text-zinc-800">{authUser.fname} {authUser.lname}</p>
+                    <p className="text-xs text-zinc-500">@{authUser.username}</p>
+                  </div>
+                  <div className="py-1">
+                    <Link
+                      to="/edit-profile"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50"
+                      onClick={() => setShowUserMenu(false)}
+                    >
+                      <Settings size={16} /> Settings
+                    </Link>
+                    <Link
+                      to="/fund-wallet"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50"
+                      onClick={() => setShowUserMenu(false)}
+                    >
+                      <Wallet size={16} /> Fund Wallet
+                    </Link>
+                    <button
+                      type="button"
+                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                    >
+                      <LogOut size={16} /> Sign Out
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </header>
+  );
 }

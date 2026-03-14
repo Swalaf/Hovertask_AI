@@ -2,39 +2,57 @@ import { Link } from "react-router-dom";
 
 const JoinUsSection = () => {
     return (
-        <section className="relative bg-gradient-to-r from-base to-[#2C418F] text-white rounded-full flex items-center p-4 max-w-[1199px] mx-auto overflow-hidden max-md:rounded-2xl max-md:py-10 mb-32 z-0">
+        <section className="relative bg-gradient-to-r from-[#2C418F] to-[#1a2a5e] dark:from-indigo-900 dark:to-slate-950 text-white rounded-3xl flex items-center p-6 md:p-12 max-w-5xl mx-auto overflow-hidden mb-20 z-0">
             {/* Gradient decoration */}
-            <div className="bg-gradient-to-r from-[#BAC7F8] to-base h-[80%] w-[159px] rounded-[192px] right-1/2 absolute z-0"></div>
-            <div className="max-md:hidden -translate-x-2">
-                <img src="/assets/images/sittingdown.png" alt="Woman sitting down" />
+            <div className="bg-gradient-to-r from-blue-300 to-[#2C418F] h-[80%] w-[200px] rounded-full right-0 md:right-1/3 absolute z-0 opacity-30"></div>
+            
+            <div className="hidden md:block absolute -left-4">
+                <img 
+                    src="/assets/images/sittingdown.png" 
+                    alt="Join HoverTask today" 
+                    className="max-w-xs"
+                    loading="lazy"
+                />
             </div>
-            <div className="text-center md:text-left space-y-6">
-                <h2 className="text-[40px] relative">Join Us Today and Start Earning or Advertising!</h2>
-                <div className="flex flex-wrap justify-center md:justify-start gap-6 relative">
+            
+            <div className="text-center md:text-left md:ml-auto space-y-6 relative z-10">
+                <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold">
+                    Join Us Today and Start Earning or Advertising!
+                </h2>
+                <p className="text-white/80 text-lg max-w-lg">
+                    Join thousands of users already earning and growing their businesses on HoverTask.
+                </p>
+                <div className="flex flex-wrap justify-center md:justify-start gap-4">
                     <Link
-                        to="#"
-                        className="bg-white text-blue-700 px-6 py-2 rounded-3xl font-medium shadow hover:bg-gray-200 transition"
+                        to="/signup"
+                        className="bg-white text-[#2C418F] dark:text-indigo-600 px-8 py-3 rounded-2xl font-semibold shadow-lg hover:bg-gray-100 dark:hover:bg-slate-100 hover:shadow-xl transition-all hover:-translate-y-0.5"
                     >
                         Create Account
                     </Link>
                     <Link
-                        to="#"
-                        className="bg-transparent border border-white px-6 py-2 rounded-3xl font-medium hover:bg-white hover:text-blue-700 transition"
+                        to="/signin"
+                        className="bg-transparent border-2 border-white px-8 py-3 rounded-2xl font-semibold hover:bg-white hover:text-[#2C418F] dark:hover:text-indigo-600 transition-all"
                     >
-                        Login to Account
+                        Sign In
                     </Link>
                 </div>
-                <div className="flex justify-center md:justify-start gap-6">
-                    <img
-                        src="/assets/images/Apple.png"
-                        alt="App Store"
-                        className="h-12 transform hover:scale-105 transition"
-                    />
-                    <img
-                        src="/assets/images/Google.png"
-                        alt="Google Play"
-                        className="h-12 transform hover:scale-105 transition"
-                    />
+                <div className="flex justify-center md:justify-start gap-4 pt-2">
+                    <a href="#" className="inline-block">
+                        <img
+                            src="/assets/images/Apple.png"
+                            alt="Download on App Store"
+                            className="h-10 md:h-12 transform hover:scale-105 transition"
+                            loading="lazy"
+                        />
+                    </a>
+                    <a href="#" className="inline-block">
+                        <img
+                            src="/assets/images/Google.png"
+                            alt="Get it on Google Play"
+                            className="h-10 md:h-12 transform hover:scale-105 transition"
+                            loading="lazy"
+                        />
+                    </a>
                 </div>
             </div>
         </section>

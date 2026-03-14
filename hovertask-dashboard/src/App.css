@@ -6,9 +6,46 @@
 
 :root {
 	--color-primary: #4b70f5;
+	--color-primary-light: #6B8AFF;
+	--color-primary-dark: #3A5AE8;
 	--color-success: #009a49;
 	--color-danger: #ff5449;
+	--color-warning: #F59E0B;
 	--breakpoint-mobile: 821px;
+
+	/* Enhanced shadows for depth */
+	--shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+	--shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+	--shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+	--shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+	--shadow-primary: 0 4px 14px 0 rgba(75, 112, 245, 0.3);
+	--shadow-card: 0 2px 8px rgba(0, 0, 0, 0.08);
+	--shadow-card-hover: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+	/* Border radius */
+	--radius-sm: 0.5rem;
+	--radius-md: 0.75rem;
+	--radius-lg: 1rem;
+	--radius-xl: 1.5rem;
+	--radius-full: 9999px;
+}
+
+/* Dark mode CSS variables */
+.dark {
+	--color-primary: #4b70f5;
+	--color-primary-light: #6B8AFF;
+	--color-success: #22c55e;
+	--color-danger: #ef4444;
+	--color-warning: #f59e0b;
+	
+	/* Dark mode shadows */
+	--shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+	--shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+	--shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+	--shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+	--shadow-primary: 0 4px 20px rgba(75, 112, 245, 0.4);
+	--shadow-card: 0 4px 16px rgba(0, 0, 0, 0.3);
+	--shadow-card-hover: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 @font-face {
@@ -21,6 +58,123 @@
 	font-family: Outfit, sans-serif;
 }
 
+/* Base dark mode styles */
+.dark body {
+	background-color: #0f172a;
+	color: #f1f5f9;
+}
+
+/* Light mode default */
+body {
+	background-color: #ffffff;
+	color: #0f172a;
+	transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Dark mode background with subtle gradient */
+.dark .dark-bg {
+	background: linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+	background-attachment: fixed;
+}
+
+/* Dark mode card styling */
+.dark .dark-card {
+	background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+	border: 1px solid #334155;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Dark mode subtle glow effect */
+.dark .dark-glow {
+	box-shadow: 0 0 40px rgba(75, 112, 245, 0.1);
+}
+
+/* Dark mode input fields */
+.dark input,
+.dark textarea,
+.dark select {
+	background-color: #1e293b !important;
+	border-color: #334155 !important;
+	color: #f1f5f9 !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+	color: #64748b !important;
+}
+
+/* Dark mode focus states */
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+	border-color: #4b70f5 !important;
+	box-shadow: 0 0 0 3px rgba(75, 112, 245, 0.2) !important;
+}
+
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+.dark ::-webkit-scrollbar-track {
+	background: #1e293b;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+	background: #475569;
+	border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+	background: #64748b;
+}
+
+/* Dark mode text hierarchy */
+.dark .text-primary-dark {
+	color: #f1f5f9;
+}
+
+.dark .text-secondary-dark {
+	color: #94a3b8;
+}
+
+.dark .text-tertiary-dark {
+	color: #64748b;
+}
+
+/* Dark mode borders */
+.dark .border-dark {
+	border-color: #334155;
+}
+
+.dark .divide-dark > :not([hidden]) ~ :not([hidden]) {
+	border-color: #334155;
+}
+
+/* Dark mode hover effects */
+.dark .hover-dark:hover {
+	background-color: #334155;
+}
+
+/* Dark mode button overrides */
+.dark .btn-primary {
+	background-color: #4b70f5;
+	color: white;
+}
+
+.dark .btn-primary:hover {
+	background-color: #3b5ae8;
+}
+
+/* Subtle grid pattern for dark mode */
+.dark .dark-grid {
+	background-image: 
+		linear-gradient(rgba(75, 112, 245, 0.03) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(75, 112, 245, 0.03) 1px, transparent 1px);
+	background-size: 40px 40px;
+}
+
 .bg-container {
 	background-image: url("/images/hero-background.png");
 	background-position: center;
@@ -30,184 +184,4 @@
 
 button:not(:disabled) {
 	cursor: pointer;
-}
-
-body,
-html {
-	user-select: none;
-}
-
-*::-webkit-scrollbar {
-	display: none;
-	-webkit-appearance: none;
-}
-
-* {
-	scrollbar-width: none;
-	-ms-overflow-style: none;
-}
-
-#edit-profile-board {
-	background-image: url("/images/edit-profile-bg.png");
-	background-size: cover;
-	background-position: center center;
-}
-
-/* Modal overlay fix: ensure HeroUI modal wrapper shows a backdrop */
-div[data-slot="wrapper"].fixed.inset-0,
-div[data-slot="wrapper"][data-open="true"] {
-	background: rgba(0, 0, 0, 0.45) !important;
-	backdrop-filter: blur(4px) !important;
-	-webkit-backdrop-filter: blur(4px) !important;
-	z-index: 9999 !important;
-}
-
-/* Fallback generic selectors in case classnames differ */
-.heroui-modal-overlay,
-.modal-overlay,
-[data-heroui-overlay] {
-	background: rgba(0, 0, 0, 0.45) !important;
-	backdrop-filter: blur(4px) !important;
-	-webkit-backdrop-filter: blur(4px) !important;
-	z-index: 9999 !important;
-}
-
-/* Ensure modal content has a solid background (library theme classes may be missing on live) */
-div[data-slot="wrapper"] section[role="dialog"],
-section[role="dialog"][data-open="true"],
-section[role="dialog"].bg-content1,
-.heroui-modal-content,
-.modal-content {
-	background-color: #ffffff !important;
-	color: #000000 !important;
-	border-radius: 0.75rem !important; /* match rounded-large */
-	box-shadow: 0 8px 24px rgba(16,24,40,0.12) !important;
-}
-
-/* Fallback styles for Heroui/Autocomplete/Select dropdown panels (listbox)
-	 Ensures the dropdown has a visible white background, rounded corners and
-	 shadow even if Tailwind utility classes are absent or purged in production. */
-div[data-slot="listboxWrapper"] {
-	min-width: 100% !important; /* prefer full width of trigger */
-}
-
-div[data-slot="listbox"] {
-	background: #ffffff !important;
-	border-radius: 0.5rem !important;
-	box-shadow: 0 8px 24px rgba(2,6,23,0.08) !important;
-	z-index: 99999 !important;
-	overflow: auto !important;
-	max-height: 14rem !important; /* limit height so list becomes scrollable */
-	overflow-y: auto !important;
-	-webkit-overflow-scrolling: touch !important; /* smooth momentum scrolling on mobile */
-	scroll-behavior: smooth !important;
-	overscroll-behavior: contain !important;
-}
-
-/* keep the hidden-select container visually hidden but accessible for screen readers */
-[data-testid="hidden-select-container"] {
-	position: absolute !important;
-	width: 1px !important;
-	height: 1px !important;
-	overflow: hidden !important;
-	clip: rect(0 0 0 0) !important;
-	clip-path: inset(50%) !important;
-}
-
-/* Normalize Heroui select trigger sizing and ensure the chevron icon is on the right.
-	 This makes Select/Autocomplete triggers match other form inputs (height, padding)
-	 and prevents the icon from appearing on the left due to layout resets. */
-div[data-slot="mainWrapper"] > button[data-slot="trigger"] {
-	height: 44px !important; /* match typical input height */
-	min-height: 44px !important;
-	padding-right: 3rem !important; /* room for the selector icon */
-	padding-left: 0.75rem !important;
-	display: inline-flex !important;
-	align-items: center !important;
-	justify-content: flex-start !important;
-	gap: 0.5rem !important;
-	border-radius: 9999px !important; /* pill / rounded-full */
-	background: #ffffff !important;
-	box-sizing: border-box !important;
-}
-
-/* Place the chevron icon explicitly on the right */
-div[data-slot="mainWrapper"] > button[data-slot="trigger"] [data-slot="selectorIcon"] {
-	right: 0.75rem !important;
-	left: auto !important;
-	transform: none !important;
-}
-
-/* Make sure the inner value wrapper doesn't overlap the icon */
-div[data-slot="mainWrapper"] > button[data-slot="trigger"] [data-slot="innerWrapper"] {
-	width: calc(100% - 3rem) !important;
-	justify-content: flex-start !important;
-	align-items: center !important;
-	text-align: left !important;
-}
-
-/* Ensure the displayed value inside the trigger is left-aligned */
-div[data-slot="mainWrapper"] > button[data-slot="trigger"] [data-slot="value"] {
-	display: block !important;
-	text-align: left !important;
-	color: inherit !important;
-}
-
-/* Also support kebab-case data-slot attribute variants used by some builds */
-div[data-slot="main-wrapper"] > button[data-slot="trigger"] {
-	height: 44px !important;
-	min-height: 44px !important;
-	padding-right: 3rem !important;
-	padding-left: 0.75rem !important;
-	display: inline-flex !important;
-	align-items: center !important;
-	justify-content: flex-start !important;
-	gap: 0.5rem !important;
-	border-radius: 9999px !important;
-	background: #ffffff !important;
-	box-sizing: border-box !important;
-}
-
-div[data-slot="main-wrapper"] > button[data-slot="trigger"] [data-slot="selectorIcon"] {
-	right: 0.75rem !important;
-	left: auto !important;
-	transform: none !important;
-}
-
-div[data-slot="main-wrapper"] > button[data-slot="trigger"] [data-slot="innerWrapper"] {
-	width: calc(100% - 3rem) !important;
-	justify-content: flex-start !important;
-	align-items: center !important;
-	text-align: left !important;
-}
-
-div[data-slot="main-wrapper"] > button[data-slot="trigger"] [data-slot="value"] {
-	display: block !important;
-	text-align: left !important;
-	color: inherit !important;
-}
-
-/* listbox wrapper kebab-case fallback */
-div[data-slot="listbox-wrapper"],
-div[data-slot="listbox-wrapper"] {
-	min-width: 100% !important;
-}
-
-/* Small tweak: list items should have comfortable vertical padding */
-div[data-slot="listbox"] [role="option"] {
-	padding-top: 0.6rem !important;
-	padding-bottom: 0.6rem !important;
-}
-
-/* Ensure selected/active option has scroll margin so it won't be clipped when focused/selected */
-div[data-slot="listbox"] [role="option"][aria-selected="true"],
-div[data-slot="listbox"] [role="option"].is-active {
-	scroll-margin-block: 1.5rem !important;
-}
-
-/* Kebab-case fallback for listbox too */
-div[data-slot="listbox-wrapper"] div[data-slot="listbox"],
-div[data-slot="listbox-wrapper"] {
-	max-height: 14rem !important;
-	overflow-y: auto !important;
 }

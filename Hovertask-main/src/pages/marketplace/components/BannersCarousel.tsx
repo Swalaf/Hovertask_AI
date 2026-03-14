@@ -25,17 +25,17 @@ const BannersCarousel = () => {
             <div className="grid grid-cols-4 gap-1 w-[108px] mx-auto">
                 <span
                     className={`${
-                        currentSlide === 1 ? "col-span-2 bg-base" : "bg-[#B3B3B3]"
+                        currentSlide === 1 ? "col-span-2 bg-base" : "bg-[#B3B3B3] dark:bg-slate-600"
                     } h-[3.47px] w-full rounded-full inline-block`}
                 ></span>
                 <span
                     className={`${
-                        currentSlide === 2 ? "col-span-2 bg-base" : "bg-[#B3B3B3]"
+                        currentSlide === 2 ? "col-span-2 bg-base" : "bg-[#B3B3B3] dark:bg-slate-600"
                     }  h-[3.47px] w-full rounded-full inline-block"`}
                 ></span>
                 <span
                     className={`${
-                        currentSlide === 3 ? "col-span-2 bg-base" : "bg-[#B3B3B3]"
+                        currentSlide === 3 ? "col-span-2 bg-base" : "bg-[#B3B3B3] dark:bg-slate-600"
                     }  h-[3.47px] w-full rounded-full inline-block"`}
                 ></span>
             </div>

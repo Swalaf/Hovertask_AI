@@ -1,5 +1,5 @@
 export interface AuthUserDTO {
-	has_paid_advert_fee: any;
+	has_paid_advert_fee: boolean;
 	advertise_count: number;
 	task_count: number;
 	account_status: string;

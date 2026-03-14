@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('completed_tasks', function (Blueprint $table) {
-            // Add new columns
-            $table->string('social_media_url')->nullable()->after('advert_id');
-            $table->decimal('payment_per_task', 10, 2)->default(0)->after('social_media_url');
-            $table->string('title')->nullable()->after('payment_per_task');
+            // Add new columns - don't use after() since advert_id may not exist yet
+            $table->string('social_media_url')->nullable();
+            $table->decimal('payment_per_task', 10, 2)->default(0);
+            $table->string('title')->nullable();
         });
     }
 

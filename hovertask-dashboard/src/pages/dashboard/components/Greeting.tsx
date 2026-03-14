@@ -1,4 +1,4 @@
-import { DollarSign } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 export default function Greeting({
 	lname,
@@ -8,13 +8,17 @@ export default function Greeting({
 	how_you_want_to_use?: string;
 }) {
 	return (
-		<div className="flex justify-between">
-			<h1 className="text-[18.66px] font-light">
-				Welcome back, <br />
-				<span className="capitalize font-normal">{lname}</span>
-			</h1>
-			<div className="bg-[#10AF88] text-white py-1.5 px-3 rounded-lg inline-flex items-center gap-2 text-sm h-fit">
-				<DollarSign size={14} />{" "}
+		<div className="flex justify-between items-start">
+			<div>
+				<h1 className="text-2xl font-semibold text-zinc-800">
+					Welcome back, <span className="capitalize text-primary">{lname}</span>
+				</h1>
+				<p className="text-sm text-zinc-500 mt-1">
+					Here's what's happening with your account today.
+				</p>
+			</div>
+			<div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white py-2 px-4 rounded-xl inline-flex items-center gap-2 text-sm font-medium shadow-md">
+				<Sparkles size={16} />{" "}
 				<span className="capitalize">{how_you_want_to_use ?? "Earner"}</span>
 			</div>
 		</div>

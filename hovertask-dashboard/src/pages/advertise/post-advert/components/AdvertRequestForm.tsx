@@ -12,6 +12,13 @@ import {
   DollarSign,
   Users,
   X,
+  CheckCircle,
+  ArrowRight,
+  Target,
+  Wallet,
+  FileText,
+  Image as ImageIcon,
+  Video
 } from "lucide-react";
 import CustomSelect from "../../../../shared/components/Select";
 import {
@@ -32,6 +39,7 @@ import Label from "./Label";
 import SetPaymentMethod from "./SetPaymentMethod";
 import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/react";
 import { Button } from "@heroui/react";
+import cn from "../../../../utils/cn";
 
 
 const platformConfig: Record<
@@ -102,6 +110,7 @@ export default function AdvertRequestForm({ platform }: AdvertRequestFormProps) 
 
   // 💰 Payment Summary Feature State
   const [showSummary, setShowSummary] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
 
   const isEngagementTask =
     new URLSearchParams(window.location.search).get("type") === "engagement";
@@ -158,7 +167,6 @@ export default function AdvertRequestForm({ platform }: AdvertRequestFormProps) 
     setValue("estimated_cost", cost, { shouldValidate: true });
   }, [participants, paymentPerTask, noOfPosts, isEngagementTask, setValue]);
 
- 
 
 
   // ✅ Auto-fill engagement templates (title, description, payment)
@@ -169,7 +177,7 @@ export default function AdvertRequestForm({ platform }: AdvertRequestFormProps) 
         { title: string; description: string; payment: number }
       > = {
         "Get Real People to Like your Social Media Post": {
-          title: "Like pepoles Social Media Post",
+          title: "Like peoples Social Media Post",
           description:
             "Engage real users to like your post and boost its visibility organically.",
           payment: 5,
@@ -187,7 +195,7 @@ export default function AdvertRequestForm({ platform }: AdvertRequestFormProps) 
           payment: 10,
         },
         "Get Real People to Subscribe to your Channel": {
-          title: "subscribe to peoples Channel",
+          title: "Subscribe to peoples Channel",
           description:
             "Get more subscribers who are interested in your content.",
           payment: 15,
@@ -241,7 +249,7 @@ export default function AdvertRequestForm({ platform }: AdvertRequestFormProps) 
       .toLowerCase()
       .replace(/[^a-z0-9]/gi, "");
 
-      
+
   // ✅ Force all socialMedia items to match { key, label, value } shape
   type Option = { key: string; label: string; value: string };
 
@@ -304,484 +312,515 @@ export default function AdvertRequestForm({ platform }: AdvertRequestFormProps) 
   const totalCost =
     (isEngagementTask ? participants : noOfPosts) * (paymentPerTask || 0);
 
+  // Form sections
+  const formSteps = [
+    { number: 1, label: "Campaign Details", icon: FileText },
+    { number: 2, label: "Budget & Pricing", icon: DollarSign },
+    { number: 3, label: "Target Audience", icon: Target },
+    { number: 4, label: "Media & Content", icon: ImageIcon },
+  ];
+
   return (
     <>
-      <form id="advert-form" className="p-6 space-y-6" ref={formRef}>
-        {/* ✅ Engagement header */}
-                {isEngagementTask && engagementType && (
-                  <div className="bg-primary/10 border border-primary text-primary rounded-xl p-3 text-sm mb-3">
-                    <strong>Selected Engagement Type:</strong> {engagementType}
+      {/* Step Indicator */}
+      <div className="bg-white rounded-xl p-4 border border-zinc-100 mb-6">
+        <div className="flex items-center justify-between">
+          {formSteps.map((step, index) => {
+            const Icon = step.icon;
+            const isActive = currentStep === step.number;
+            const isCompleted = currentStep > step.number;
+            
+            return (
+              <div key={step.number} className="flex items-center">
+                <button
+                  type="button"
+                  onClick={() => setCurrentStep(step.number)}
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-2 rounded-lg transition-all",
+                    isActive && "bg-primary text-white",
+                    isCompleted && "bg-green-100 text-green-700",
+                    !isActive && !isCompleted && "text-zinc-500 hover:bg-zinc-100"
+                  )}
+                >
+                  {isCompleted ? (
+                    <CheckCircle className="w-4 h-4" />
+                  ) : (
+                    <Icon className="w-4 h-4" />
+                  )}
+                  <span className="text-sm font-medium hidden sm:block">{step.label}</span>
+                </button>
+                {index < formSteps.length - 1 && (
+                  <div className={cn(
+                    "w-8 sm:w-16 h-0.5 mx-1",
+                    isCompleted ? "bg-green-500" : "bg-zinc-200"
+                  )} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <form id="advert-form" className="space-y-6" ref={formRef}>
+        
+        {/* STEP 1: Campaign Details */}
+        {currentStep === 1 && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+            {/* Engagement Header */}
+            {isEngagementTask && engagementType && (
+              <div className="bg-gradient-to-r from-primary/10 to-blue-50 border border-primary/20 rounded-xl p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center">
+                    <Users className="w-5 h-5 text-primary" />
                   </div>
-                )}
-        
-                {/* Title */}
-                {!isEngagementTask && config && (
-                  <Input
-                    className="hidden"    
-                    icon={<Speaker size={16} />}
-                    placeholder="Enter the title of your advert"
-                    {...register("title", {
-                      required: "Enter the title of your advert",
-                      pattern: { value: /\w+(?:\s*.+)*/, message: "Enter a valid title." },
-                    })}
-                    errorMessage={errors.title?.message as string}
-                  />
-                )}
-        
-                {/* Hidden input for validation */}
-                {isEngagementTask && (
-               <input
-                  type="hidden"
-                  {...register("title", { required: "title is required" })}
-                />
-                )}
-        
-               {/* ✅ Platform selection for normal adverts */}
-        {!isEngagementTask && (
-          <CustomSelect
-            options={
-              platform
-                ? [{ key: platform.toLowerCase(), label: platform }]
-                : socialMedia
-            }
-            aria-label="Selected Platform"
-            label={
-              <Label
-                title={platform ? "Selected Platform" : "Choose Platform to create advert on"}
-                description="Choose the platform where you'd like to advertise."
-              />
-            }
-            placeholder="Select platform"
-            className="[&_button]:rounded-full max-w-[250px] [&_button]:bg-white"
-            startContent={<Globe />}
-            defaultSelectedKeys={platform ? [platform.toLowerCase()] : []}
-            onChange={(value) => {
-              const platformValue = Array.isArray(value) ? value[0] : value;
-              setSelectedPlatform(platformValue);
-              setValue("platforms", platformValue, { shouldValidate: true });
-            }}
-            errorMessage={errors.platforms?.message as string}
-          />
-        )}
-        
-        
-                {/* ✅ Updated Platform Selection for Engagement */}
-                {isEngagementTask && (
                   <div>
-                    <CustomSelect
-                      options={filteredSocialMedia}
-                      aria-label="Select Platform"
-                      label={
-                        <Label
-                          title="Select Platform"
-                          description="Choose the platform where you'd like to create engagement on."
-                        />
-                      }
-                      placeholder="Select platform"
-                      className="[&_button]:rounded-full max-w-[250px] [&_button]:bg-white"
-                      startContent={<Globe />}
-                      onChange={(value) =>
-                        setValue("platforms", value, { shouldValidate: true })
-                      }
-                      errorMessage={errors.platforms?.message as string}
-                    />
-        
-                    {/* Helper note showing allowed platforms */}
-                    {engagementType && (
-                      <small className="block mt-2 text-xs text-zinc-500">
-                        Platforms available for this engagement:{" "}
-                        {(engagementPlatformMap[engagementType] ?? []).join(", ") || "All"}
-                      </small>
-                    )}
+                    <p className="text-sm text-zinc-500">Creating</p>
+                    <h3 className="font-semibold text-zinc-800">{engagementType}</h3>
                   </div>
-                )}
-        
-                {/* Hidden input for validation */}
-                <input
-                  type="hidden"
-                  {...register("platforms", { required: "Platform is required" })}
+                </div>
+              </div>
+            )}
+
+            {/* Platform Selection */}
+            <div className="bg-white rounded-xl p-6 border border-zinc-100">
+              <h3 className="text-lg font-semibold text-zinc-800 mb-4 flex items-center gap-2">
+                <Globe className="w-5 h-5 text-primary" />
+                Select Platform
+              </h3>
+              
+              {!isEngagementTask ? (
+                <CustomSelect
+                  options={
+                    platform
+                      ? [{ key: platform.toLowerCase(), label: platform }]
+                      : socialMedia
+                  }
+                  aria-label="Selected Platform"
+                  label={
+                    <Label
+                      title={platform ? "Selected Platform" : "Choose Platform"}
+                      description="Choose the platform where you'd like to advertise."
+                    />
+                  }
+                  placeholder="Select platform"
+                  className="max-w-md"
+                  startContent={<Globe />}
+                  defaultSelectedKeys={platform ? [platform.toLowerCase()] : []}
+                  onChange={(value) => {
+                    const platformValue = Array.isArray(value) ? value[0] : value;
+                    setSelectedPlatform(platformValue);
+                    setValue("platforms", platformValue, { shouldValidate: true });
+                  }}
+                  errorMessage={errors.platforms?.message as string}
                 />
-        
-                {/* Dynamic input (based on platform) */}
-                 {!isEngagementTask && config && (
-                  <Input
-                    className="max-w-[250px] rounded-full bg-white"
+              ) : (
+                <div>
+                  <CustomSelect
+                    options={filteredSocialMedia}
+                    aria-label="Select Platform"
                     label={
                       <Label
-                        title={config.inputLabel}
-                        description={config.inputDescription}
+                        title="Select Platform"
+                        description="Choose the platform where you'd like to create engagement."
                       />
                     }
-                    icon={<Hash size={16} />}
-                    placeholder="0"
-                    {...register(config.registerKey, {
-                      required: `Enter the number of ${selectedPlatform} posts you want`,
-                      pattern: {
-                        value: /^\d+$/,
-                        message: "Enter a valid number",
-                      },
-                    })}
-                    errorMessage={errors[config.registerKey]?.message as string}
-                  />
-                )}
-        
-                {/* Number of Participants */}
-                {isEngagementTask && (
-                  <Input
-                    className="max-w-[250px] rounded-full bg-white"
-                    label={
-                      <Label
-                        title="Number of Participants"
-                        description="Enter how many participants should engage with this task."
-                      />
+                    placeholder="Select platform"
+                    className="max-w-md"
+                    startContent={<Globe />}
+                    onChange={(value) =>
+                      setValue("platforms", value, { shouldValidate: true })
                     }
-                    icon={<Users size={16} />}
-                    placeholder="0"
-                    {...register("number_of_participants", {
-                      required: "Enter number of participants",
-                      pattern: {
-                        value: /^\d+$/,
-                        message: "Enter a valid number",
-                      },
-                    })}
-                    errorMessage={errors.number_of_participants?.message as string}
+                    errorMessage={errors.platforms?.message as string}
                   />
-                )}
-        
-                {/* Payment per Task */}
+                  {engagementType && (
+                    <p className="mt-2 text-xs text-zinc-500">
+                      Available: {(engagementPlatformMap[engagementType] ?? []).join(", ")}
+                    </p>
+                  )}
+                </div>
+              )}
+              <input
+                type="hidden"
+                {...register("platforms", { required: "Platform is required" })}
+              />
+            </div>
+
+            {/* Number of Posts/Participants */}
+            <div className="bg-white rounded-xl p-6 border border-zinc-100">
+              <h3 className="text-lg font-semibold text-zinc-800 mb-4 flex items-center gap-2">
+                {isEngagementTask ? <Users className="w-5 h-5 text-primary" /> : <Hash className="w-5 h-5 text-primary" />}
+                {isEngagementTask ? "Number of Participants" : "Number of Posts"}
+              </h3>
+              
+              {!isEngagementTask && config ? (
                 <Input
-                  className="hidden"
-                  icon={<DollarSign size={16} />}
+                  className="max-w-xs"
+                  label={
+                    <Label
+                      title={config.inputLabel}
+                      description={config.inputDescription}
+                    />
+                  }
+                  icon={<Hash size={16} />}
                   placeholder="0"
-                  {...register("payment_per_task", {
-                    required: "Enter payment per task",
-                    pattern: {
-                      value: /^\d+$/,
-                      message: "Enter a valid number",
-                    },
+                  {...register(config.registerKey, {
+                    required: `Enter the number of ${selectedPlatform} posts`,
+                    pattern: { value: /^\d+$/, message: "Enter a valid number" },
                   })}
-                  errorMessage={errors.payment_per_task?.message as string}
+                  errorMessage={errors[config.registerKey]?.message as string}
                 />
-        
-                {/* Estimated Cost */}
+              ) : (
                 <Input
-                  className="hidden"
-                  icon={<DollarSign size={16} />}
+                  className="max-w-xs"
+                  label={
+                    <Label
+                      title="Number of Participants"
+                      description="How many people should engage with this task?"
+                    />
+                  }
+                  icon={<Users size={16} />}
                   placeholder="0"
-                  value={
-                    isEngagementTask
-                      ? participants && paymentPerTask
-                        ? participants * paymentPerTask
-                        : ""
-                      : noOfPosts && paymentPerTask
-                      ? noOfPosts * paymentPerTask
-                      : ""
-                  }
-                  readOnly
-                  {...register("estimated_cost", { required: true })}
+                  {...register("number_of_participants", {
+                    required: "Enter number of participants",
+                    pattern: { value: /^\d+$/, message: "Enter a valid number" },
+                  })}
+                  errorMessage={errors.number_of_participants?.message as string}
                 />
-        
-                {/* Deadline - hidden automatically set */}
-                {isEngagementTask && (
-                  <input type="hidden" {...register("deadline", { required: true })} />
-                )}
-        
-        
-                {/* Gender */}
-                <CustomSelect
-                  options={genders}
+              )}
+            </div>
+
+            {/* Social Media URL for Engagement */}
+            {isEngagementTask && (
+              <div className="bg-white rounded-xl p-6 border border-zinc-100">
+                <h3 className="text-lg font-semibold text-zinc-800 mb-4 flex items-center gap-2">
+                  <LinkIcon className="w-5 h-5 text-primary" />
+                  Your Content Link
+                </h3>
+                <Input
                   label={
                     <Label
-                      title="Select Gender"
-                      description="Choose the target gender for your audience."
+                      title="Your Social Media Post Link"
+                      description="Provide the link to your post for tracking and verification."
                     />
                   }
-                  placeholder="Select gender"
-                  className="[&_button]:rounded-full max-w-[250px] [&_button]:bg-white"
-                  startContent={<User />}
-                  onChange={(value) =>
-                    setValue("gender", value, { shouldValidate: true })
-                  }
-                  errorMessage={errors.gender?.message as string}
+                  icon={<LinkIcon size={16} />}
+                  placeholder="https://..."
+                  type="url"
+                  {...register("social_media_url", {
+                    required: "Enter your post link",
+                    pattern: urlValidation,
+                  })}
+                  errorMessage={errors.social_media_url?.message as string}
                 />
-                <input
-                  type="hidden"
-                  {...register("gender", { required: "Gender is required" })}
-                />
-        
-                {/* Location */}
-                <CustomSelect
-                  options={states}
-                  label={
-                    <Label
-                      title="Select Location"
-                      description="Choose the preferred location for your advert audience."
-                    />
-                  }
-                  className="[&_button]:rounded-full [&_button]:bg-white"
-                  selectionMode="multiple"
-                  onChange={(value) =>
-                    setValue("location", value, { shouldValidate: true })
-                  }
-                  errorMessage={errors.location?.message as string}
-                />
-                <input
-                  type="hidden"
-                  {...register("location", { required: "Location is required" })}
-                />
-        
-                {/* Religion */}
-                <CustomSelect
-                  options={religions}
-                  label={
-                    <Label
-                      title="Select Religion"
-                      description="Choose the target religion for your audience."
-                    />
-                  }
-                  className="[&_button]:rounded-full [&_button]:bg-white"
-                  selectionMode="multiple"
-                  placeholder="Select religion"
-                  startContent={<Church />}
-                  onChange={(value) =>
-                    setValue("religion", value, { shouldValidate: true })
-                  }
-                  errorMessage={errors.religion?.message as string}
-                />
-                <input
-                  type="hidden"
-                  {...register("religion", { required: "Religion is required" })}
-                />
-        
-                {/* Engagement Task URL */}
-                {isEngagementTask && (
-                  <Input
-                    className="rounded-full bg-white"
-                    label={
-                      <Label
-                        title="Your Social Media Post Link"
-                        description="Provide the link to your post for tracking and verification."
-                      />
+              </div>
+            )}
+
+            {/* Description */}
+            {config && (
+              <div className="bg-white rounded-xl p-6 border border-zinc-100">
+                <h3 className="text-lg font-semibold text-zinc-800 mb-4 flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-primary" />
+                  Advert Content
+                </h3>
+                <div className="space-y-2">
+                  <Label
+                    title={
+                      isEngagementTask &&
+                      engagementType === "Get Real People to Comment to your Social Media Post"
+                        ? "Comment Instructions"
+                        : "Advert Caption"
                     }
-                    icon={<LinkIcon size={16} />}
-                    placeholder="Enter your post link"
-                    type="url"
-                    {...register("social_media_url", {
-                      required: "Enter your post link",
-                      pattern: urlValidation,
-                    })}
-                    errorMessage={errors.social_media_url?.message as string}
-                    
+                    description={
+                      isEngagementTask &&
+                      engagementType === "Get Real People to Comment to your Social Media Post"
+                        ? "Provide clear instructions for comments"
+                        : "Write the text or caption for your advert"
+                    }
                   />
-                     
-                  
-                )}
-        
-                {/* Task type */}
-                <input
-                  type="hidden"
-                  value={isEngagementTask ? "engagement" : "advert"}
-                  {...register("type")}
-                />
-        
-                {/* Task category */}
-                <input type="hidden" value="social_media" {...register("category")} />
-        
-        {/* Description */}
-        {config && (
-          <div className="space-y-1 text-sm">
-            <Label
-              title={
-                isEngagementTask &&
-                engagementType ===
-                  "Get Real People to Comment to your Social Media Post"
-                  ? "Enter Comment Instruction or Example"
-                  : "Enter Advert Text or Caption"
-              }
-              description={
-                isEngagementTask &&
-                engagementType ===
-                  "Get Real People to Comment to your Social Media Post"
-                  ? "Provide clear instructions for the comment you want users to make. Example: ‘Comment “Great work!” on our latest video.’"
-                  : "Write the text or caption for your advert."
-              }
-            />
-        
-            {/* 👇 Added this explanatory helper text */}
-            {!isEngagementTask && (
-              <p className="text-xs text-gray-600 leading-relaxed mb-2">
-                Please enter the advert text or caption. The advert text or caption should be well detailed.
-                You can also include a link to your site, a phone number for people to contact you, or any
-                information you want people to see on your advert.
-              </p>
+                  <textarea
+                    {...register("description", {
+                      required: "Enter task description.",
+                      pattern: descriptionValidation,
+                      minLength: { value: 20, message: "Description is too short." },
+                    })}
+                    className="w-full h-32 bg-white border border-zinc-300 rounded-xl p-4 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all resize-none"
+                    placeholder="Enter your advert description..."
+                  />
+                  {errors.description && (
+                    <small className="text-danger">{errors.description.message as string}</small>
+                  )}
+                </div>
+              </div>
             )}
-        
-            <textarea
-              {...register("description", {
-                required: "Enter task description.",
-                pattern: descriptionValidation,
-                minLength: {
-                  value: 20,
-                  message: "Description is too short.",
-                },
-              })}
-              id="description"
-              className="bg-white border border-zinc-300 rounded-2xl w-full h-40 focus:outline-primary p-4"
-            />
-        
-            {errors.description && (
-              <small className="text-danger">
-                {errors.description.message as string}
-              </small>
-            )}
+
+            <input type="hidden" {...register("title", { required: "title is required" })} />
           </div>
         )}
-        
-                 {isEngagementTask && (
-                <input 
-                  type="hidden"
-                  {...register("description")}
-                />
-                )}
 
+        {/* STEP 2: Budget & Pricing */}
+        {currentStep === 2 && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+            {/* Hidden inputs for form */}
+            <Input className="hidden" icon={<DollarSign size={16} />} placeholder="0" {...register("payment_per_task", { required: true })} />
+            <Input className="hidden" value={totalCost} readOnly {...register("estimated_cost", { required: true })} />
+            {isEngagementTask && <input type="hidden" {...register("deadline", { required: true })} />}
+            <input type="hidden" value={isEngagementTask ? "engagement" : "advert"} {...register("type")} />
+            <input type="hidden" value="social_media" {...register("category")} />
 
+            {/* Payment Summary Card */}
+            <div className="bg-gradient-to-br from-primary/5 to-blue-50 rounded-xl p-6 border border-primary/20">
+              <h3 className="text-lg font-semibold text-zinc-800 mb-4 flex items-center gap-2">
+                <Wallet className="w-5 h-5 text-primary" />
+                Budget Summary
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-white rounded-xl p-4 border border-zinc-100">
+                  <p className="text-sm text-zinc-500 mb-1">
+                    {isEngagementTask ? "Participants" : "Number of Posts"}
+                  </p>
+                  <p className="text-2xl font-bold text-zinc-800">
+                    {isEngagementTask ? (participants || 0) : (noOfPosts || 0)}
+                  </p>
+                </div>
                 
-        {!isEngagementTask && config && (
-          <div>
-            <Label
-              title="Choose Your Advert Media Upload Option"
-              description="Upload media for your advert."
-            />
-
-            <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
-              <div className="flex flex-col gap-2">
-                <label
-                  className="text-sm px-3 py-1.5 rounded-lg bg-primary/10 border border-primary text-primary cursor-pointer"
-                  htmlFor="media"
-                >
-                  Upload Video Advert
-                </label>
-                <label
-                  className="text-sm px-3 py-1.5 rounded-lg bg-primary/10 border border-primary text-primary cursor-pointer"
-                  htmlFor="media"
-                >
-                  Upload Image Advert
-                </label>
-                <p className="text-xs text-gray-500 mt-1">
-                  Max file size: 20MB (image or video)
-                </p>
+                <div className="bg-white rounded-xl p-4 border border-zinc-100">
+                  <p className="text-sm text-zinc-500 mb-1">Pay Per Task</p>
+                  <p className="text-2xl font-bold text-zinc-800">
+                    ₦{Number(paymentPerTask || 0).toLocaleString()}
+                  </p>
+                </div>
+                
+                <div className="bg-primary rounded-xl p-4 text-white">
+                  <p className="text-sm text-blue-100 mb-1">Total Budget</p>
+                  <p className="text-2xl font-bold">
+                    ₦{totalCost.toLocaleString()}
+                  </p>
+                </div>
               </div>
 
-              <div className="max-w-[250px]">
-                <ImageInput id="media" maxLength={3} required />
+              <p className="text-xs text-zinc-500 mt-4 text-center">
+                {isEngagementTask 
+                  ? "Participants × Pay per Task = Total Budget"
+                  : "Number of Posts × Pay per Post = Total Budget"
+                }
+              </p>
+            </div>
+
+            {/* Pricing Info */}
+            <div className="bg-white rounded-xl p-6 border border-zinc-100">
+              <h4 className="font-medium text-zinc-800 mb-3">Pricing Tiers</h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {[
+                  { platform: "WhatsApp", price: "₦100" },
+                  { platform: "Instagram", price: "₦150" },
+                  { platform: "Facebook", price: "₦150" },
+                  { platform: "Twitter/X", price: "₦150" },
+                  { platform: "TikTok", price: "₦150" },
+                ].map((tier) => (
+                  <div key={tier.platform} className="bg-zinc-50 rounded-lg p-3 text-center">
+                    <p className="text-xs text-zinc-500">{tier.platform}</p>
+                    <p className="font-semibold text-zinc-800">{tier.price}</p>
+                    <p className="text-[10px] text-zinc-400">per post</p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         )}
 
-        {/* 💰 Payment Summary Button */}
-<div className="flex justify-center mt-6">
-  <Button
-    type="button"
-    variant="bordered"
-    className="flex items-center gap-2 border-primary text-primary hover:bg-primary hover:text-white transition"
-    onPress={() => setShowSummary(true)}
-  >
-    <DollarSign size={18} />
-    View Payment Summary
-  </Button>
-</div>
+        {/* STEP 3: Target Audience */}
+        {currentStep === 3 && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <div className="bg-white rounded-xl p-6 border border-zinc-100">
+              <h3 className="text-lg font-semibold text-zinc-800 mb-4 flex items-center gap-2">
+                <Target className="w-5 h-5 text-primary" />
+                Target Your Audience
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Gender */}
+                <div>
+                  <CustomSelect
+                    options={genders}
+                    label={
+                      <Label
+                        title="Gender"
+                        description="Target gender preference"
+                      />
+                    }
+                    placeholder="Any gender"
+                    startContent={<User />}
+                    onChange={(value) =>
+                      setValue("gender", value, { shouldValidate: true })
+                    }
+                    errorMessage={errors.gender?.message as string}
+                  />
+                  <input
+                    type="hidden"
+                    {...register("gender", { required: "Gender is required" })}
+                  />
+                </div>
 
+                {/* Location */}
+                <div>
+                  <CustomSelect
+                    options={states}
+                    label={
+                      <Label
+                        title="Location"
+                        description="Target locations"
+                      />
+                    }
+                    placeholder="All locations"
+                    selectionMode="multiple"
+                    onChange={(value) =>
+                      setValue("location", value, { shouldValidate: true })
+                    }
+                    errorMessage={errors.location?.message as string}
+                  />
+                  <input
+                    type="hidden"
+                    {...register("location", { required: "Location is required" })}
+                  />
+                </div>
 
-        {/* 💰 Payment Summary Modal (HeroUI version) */}
-<Modal isOpen={showSummary} onClose={() => setShowSummary(false)}>
-  <ModalContent className="sm:max-w-md p-4 rounded-xl">
-    <ModalHeader className="flex justify-between items-center border-b pb-2">
-      <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
-        <DollarSign size={20} /> Payment Summary
-      </h3>
-      <button
-        onClick={() => setShowSummary(false)}
-        className="text-gray-500 hover:text-gray-800"
-      >
-        <X size={18} />
-      </button>
-    </ModalHeader>
+                {/* Religion */}
+                <div>
+                  <CustomSelect
+                    options={religions}
+                    label={
+                      <Label
+                        title="Religion"
+                        description="Target religion (optional)"
+                      />
+                    }
+                    placeholder="Any religion"
+                    startContent={<Church />}
+                    selectionMode="multiple"
+                    onChange={(value) =>
+                      setValue("religion", value, { shouldValidate: true })
+                    }
+                    errorMessage={errors.religion?.message as string}
+                  />
+                  <input
+                    type="hidden"
+                    {...register("religion")}
+                  />
+                </div>
+              </div>
+            </div>
 
-    <ModalBody className="mt-3 text-sm text-gray-700 space-y-2">
-      {isEngagementTask ? (
-        <p>
-          You’re creating an <strong>engagement task</strong> where you’ll
-          pay participants to interact with your post.
-        </p>
-      ) : (
-        <p>
-          You’re creating a <strong>social media advert</strong>. You’ll
-          pay based on the number of posts you want shared.
-        </p>
-      )}
+            {/* Audience Tips */}
+            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+              <h4 className="font-medium text-blue-800 mb-2">💡 Tips for Better Results</h4>
+              <ul className="text-sm text-blue-700 space-y-1">
+                <li>• Target specific locations for local businesses</li>
+                <li>• Consider gender for products targeted to specific audiences</li>
+                <li>• Leave religion unselected to reach everyone</li>
+              </ul>
+            </div>
+          </div>
+        )}
 
-      <p>
-        <strong>Calculation:</strong>{" "}
-        {isEngagementTask
-          ? "Participants × Pay per Task"
-          : "Posts × Pay per Task"}
-      </p>
+        {/* STEP 4: Media & Content */}
+        {currentStep === 4 && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+            {!isEngagementTask && config && (
+              <div className="bg-white rounded-xl p-6 border border-zinc-100">
+                <h3 className="text-lg font-semibold text-zinc-800 mb-4 flex items-center gap-2">
+                  <ImageIcon className="w-5 h-5 text-primary" />
+                  Upload Media
+                </h3>
+                
+                <div className="flex flex-col sm:flex-row gap-4 items-start">
+                  <div className="flex flex-col gap-2">
+                    <label className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 border border-primary text-primary cursor-pointer hover:bg-primary/20 transition">
+                      <Video className="w-4 h-4" />
+                      Upload Video
+                      <input type="file" accept="video/*" className="hidden" />
+                    </label>
+                    <label className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 border border-primary text-primary cursor-pointer hover:bg-primary/20 transition">
+                      <ImageIcon className="w-4 h-4" />
+                      Upload Images
+                      <input type="file" accept="image/*" multiple className="hidden" />
+                    </label>
+                    <p className="text-xs text-zinc-500">Max 20MB per file</p>
+                  </div>
+                  
+                  <div className="flex-1 max-w-xs">
+                    <ImageInput id="media" maxLength={3} />
+                  </div>
+                </div>
+              </div>
+            )}
 
-      <div className="mt-4 bg-white p-4 rounded-xl border border-zinc-200 shadow-sm space-y-2">
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-600">
-            {isEngagementTask ? "Participants" : "Number of Posts"}
-          </span>
-          <span className="font-medium text-gray-900">
-            {isEngagementTask ? participants || 0 : noOfPosts || 0}
-          </span>
+            {/* Review & Submit */}
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
+              <h3 className="text-lg font-semibold text-zinc-800 mb-4 flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-green-600" />
+                Review Your Campaign
+              </h3>
+              
+              <div className="bg-white rounded-xl p-4 border border-zinc-100 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-zinc-500">Platform:</span>
+                  <span className="font-medium capitalize">{selectedPlatform || "Not selected"}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-zinc-500">{isEngagementTask ? "Participants" : "Posts"}:</span>
+                  <span className="font-medium">{isEngagementTask ? (participants || 0) : (noOfPosts || 0)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-zinc-500">Pay per Task:</span>
+                  <span className="font-medium">₦{Number(paymentPerTask || 0).toLocaleString()}</span>
+                </div>
+                <hr className="border-dashed my-2" />
+                <div className="flex justify-between">
+                  <span className="text-zinc-800 font-medium">Total Budget:</span>
+                  <span className="text-primary font-bold text-lg">₦{totalCost.toLocaleString()}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Navigation Buttons */}
+        <div className="flex justify-between pt-4">
+          {currentStep > 1 ? (
+            <Button
+              type="button"
+              variant="bordered"
+              onPress={() => setCurrentStep(currentStep - 1)}
+              className="border-zinc-300"
+            >
+              Back
+            </Button>
+          ) : (
+            <div />
+          )}
+          
+          {currentStep < 4 ? (
+            <Button
+              type="button"
+              onPress={() => setCurrentStep(currentStep + 1)}
+              className="bg-primary text-white"
+            >
+              Continue <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          ) : (
+            <div className="pb-12">
+              <SetPaymentMethod
+                onAdvertPreviewOpen={modalProps.onOpen}
+                isFormValid={isValid}
+                triggerValidationFn={trigger}
+                estimatedCost={watch("estimated_cost") || 0}
+              />
+            </div>
+          )}
         </div>
 
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-600">Pay per Task</span>
-          <span className="font-medium text-gray-900">
-            ₦{paymentPerTask?.toLocaleString() || "0"}
-          </span>
-        </div>
-
-        <hr className="my-2" />
-
-        <div className="flex justify-between text-base font-semibold">
-          <span>Total Estimated Cost</span>
-          <span className="text-primary">
-            ₦{totalCost?.toLocaleString() || "0"}
-          </span>
-        </div>
-      </div>
-
-      <p className="text-xs text-gray-500 mt-3 text-center">
-        This is the total amount you’ll fund for this campaign. No hidden
-        fees.
-      </p>
-
-      <div className="mt-4 flex justify-end">
-        <button
-          onClick={() => setShowSummary(false)}
-          className="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition"
-        >
-          Okay, Got it
-        </button>
-      </div>
-    </ModalBody>
-  </ModalContent>
-</Modal>
-
-
-        {/* Payment Method Section (unchanged) */}
-        <SetPaymentMethod
-          onAdvertPreviewOpen={modalProps.onOpen}
-          isFormValid={isValid}
-          triggerValidationFn={trigger}
-          estimatedCost={watch("estimated_cost") || 0}
-        />
-
-        {/* Modals (unchanged) */}
+        {/* Modals */}
         {isValid && (
           <AdvertSummaryModal
             modalProps={modalProps}

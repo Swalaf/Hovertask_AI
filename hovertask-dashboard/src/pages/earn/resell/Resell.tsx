@@ -1,6 +1,5 @@
-import { ArrowLeft, ShoppingBag } from "lucide-react";
+import { ArrowLeft, Search, TrendingUp, DollarSign, Users, ArrowRight, Store } from "lucide-react";
 import { Link } from "react-router";
-import MarketplaceSearchForm from "../../../shared/components/MarketplaceSearchForm";
 import { useState } from "react";
 import cn from "../../../utils/cn";
 import ProductCard from "../../../shared/components/ProductCard";
@@ -9,8 +8,6 @@ import useProducts from "../../../hooks/useProducts";
 import Loading from "../../../shared/components/Loading";
 import EmptyMapErr from "../../../shared/components/EmptyMapErr";
 import useProductCategories from "../../../hooks/useProductCategories";
-import ResellerLinkModal from "../../../shared/components/ResellerLinkModal";
-import generateResellerLink from "../../../utils/generateResellerLink";
 
 export default function ResellPage() {
 	const { categories, refresh } = useProductCategories();
@@ -20,194 +17,172 @@ export default function ResellPage() {
 	const [currentCategory, setCurrentCategory] = useState<string>("all");
 	const [searchTerm, setSearchTerm] = useState<string>("");
 
-	// reseller link modal
-	const modalProps = useDisclosure();
-	const [resellerData, setResellerData] = useState<any>(null);
-
 	// FILTER LOGIC
 	const filteredProducts = products
 		? products
 				.filter((p) => Number(p.resell_budget) >= 500)
-				.filter((p) =>
+				.filter((p =>
 					currentCategory === "all"
 						? true
 						: String(p.category_id) === String(currentCategory)
-				)
-				.filter((p) =>
+				))
+				.filter((p =>
 					searchTerm.trim().length === 0
 						? true
 						: p.name.toLowerCase().includes(searchTerm.toLowerCase())
-				)
+				))
 		: [];
 
 	return (
-		<div className="grid min-[1000px]:grid-cols-[1fr_200px] min-h-full gap-4">
-			<div className="shadow min-h-full bg-white p-4 space-y-12">
-				<div
-					style={{ backgroundImage: "url('/images/Rectangle 39253.png')" }}
-					className="bg-cover p-4 space-y-24 rounded-3xl max-w-full"
-				>
-					<div className="flex gap-4 flex-1 text-white">
-						<Link to="/earn">
-							<ArrowLeft />
-						</Link>
-
-						<div className="space-y-2">
-							<h1 className="text-xl font-medium">
-								Hot-selling Products to Maximize Your Earnings
-							</h1>
-							<p className="text-sm">
-								Get access to high-demand products and services at discounted
-								rates, resell, and earn profits instantly!
-							</p>
-						</div>
+		<div className="space-y-6">
+			{/* Hero Header */}
+			<div 
+				style={{ backgroundImage: "url('/images/Rectangle 39253.png')" }}
+				className="bg-cover bg-center rounded-2xl p-8 text-white"
+			>
+				<div className="flex items-start gap-4 mb-6">
+					<Link 
+						to="/earn" 
+						className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center hover:bg-white/30 transition-colors"
+					>
+						<ArrowLeft className="w-5 h-5" />
+					</Link>
+					<div className="flex-1">
+						<h1 className="text-2xl font-bold mb-2">
+							Hot-selling Products to Maximize Your Earnings
+						</h1>
+						<p className="text-white/80">
+							Get access to high-demand products and services at discounted rates, resell, and earn profits instantly!
+						</p>
 					</div>
+				</div>
 
-					<div className="flex justify-center">
-						<MarketplaceSearchForm
-							onSearch={(value) => setSearchTerm(value)}
-							placeholder="Search for products..."
+				{/* Search Bar */}
+				<div className="max-w-xl">
+					<div className="relative">
+						<Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
+						<input
+							type="text"
+							placeholder="Search for products to resell..."
+							value={searchTerm}
+							onChange={(e) => setSearchTerm(e.target.value)}
+							className="w-full pl-12 pr-4 py-3 rounded-xl border-0 focus:ring-2 focus:ring-primary/50 outline-none text-zinc-800"
 						/>
 					</div>
-				</div>
-
-				{/* CATEGORY FILTER */}
-				<div className="space-y-2">
-					<h2 className="font-medium text-lg">All Categories</h2>
-
-					<div className="flex gap-2 flex-wrap">
-						{/* MANUAL ALL BUTTON */}
-						<button
-							type="button"
-							onClick={() => setCurrentCategory("all")}
-							className={cn(
-								"py-1 px-2 rounded-lg bg-zinc-200 border border-zinc-300 text-sm capitalize",
-								{
-									"bg-primary text-white": currentCategory === "all",
-								},
-							)}
-						>
-							all
-						</button>
-
-						{/* CATEGORIES FROM API */}
-						{categories ? (
-							categories
-								.filter((cat) => cat.key !== "all") // remove duplicate ALL
-								.map((category) => (
-									<button
-										type="button"
-										onClick={() => setCurrentCategory(String(category.key))}
-										className={cn(
-											"py-1 px-2 rounded-lg bg-zinc-200 border border-zinc-300 text-sm capitalize",
-											{
-												"bg-primary text-white":
-													String(category.key) === currentCategory,
-											},
-										)}
-										key={category.key}
-									>
-										{category.label}
-									</button>
-								))
-						) : categories === null ? (
-							<Loading />
-						) : (
-							<EmptyMapErr
-								onButtonClick={refresh}
-								description="Failed to load product categories."
-								buttonInnerText="Try Again"
-							/>
-						)}
-					</div>
-				</div>
-
-				{/* PRODUCT LIST */}
-				<div className="space-y-5">
-					<h2 className="font-medium text-lg">Top Products to Buy or Resell</h2>
-
-					{products ? (
-						filteredProducts.length ? (
-							<div className="grid max-[380px]:grid-cols-1 max-[640px]:grid-cols-2 sm:grid-cols-3 p-4 rounded-3xl bg-primary/20 gap-x-2 gap-y-4">
-								{filteredProducts.map((product) => (
-									<ProductCard
-										responsive
-										key={product.id}
-										{...product}
-										budget={product.resell_budget}
-										buttonText="Generate Reseller Link"
-										onButtonClickAction={async () => {
-											try {
-												const res: any = await generateResellerLink(
-													String(product.id),
-												);
-												const url =
-													(res && res.data && (res.data.reseller_url || res.data.url)) ||
-													`${window.location.origin}/marketplace/p/${product.id}`;
-
-												setResellerData({ product, reseller_url: url });
-											} catch (err) {
-												console.error("Failed to generate reseller link", err);
-												setResellerData({
-													product,
-													reseller_url: `${window.location.origin}/marketplace/p/${product.id}`,
-												});
-											}
-
-											modalProps.onOpen();
-											return true;
-										}}
-									/>
-								))}
-							</div>
-						) : (
-							<EmptyMapErr
-								description="No products found for this filter"
-								buttonInnerText="Refresh"
-								onButtonClick={reload}
-							/>
-						)
-					) : (
-						<Loading />
-					)}
-				</div>
-
-				<div>
-					<img src="/images/Group 1000004391.png" alt="" />
 				</div>
 			</div>
 
-			{/* SIDEBAR */}
-			{products && (
-				<div>
-					<div className="p-4 bg-primary bg-opacity-20 max-[1000px]:hidden text-xs rounded-2xl mt-[552px] space-y-3">
-						<img
-							src="/images/Why_wait__Shop_the_latest_trends_and_essentials_on_-removebg-preview 2.png"
-							alt=""
-						/>
-						<p>
-							Add a new product or service to the marketplace. Include details,
-							set your price, and upload images to attract buyers.
-						</p>
-
-						<Link
-							to="/marketplace/list-product"
-							className="flex items-center gap-2 px-2 py-1.5 rounded-xl bg-primary text-white w-full justify-center"
-						>
-							<ShoppingBag size={12} /> List a New Product
-						</Link>
+			{/* Quick Stats */}
+			<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+				{[
+					{ label: "Total Sales", value: "₦125,400", icon: DollarSign, color: "bg-green-500" },
+					{ label: "Products", value: "48", icon: Store, color: "bg-blue-500" },
+					{ label: "Active Resellers", value: "234", icon: Users, color: "bg-purple-500" },
+					{ label: "Profit Margin", value: "15-40%", icon: TrendingUp, color: "bg-amber-500" },
+				].map((stat, index) => (
+					<div key={index} className="bg-white rounded-xl p-4 border border-zinc-100">
+						<div className={cn("w-10 h-10 rounded-lg flex items-center justify-center mb-3", stat.color)}>
+							<stat.icon className="w-5 h-5 text-white" />
+						</div>
+						<p className="text-xl font-bold text-zinc-800">{stat.value}</p>
+						<p className="text-xs text-zinc-500">{stat.label}</p>
 					</div>
-				</div>
-			)}
+				))}
+			</div>
 
-			<ResellerLinkModal
-				open={modalProps.isOpen}
-				onClose={() => {
-					modalProps.onClose();
-					setResellerData(null);
-				}}
-				data={resellerData}
-			/>
+			{/* How It Works */}
+			<div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
+				<h2 className="text-lg font-semibold text-zinc-800 mb-6">How Reselling Works</h2>
+				<div className="grid md:grid-cols-3 gap-6">
+					{[
+						{ step: "1", title: "Choose a Product", desc: "Browse our catalog and select products with high profit margins" },
+						{ step: "2", title: "Share Your Link", desc: "Get your unique reseller link and share with your network" },
+						{ step: "3", title: "Earn Commission", desc: "Receive instant payment when someone purchases through your link" },
+					].map((item, index) => (
+						<div key={index} className="text-center">
+							<div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
+								{item.step}
+							</div>
+							<h3 className="font-semibold text-zinc-800 mb-2">{item.title}</h3>
+							<p className="text-sm text-zinc-500">{item.desc}</p>
+						</div>
+					))}
+				</div>
+			</div>
+
+			{/* Categories */}
+			<div className="bg-white rounded-xl p-5 border border-zinc-100">
+				<div className="flex items-center justify-between mb-4">
+					<h2 className="font-semibold text-zinc-800">Categories</h2>
+					<span className="text-xs text-zinc-500">{filteredProducts.length} products found</span>
+				</div>
+				<div className="flex gap-2 flex-wrap">
+					<button
+						type="button"
+						onClick={() => setCurrentCategory("all")}
+						className={cn(
+							"py-2 px-4 rounded-lg text-sm font-medium transition-all",
+							currentCategory === "all"
+								? "bg-primary text-white"
+								: "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+						)}
+					>
+						All
+					</button>
+					{categories ? (
+						categories
+							.filter((cat) => cat.key !== "all")
+							.map((category) => (
+								<button
+									type="button"
+									onClick={() => setCurrentCategory(String(category.key))}
+									className={cn(
+										"py-2 px-4 rounded-lg text-sm font-medium transition-all capitalize",
+										String(category.key) === currentCategory
+											? "bg-primary text-white"
+											: "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+									)}
+									key={category.key}
+								>
+									{category.label}
+								</button>
+							))
+					) : categories === null ? (
+						<Loading />
+					) : (
+						<EmptyMapErr
+							onButtonClick={refresh}
+							description="Failed to load product categories."
+							buttonInnerText="Try Again"
+						/>
+					)}
+				</div>
+			</div>
+
+			{/* Products Grid */}
+			<div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+				{filteredProducts.length > 0 ? (
+					filteredProducts.map((product) => (
+						<ProductCard key={product.id} {...product} />
+					))
+				) : (
+					<div className="col-span-full bg-white rounded-xl p-8 border border-zinc-100 text-center">
+						<div className="w-16 h-16 bg-zinc-100 rounded-full flex items-center justify-center mx-auto mb-4">
+							<Store className="w-8 h-8 text-zinc-400" />
+						</div>
+						<h3 className="text-lg font-semibold text-zinc-800 mb-2">No Products Found</h3>
+						<p className="text-zinc-500 text-sm mb-4">
+							Try adjusting your search or filter to find products.
+						</p>
+						<button 
+							onClick={() => { setSearchTerm(""); setCurrentCategory("all"); }}
+							className="inline-flex items-center gap-2 text-primary font-medium hover:underline"
+						>
+							Clear filters <ArrowRight size={16} />
+						</button>
+					</div>
+				)}
+			</div>
 		</div>
 	);
 }

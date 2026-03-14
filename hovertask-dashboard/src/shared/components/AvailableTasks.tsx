@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { ClipboardList } from "lucide-react";
 import useTasks from "../../hooks/useTasks";
 import EmptyMapErr from "./EmptyMapErr";
 import Loading from "./Loading";
@@ -9,7 +10,6 @@ export default function AvailableTasks({
 	filter,
 }: { mode?: "preview"; filter?: string }) {
 	const { tasks, reload } = useTasks();
-	console.log(tasks);
 
 	if (tasks === null) {
 		return <Loading />;
@@ -25,12 +25,15 @@ export default function AvailableTasks({
 		mode === "preview" ? filteredTasks.slice(0, 4) : filteredTasks;
 
 	return (
-		<div className="space-y-3">
-			<h2 className="text-[20.8px]">New Available Tasks</h2>
+		<div className="space-y-4">
+			<div className="flex items-center gap-2">
+				<ClipboardList size={20} className="text-primary" />
+				<h2 className="text-lg font-semibold text-zinc-800">New Available Tasks</h2>
+			</div>
 
 			{/* Render Tasks */}
 			{displayedTasks.length > 0 ? (
-				<div className="space-y-4">
+				<div className="grid gap-4">
 					{displayedTasks.map((task) => (
 						<TaskCard {...task} key={task.id} />
 					))}
@@ -43,11 +46,11 @@ export default function AvailableTasks({
 				/>
 			)}
 
-			{/* Show “See all tasks” button if in preview mode */}
+			{/* Show "See all tasks" button if in preview mode */}
 			{mode === "preview" && filteredTasks.length > 4 && (
 				<Link
 					to="/earn/tasks"
-					className="block w-fit mx-auto px-4 py-2 rounded-full border border-primary text-sm text-primary transition-colors hover:bg-primary/20"
+					className="block w-fit mx-auto px-6 py-2.5 rounded-full border border-primary text-sm text-primary font-medium transition-colors hover:bg-primary hover:text-white"
 				>
 					See all tasks
 				</Link>

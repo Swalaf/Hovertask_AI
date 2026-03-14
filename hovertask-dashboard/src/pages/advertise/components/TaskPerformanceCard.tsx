@@ -1,6 +1,6 @@
 export default function TaskPerformanceCard() {
 	return (
-		<div className="max-w-3xl mx-auto p-4 space-y-6 bg-white rounded-xl shadow">
+		<div className="p-4 space-y-6 bg-white rounded-xl shadow w-full">
 			{/* Header */}
 			<div className="flex justify-between items-start border p-4 rounded-lg">
 				<div>

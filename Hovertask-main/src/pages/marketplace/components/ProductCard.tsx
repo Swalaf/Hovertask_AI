@@ -41,10 +41,10 @@ const ProductCard = ({
         <div
             className={`${horizontal ? "flex gap-2 items-center" : ""} ${
                 horizontal ? "w-[320px]" : responsive ? "" : "w-[180px]"
-            } bg-white rounded-2xl p-4 space-y-2`}
+            } bg-white dark:bg-slate-800 rounded-2xl p-4 space-y-2 dark:shadow-lg dark:shadow-indigo-500/10`}
         >
             <div
-                className="bg-zinc-200 rounded-2xl overflow-hidden cursor-pointer"
+                className="bg-zinc-200 dark:bg-slate-700 rounded-2xl overflow-hidden cursor-pointer"
                 onClick={goToProduct}
             >
                 <img
@@ -57,23 +57,23 @@ const ProductCard = ({
             <div className="space-y-2">
                 <div>
                     <div className="flex justify-between">
-                        <h3 className="text-[11.28px] capitalize">{name}</h3>
+                        <h3 className="text-[11.28px] capitalize dark:text-white">{name}</h3>
                         <button className="text-[#FF00FB]">
                             <FaHeart />
                         </button>
                     </div>
 
                     <div className="flex gap-6">
-                        <p className="text-[9.4px] text-[#77777A] line-through">₦{price}</p>
-                        <p className="text-[11.28px]">₦{discountedPrice}</p>
+                        <p className="text-[9.4px] text-[#77777A] dark:text-slate-400 line-through">₦{price}</p>
+                        <p className="text-[11.28px] dark:text-white">₦{discountedPrice}</p>
                     </div>
 
                     <div className="flex gap-4 items-center">
-                        <p className="text-[9.4px] flex items-center">
+                        <p className="text-[9.4px] flex items-center dark:text-slate-300">
                             <BiStar /> {rating.toFixed(1)}
                         </p>
-                        <p className="text-[9.4px] text-base">({reviews_count} Reviews)</p>
-                        <p className="text-[#77777A] text-[9.11px]">{available_units} Units</p>
+                        <p className="text-[9.4px] text-base dark:text-slate-300">({reviews_count} Reviews)</p>
+                        <p className="text-[#77777A] dark:text-slate-400 text-[9.11px]">{available_units} Units</p>
                     </div>
                 </div>
 

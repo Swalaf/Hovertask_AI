@@ -62,14 +62,14 @@ const SideNav = () => {
 
     return (
         <div className="max-w-[243px] space-y-12 max-xl:hidden">
-            <div className="bg-[#3F5FCF] py-20 pl-6 rounded-3xl text-white">
+            <div className="bg-[#3F5FCF] dark:bg-gradient-to-br dark:from-indigo-700 dark:to-purple-800 py-20 pl-6 rounded-3xl text-white">
                 <div className="border-1 border-[#FFFFFF33] pl-4 pr-2 py-10 rounded-2xl space-y-3">
                     {navLinks.map((link) => {
                         return (
                             <Link
                                 className={`${
-                                    location.pathname.includes(link.path) ? "bg-white text-[#3F5FCF]" : ""
-                                } text-[14.95px] flex gap-2 items-center py-2 px-6 rounded-xl whitespace-nowrap`}
+                                    location.pathname.includes(link.path) ? "bg-white dark:bg-slate-200 text-[#3F5FCF] dark:text-indigo-700" : ""
+                                } text-[14.95px] flex gap-2 items-center py-2 px-6 rounded-xl whitespace-nowrap hover:bg-white/20`}
                                 key={link.label}
                                 to={link.path}
                             >

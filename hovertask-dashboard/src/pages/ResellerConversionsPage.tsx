@@ -112,8 +112,14 @@ export default function ResellerConversionsPage() {
   }
 
   return (
-    <div className="p-3 md:p-6 space-y-6">
-      <h1 className="text-lg md:text-xl font-semibold">Reseller Conversions Overview</h1>
+    <div className="space-y-6 p-4 md:p-6">
+      {/* Header */}
+      <div className="flex items-center gap-4">
+        <div>
+          <h1 className="text-xl md:text-2xl font-bold text-zinc-800">Reseller Conversions Overview</h1>
+          <p className="text-sm text-zinc-500">Track your reseller performance and earnings</p>
+        </div>
+      </div>
 
       {/* SUMMARY CARDS */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">

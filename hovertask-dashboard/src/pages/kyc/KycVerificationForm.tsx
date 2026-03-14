@@ -17,7 +17,7 @@ export default function KycVerificationForm() {
 
 	return (
 		<div className="mobile:flex gap-4 min-h-full">
-			<div className="bg-white shadow-md px-4 py-8 space-y-12 mobile:w-[724px] max-w-[724px] overflow-hidden min-h-full">
+			<div className="bg-white shadow-md px-4 py-8 space-y-12 overflow-hidden min-h-full w-full">
 				<div className="flex gap-4 flex-1">
 					<Link to="/">
 						<ArrowLeft />

@@ -1,118 +1,88 @@
 import { useRef, useState } from "react";
 import type { FieldValues } from "react-hook-form";
 import { Link } from "react-router-dom";
-import logo from "../../assets/brand-logo.svg";
+import { Helmet } from "react-helmet-async";
 import confetti from "../../assets/confetti.gif";
+import { FaGoogle } from "react-icons/fa";
 import EarnsphereAccountForm from "./components/EarnsphereAccountForm";
 import PersonalInfoForm from "./components/PersonalInfoForm";
 import EmailVerificationForm from "./components/EmailVerificationForm";
-import useSlider from "./hooks/useSlider";
 import signup from "./utils/signup";
 
-const slides = [
-	{
-		image: "/assets/images/newgilr.jpeg",
-		title: "Unlock Your Earning Potential",
-		description:
-			"Discover endless opportunities to earn, advertise, and resell products.",
-	},
-	{
-		image: "/assets/images/frackels.webp",
-		title: "Boost your brand visibility",
-		description:
-			"Advertise on our marketplace or levergae social media to grow your business.",
-	},
-	{
-		image: "/assets/images/newgilr.jpeg",
-		title: "Turn Product to profit ",
-		description:
-			"Access a widea way of products to resell and earn commissions.",
-	},
-];
-
 const Signup = () => {
-	const currentSlide = useSlider(slides.length);
-	const [currentForm, setCurrentForm] = useState<
-		"personal" | "earnsphere" | "verification"
-	>("personal");
+	const [currentForm, setCurrentForm] = useState<"personal" | "earnsphere" | "verification">("personal");
 	const [aggregateForm, setAggregateForm] = useState<FieldValues>({});
 	const multiStepForm = useRef<HTMLDivElement>(null);
 	const [verificationSuccess, setVerificationSuccess] = useState(false);
 
-	// Remove scroll logic since only one form is rendered at a time
+	const getStepNumber = () => {
+		if (currentForm === "personal") return 1;
+		if (currentForm === "earnsphere") return 2;
+		return 3;
+	};
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-4 flex items-center justify-center">
-			<div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-5xl flex flex-col md:flex-row gap-8">
-				{/* Left Section - Carousel */}
-				<div className="w-full md:w-1/2">
-					<div className="relative h-[500px] rounded-2xl overflow-hidden">
-						{/* Images Container */}
-						<div
-							className="absolute w-full h-full transition-transform duration-700 ease-in-out"
-							style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-						>
-							<div className="absolute w-full h-full flex">
-								{slides.map((slide, index) => (
-									<div
-										key={index}
-										className="min-w-full h-full relative transform hover:rotate-0 transition-transform duration-300 overflow-hidden"
-									>
-										<img
-											src={slide.image}
-											alt={slide.title}
-											className="w-full h-full object-cover"
-										/>
-										<div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent">
-											<div
-												className="absolute bottom-16 p-6 text-white transition-opacity duration-500"
-												style={{ opacity: currentSlide === index ? 1 : 0 }}
-											>
-												<h2 className="text-2xl font-bold mb-2">
-													{slide.title}
-												</h2>
-												<p className="text-gray-200">{slide.description}</p>
-											</div>
-										</div>
-									</div>
-								))}
-							</div>
-						</div>
-
-						{/* Indicators */}
-						<div className="absolute bottom-6 left-6 flex items-center gap-2 transition-transform duration-700">
-							{slides.map((img, index) => (
-								<button
-									type="button"
-									key={img.title}
-									className={`w-2 h-2 rounded-full transition-all duration-300 ${
-										currentSlide === index
-											? "scale-150 bg-blue-500"
-											: "bg-white/50 hover:bg-white/75"
+		<>
+			<Helmet>
+				<title>Sign Up - HoverTask | Join 500k+ Members</title>
+				<meta name="description" content="Create your free HoverTask account and start earning money through social media tasks, advertising your business, or becoming a reseller. Join 500k+ members today!" />
+				<meta name="keywords" content="sign up, register, create account, hovertask, earn money online, social media tasks, reseller" />
+				<meta property="og:title" content="Sign Up - HoverTask | Join 500k+ Members" />
+				<meta property="og:description" content="Create your free account and start earning. Join Nigeria's fastest-growing earning platform with 500k+ members." />
+				<meta property="og:url" content="https://hovertask.com/signup" />
+				<link rel="canonical" href="https://hovertask.com/signup" />
+			</Helmet>
+			<div className="min-h-screen bg-gradient-to-br from-[#2C418F]/5 via-blue-50 to-white dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-4 flex items-center justify-center">
+				<div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 md:p-8 w-full max-w-md dark:shadow-2xl dark:shadow-indigo-500/10">
+					{/* Progress Steps */}
+					<div className="flex items-center gap-2 mb-6">
+						{[1, 2, 3].map((step) => (
+							<>
+								<div 
+									key={step}
+									className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all ${
+										getStepNumber() >= step 
+											? "bg-gradient-to-r from-[#2C418F] to-blue-600 text-white" 
+											: "bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-400"
 									}`}
-								/>
-							))}
-						</div>
-					</div>
-				</div>
-
-				{/* Right Section - Form */}
-				<div className="w-full md:w-1/2 flex flex-col">
-					<div className="pb-6 mb-6">
-						<img src={logo} alt="Hovertask Logo" className="h-8" />
-					</div>
-
-					<div className="h-0.5 bg-slate-300 mb-6">
-						<div
-							style={{
-								marginLeft: currentForm === "personal" ? 0 : "50%",
-							}}
-							className="w-1/2 h-full bg-blue-600 transition-all"
-						/>
+								>
+									{getStepNumber() > step ? (
+										<svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+											<path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+										</svg>
+									) : step}
+								</div>
+								{step < 3 && (
+									<div className={`flex-1 h-0.5 ${getStepNumber() > step ? "bg-[#2C418F]" : "bg-gray-200 dark:bg-slate-700"}`} />
+								)}
+							</>
+						))}
 					</div>
 
 					{/* Multi-step form - only render current step */}
 					<div ref={multiStepForm} className="w-full">
+						{/* Google Sign Up Button - at top */}
+						<button
+							type="button"
+							className="w-full flex items-center justify-center gap-3 bg-white dark:bg-slate-700 border-2 border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500 hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-700 dark:text-white py-3.5 rounded-xl font-semibold transition-all duration-200 shadow-sm hover:shadow-md mb-5"
+							onClick={() => {
+								console.log("Google sign-up clicked");
+							}}
+						>
+							<FaGoogle className="text-lg" />
+							Sign up with Google
+						</button>
+
+						{/* Divider */}
+						<div className="relative mb-5">
+							<div className="absolute inset-0 flex items-center">
+								<div className="w-full border-t border-gray-200 dark:border-slate-600"></div>
+							</div>
+							<div className="relative flex justify-center text-sm">
+								<span className="px-4 bg-white dark:bg-slate-800 text-gray-500 dark:text-slate-400">Or continue with</span>
+							</div>
+						</div>
+
 						{currentForm === "personal" && (
 							<PersonalInfoForm
 								onSubmit={(form: FieldValues) => {
@@ -143,37 +113,35 @@ const Signup = () => {
 
 					{/* Success modal after verification */}
 					{verificationSuccess && (
-						<div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-999 flex flex-col items-center justify-center">
-							<div className="w-full max-w-lg rounded-2xl bg-white shadow-lg p-6 flex flex-col justify-center items-center text-center relative">
-								<img src={confetti} alt="Confetti" />
-								<div>
-									<h4 className="font-semibold text-2xl">Congratulations</h4>
-									<p className="text-zinc-600 font-light">
-										Your email has been verified and your Hovertask account is ready!
-									</p>
-									<Link
-										className="w-fit bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg block mx-auto cursor-pointer font-medium transition-colors duration-200 shadow-lg shadow-blue-600/20 mt-6"
-										to="/signin"
-									>
-										Continue
-									</Link>
-								</div>
+						<div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
+							<div className="w-full max-w-lg rounded-2xl bg-white dark:bg-slate-800 shadow-2xl p-8 flex flex-col justify-center items-center text-center relative dark:shadow-indigo-500/20">
+								<img src={confetti} alt="Confetti" className="mb-4" />
+								<h4 className="font-bold text-2xl text-gray-800 dark:text-white mb-2">Congratulations!</h4>
+								<p className="text-gray-600 dark:text-slate-400 mb-6">
+									Your email has been verified and your HoverTask account is ready!
+								</p>
+								<Link
+									to="/signin"
+									className="inline-flex items-center gap-2 bg-gradient-to-r from-[#2C418F] to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-8 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+								>
+									Continue to Login
+									<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+									</svg>
+								</Link>
 							</div>
 						</div>
 					)}
 
-					<p className="text-center text-gray-600 mt-6">
+					<p className="text-center text-gray-600 dark:text-slate-400 mt-6">
 						Already have an account?{" "}
-						<Link
-							to="/signin"
-							className="text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
-						>
+						<Link to="/signin" className="text-[#2C418F] hover:text-blue-700 font-semibold">
 							Sign In
 						</Link>
 					</p>
 				</div>
 			</div>
-		</div>
+		</>
 	);
 };
 

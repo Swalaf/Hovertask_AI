@@ -1,163 +1,187 @@
 /** biome-ignore-all lint/a11y/noStaticElementInteractions: allow static element interaction */
-import { ChevronDown } from "lucide-react";
-import { useEffect, useState } from "react";
+import {
+  LayoutDashboard,
+  Wallet,
+  Megaphone,
+  Store,
+  Users,
+  BarChart3,
+  Settings,
+  HelpCircle,
+  TrendingUp,
+  CheckCircle,
+  List,
+  Target,
+  UserPlus
+} from "lucide-react";
+import { useState } from "react";
 import { Link } from "react-router";
-import type { MenuDropdownProps } from "../../types";
 import useActiveLink from "../hooks/useActiveLink";
 import cn from "../utils/cn";
-import menu from "../utils/menu";
-import ComingSoonModal from "../shared/components/ComingSoonModal"; // 👈 make sure the path is correct
+import { FaWhatsapp, FaFacebook, FaInstagram, FaTwitter } from "react-icons/fa";
+import { SiTiktok } from "react-icons/si";
 
 export default function SideNav() {
-	const activeLink = useActiveLink();
-	const [comingSoonOpen, setComingSoonOpen] = useState(false);
+  const activeLink = useActiveLink();
 
-	const updatedMenu = menu.map((menuItem) => {
-		if (menuItem.label === "Buy Followers") {
-			menuItem.path = menuItem.basePath;
-		}
-		return menuItem;
-	});
+  // Navigation items with icons
+  const navItems = [
+    { icon: <LayoutDashboard size={20} />, label: "Dashboard", path: "/" },
+    {
+      icon: <Wallet size={20} />,
+      label: "Earn",
+      path: "/earn",
+      hasDropdown: true,
+      options: [
+        { icon: <Megaphone size={16} />, label: "Post Adverts", path: "/earn/adverts" },
+        { icon: <CheckCircle size={16} />, label: "Complete Tasks", path: "/earn/tasks" },
+        { icon: <TrendingUp size={16} />, label: "Resell Products", path: "/earn/resell" },
+        { icon: <List size={16} />, label: "Task History", path: "/earn/tasks-history" },
+      ]
+    },
+    {
+      icon: <Megaphone size={20} />,
+      label: "Advertise",
+      path: "/advertise",
+      hasDropdown: true,
+      options: [
+        { icon: <FaWhatsapp size={16} />, label: "WhatsApp", path: "/advertise/post-advert?platform=WhatsApp" },
+        { icon: <FaFacebook size={16} />, label: "Facebook", path: "/advertise/post-advert?platform=Facebook" },
+        { icon: <FaInstagram size={16} />, label: "Instagram", path: "/advertise/post-advert?platform=Instagram" },
+        { icon: <FaTwitter size={16} />, label: "Twitter/X", path: "/advertise/post-advert?platform=X" },
+        { icon: <SiTiktok size={16} />, label: "TikTok", path: "/advertise/post-advert?platform=TikTok" },
+        { icon: <List size={16} />, label: "Ad History", path: "/advertise/advert-tasks-history" },
+      ]
+    },
+    { icon: <Wallet size={20} />, label: "Wallet", path: "/fund-wallet" },
+    {
+      icon: <Store size={20} />,
+      label: "Marketplace",
+      path: "/marketplace",
+      hasDropdown: true,
+      options: [
+        { icon: <List size={16} />, label: "Browse", path: "/marketplace" },
+        { icon: <Target size={16} />, label: "List Product", path: "/marketplace/list-product?type=list-product" },
+        { icon: <Target size={16} />, label: "Resell Product", path: "/marketplace/list-product?type=resell" },
+      ]
+    },
+    { icon: <BarChart3 size={20} />, label: "Reseller Stats", path: "/reseller-conversion" },
+    { icon: <Users size={20} />, label: "Refer & Earn", path: "/refer-and-earn" },
+    {
+      icon: <UserPlus size={20} />, label: "AddMeUp", path: "/add-me-up", hasDropdown: true, options: [
+        { icon: <Target size={16} />, label: "My Profile", path: "/add-me-up/profile" },
+        { icon: <List size={16} />, label: "Points", path: "/add-me-up/points" },
+        { icon: <Users size={16} />, label: "List Profile", path: "/add-me-up/list-profile" },
+      ]
+    },
+  ];
 
-	return (
-		<div className="max-w-[243px] space-y-8 text-sm">
-			<div className="bg-primary py-20 pl-6 rounded-3xl text-white">
-				<div className="border-1 border-[#FFFFFF33] pl-4 pr-2 py-10 rounded-2xl space-y-3">
-					{updatedMenu.map((menuItem) => {
-						return menuItem.options ? (
-							<MenuOptionDropdown key={menuItem.label} {...menuItem} />
-						) : menuItem.comingSoon ? (
-							<button
-								key={menuItem.label}
-								type="button"
-								onClick={() => setComingSoonOpen(true)}
-								className="flex items-center gap-3 px-3 py-1.5 rounded-xl hover:text-primary w-fit"
-							>
-								{menuItem.icon} {menuItem.label}
-							</button>
-						) : (
-							<Link
-								className={cn(
-									"flex items-center gap-3 px-3 py-1.5 rounded-xl w-fit",
-									{
-										"bg-white text-primary": activeLink === menuItem.path,
-									},
-								)}
-								key={menuItem.label}
-								to={menuItem.path}
-							>
-								{menuItem.icon} {menuItem.label}
-							</Link>
-						);
-					})}
-				</div>
-			</div>
+  return (
+    <div className="h-full bg-white border-r border-zinc-200 py-6 px-4 flex flex-col">
+      {/* Navigation */}
+      <nav className="space-y-1 flex-1 overflow-y-auto">
+        {navItems.map((item, index) => (
+          item.hasDropdown ? (
+            <NavDropdown key={index} item={item} activeLink={activeLink} />
+          ) : (
+            <NavLink key={index} item={item} activeLink={activeLink} />
+          )
+        ))}
+      </nav>
 
-			<div className="space-y-4 p-6">
-				<Link
-					className="border-1 border-zinc-400 rounded-2xl p-4 block"
-					to="/marketplace"
-				>
-					<img
-						src="/images/Online_Shopping_Concept__Mobile_Phone_or_Smartphone_with_Cart_an_Stock_Illustration_-_Illustration_of_price__internet__60305985-removebg-preview 1.png"
-						alt=""
-					/>
-					<h5 className="font-medium">Explore Our Marketplace</h5>
-					<p className="text-xs">
-						Buy and sell products and services effortlessly. Connect with
-						trusted sellers and buyers to meet your needs today!
-					</p>
-				</Link>
-				<Link
-					className="border-1 border-zinc-400 rounded-2xl p-4 block"
-					to="/earn/resell"
-				>
-					<img
-						src="/images/Illustration_of_Nigerian_naira_notes_inside_mobile_phone_isolated_on_transparent_background-removebg-preview 1.png"
-						alt=""
-					/>
-					<h5 className="font-medium">Earn By Reselling Products</h5>
-					<p className="text-xs">
-						Choose high-demand products and enjoy attractive commissions
-					</p>
-				</Link>
-			</div>
-
-			{/* 🚧 Coming Soon Modal */}
-			<ComingSoonModal
-				isOpen={comingSoonOpen}
-				onClose={() => setComingSoonOpen(false)}
-			/>
-		</div>
-	);
+      {/* Bottom Actions */}
+      <div className="pt-4 border-t border-zinc-100 space-y-1 mt-4">
+        <NavLink
+          item={{ icon: <Settings size={18} />, label: "Settings", path: "/edit-profile" }}
+          activeLink={activeLink}
+        />
+        <NavLink
+          item={{ icon: <HelpCircle size={18} />, label: "Help Center", path: "/contact" }}
+          activeLink={activeLink}
+        />
+        <button
+          onClick={() => {
+            localStorage.removeItem("auth_token");
+            window.location.href = import.meta.env.VITE_MAIN_SITE_URL || "https://hovertask.com";
+          }}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          <span className="text-sm font-medium">Logout</span>
+        </button>
+      </div>
+    </div>
+  );
 }
 
-function MenuOptionDropdown(props: MenuDropdownProps) {
-	const [isOpen, setIsOpen] = useState(false);
-	const activeLink = useActiveLink();
+// Nav Link Component
+function NavLink({ item, activeLink }: { item: { icon: React.ReactNode; label: string; path: string }; activeLink: string }) {
+  const isActive = activeLink === item.path || (item.path !== "/" && activeLink.startsWith(item.path));
 
-	useEffect(() => {
-		document.body.style.overflowY = isOpen ? "hidden" : "auto";
-	}, [isOpen]);
+  return (
+    <Link
+      to={item.path}
+      className={cn(
+        "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
+        isActive
+          ? "bg-primary text-white shadow-md"
+          : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+      )}
+    >
+      {item.icon}
+      <span>{item.label}</span>
+    </Link>
+  );
+}
 
-	return (
-		<div aria-haspopup="menu" className="relative">
-			<div
-				className={cn("flex items-center w-fit rounded-xl", {
-					"bg-white text-primary": activeLink === props.basePath,
-				})}
-			>
-				<Link
-					to={props.basePath ?? "#"}
-					className={cn("flex items-center gap-2 px-3 py-1.5 w-fit")}
-				>
-					{props.icon} {props.label}
-				</Link>
-				<button
-					type="button"
-					onClick={() => setIsOpen(!isOpen)}
-					className={cn(
-						"flex items-center transition-all active:scale-90 px-2",
-						{
-							"rotate-180": isOpen,
-						},
-					)}
-				>
-					<ChevronDown size={13} />
-				</button>
-			</div>
+// Nav Dropdown Component
+function NavDropdown({ item, activeLink }: { item: { icon: React.ReactNode; label: string; path: string; options: { icon: React.ReactNode; label: string; path: string }[] }; activeLink: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const isParentActive = activeLink.startsWith(item.path);
 
-			{isOpen && (
-				<div
-					className="fixed inset-0"
-					onClick={() => setIsOpen(false)}
-					onKeyDown={() => setIsOpen(false)}
-				/>
-			)}
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className={cn(
+          "w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
+          isParentActive
+            ? "bg-primary/10 text-primary"
+            : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+        )}
+      >
+        <div className="flex items-center gap-3">
+          {item.icon}
+          <span>{item.label}</span>
+        </div>
+        <svg
+          className={cn("w-4 h-4 transition-transform", isOpen && "rotate-180")}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
 
-			<div
-				aria-live="polite"
-				className={cn(
-					"absolute [top:calc(100%+2px)] p-2 rounded-xl bg-white text-black text-xs transition-all [transform-origin:_top] z-10",
-					{
-						"opacity-0 overflow-hidden scale-0": !isOpen,
-					},
-				)}
-			>
-				{props.options.map((option) => (
-					<Link
-						key={option.label}
-						onClick={() => setIsOpen(false)}
-						className={cn("flex items-center gap-3 px-3 py-1.5 rounded-xl", {
-							"bg-primary text-white": option.path === activeLink,
-							"hover:text-primary": option.path !== activeLink,
-						})}
-						to={option.path}
-					>
-						{option.icon} {option.label}
-					</Link>
-				))}
-			</div>
-		</div>
-	);
+      {isOpen && (
+        <div className="mt-1 ml-4 space-y-1 py-2 border-l-2 border-zinc-200 relative z-50">
+          {item.options?.map((option, i) => (
+            <Link
+              key={i}
+              to={option.path}
+              className="flex items-center gap-3 px-4 py-2 text-sm text-zinc-600 hover:text-primary hover:bg-zinc-50 rounded-r-lg transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              {option.icon}
+              <span>{option.label}</span>
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }

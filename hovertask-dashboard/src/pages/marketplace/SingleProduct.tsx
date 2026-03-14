@@ -179,7 +179,7 @@ const handleContactSeller = async () => {
   if (error) return <p className="text-red-500">{error}</p>;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-4 sm:gap-6 max-w-6xl mx-auto p-2 sm:p-4 lg:p-6">
+    <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-4 sm:gap-6 p-2 sm:p-4 lg:p-6 w-full">
       {/* MAIN CONTENT */}
       <div className="bg-white shadow-md px-2 sm:px-4 lg:px-6 py-3 sm:py-5 lg:py-6 space-y-4 sm:space-y-6 rounded-md">
         {product && seller && (

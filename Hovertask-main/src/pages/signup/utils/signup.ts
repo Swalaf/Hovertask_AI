@@ -2,7 +2,8 @@ import type { FieldValues } from "react-hook-form";
 import { toast } from "sonner";
 
 const signup = async (form: FieldValues, callback: () => unknown) => {
-    const API_ENDPOINT = "https://backend.hovertask.com/api/register";
+    const API_BASE_URL = import.meta.env.VITE_API_URL || "https://backend.hovertask.com";
+    const API_ENDPOINT = `${API_BASE_URL}/api/register`;
 
     try {
         const response = await fetch(API_ENDPOINT, {

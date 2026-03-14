@@ -1,7 +1,7 @@
-import { Wallet } from "lucide-react";
+import { Wallet, ArrowUpRight, ArrowDownRight, Clock } from "lucide-react";
 import { Link } from "react-router";
 import { useState } from "react";
-import WithdrawModal from "./WithdrawModal"; // import your modal component
+import WithdrawModal from "./WithdrawModal"; 
 
 interface BalanceBoardProps {
   balance?: number;
@@ -26,54 +26,67 @@ export default function BalanceBoard({
   const handleCloseWithdraw = () => setShowWithdraw(false);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {/* Total Balance */}
       <div className="flex items-center gap-2">
-        <span className="text-[18.66px] font-medium">Total Balance</span>
+        <span className="text-lg font-medium text-zinc-600">Total Balance</span>
       </div>
 
       {/* Balance Amount + Fund / Withdraw Buttons */}
-      <div className="flex items-center gap-12 flex-wrap">
-        <div className="text-[34.67px] font-medium">₦{balance.toLocaleString()}</div>
-        <div className="flex gap-6 text-sm flex-wrap font-medium">
+      <div className="flex items-center gap-6 flex-wrap">
+        <div className="text-4xl font-bold text-zinc-800">
+          ₦{balance.toLocaleString()}
+        </div>
+        <div className="flex gap-3 text-sm font-medium">
           <Link
             to="/fund-wallet"
-            className="flex items-center gap-2 px-[18.5px] py-[14px] text-white bg-primary rounded-full hover:bg-primary/80 transition-colors"
+            className="flex items-center gap-2 px-5 py-2.5 text-white bg-primary rounded-full hover:bg-primary/90 transition-all shadow-md hover:shadow-lg"
           >
             <Wallet size={16} /> Fund
           </Link>
           <Link
             to="/withdraw"
             onClick={handleOpenWithdraw}
-            className="flex items-center gap-2 px-4 py-2 text-primary border border-primary rounded-full transition-colors hover:bg-primary/10"
+            className="flex items-center gap-2 px-4 py-2.5 text-primary border border-primary rounded-full transition-colors hover:bg-primary/10"
           >
-            <Wallet size={16} /> Withdraw
+            Withdraw
           </Link>
         </div>
       </div>
 
       {/* Earned / Pending / Spent Section */}
-      <div className="flex max-sm:flex-col justify-between sm:items-center gap-4 bg-gradient-to-b from-white to-[#DAE2FF] p-8 rounded-2xl">
+      <div className="grid grid-cols-3 gap-4">
         {/* Earned */}
-        <div className="space-y-3 py-2">
-          <p className="text-[13.87px]">Earned</p>
-          <p className="text-[20.8px] font-medium">₦{earned.toLocaleString()}</p>
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-green-50 border border-green-100">
+          <div className="p-2 rounded-lg bg-green-100 text-green-600">
+            <ArrowUpRight size={16} />
+          </div>
+          <div>
+            <p className="text-xs text-green-700 font-medium">Earned</p>
+            <p className="text-lg font-bold text-green-800">₦{earned.toLocaleString()}</p>
+          </div>
         </div>
-
-        <div className="self-stretch border-r border-[0.73px] border-[#B3B3B3]" />
 
         {/* Pending */}
-        <div className="space-y-3 py-2">
-          <p className="text-[13.87px]">Pending</p>
-          <p className="text-[20.8px] font-medium">₦{pending.toLocaleString()}</p>
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-amber-50 border border-amber-100">
+          <div className="p-2 rounded-lg bg-amber-100 text-amber-600">
+            <Clock size={16} />
+          </div>
+          <div>
+            <p className="text-xs text-amber-700 font-medium">Pending</p>
+            <p className="text-lg font-bold text-amber-800">₦{pending.toLocaleString()}</p>
+          </div>
         </div>
 
-        <div className="self-stretch border-r border-[0.73px] border-[#B3B3B3]" />
-
         {/* Spent */}
-        <div className="space-y-3 py-2">
-          <p className="text-[13.87px]">Spent</p>
-          <p className="text-[20.8px] font-medium">₦{spent.toLocaleString()}</p>
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-red-50 border border-red-100">
+          <div className="p-2 rounded-lg bg-red-100 text-red-600">
+            <ArrowDownRight size={16} />
+          </div>
+          <div>
+            <p className="text-xs text-red-700 font-medium">Spent</p>
+            <p className="text-lg font-bold text-red-800">₦{spent.toLocaleString()}</p>
+          </div>
         </div>
       </div>
 

@@ -1,50 +1,44 @@
 import { CircularProgress } from "@heroui/react";
 import { Link } from "react-router";
+import { ShoppingBag, ArrowUpRight } from "lucide-react";
 
 export default function ResellerTaskCard() {
   return (
-    <div className="border-1 border-zinc-300 rounded-2xl p-4 bg-white shadow-sm space-y-2">
-      <div>
-        <div className="flex justify-between gap-4">
-          <div className="text-sm">
-            <p className="font-medium text-primary">
-              Reseller Growth Task
-            </p>
-
-            <p className="text-xs text-zinc-600 leading-tight">
+    <div className="border border-zinc-200 rounded-2xl p-5 bg-white shadow-sm hover:shadow-md transition-all duration-200">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start gap-3">
+          <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+            <ShoppingBag size={20} />
+          </div>
+          <div>
+            <p className="font-semibold text-zinc-800">Reseller Growth Task</p>
+            <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
               Boost your earnings by completing simple reseller milestones.
             </p>
-
-            <p className="mt-1">
-              <span className="font-medium">Task Type:</span>{" "}
-              Resell Products & Earn Commission
-            </p>
           </div>
-
-          <p className="text-lg font-semibold text-primary">₦500 Bonus</p>
         </div>
+        <p className="text-xl font-bold text-primary">₦500 <span className="text-xs font-normal text-zinc-500">Bonus</span></p>
       </div>
 
-      <div className="flex justify-between items-center">
-        <span className="px-2 py-1 rounded-full bg-primary/15 text-primary text-xs font-medium">
-          Active for Resellers
-        </span>
+      <div className="flex items-center justify-between mt-4 pt-4 border-t border-zinc-100">
+        <div className="flex items-center gap-2">
+          <span className="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
+            Active for Resellers
+          </span>
+        </div>
 
         <CircularProgress
           color="primary"
-          formatOptions={{ style: "percent" }}
-          showValueLabel
           size="sm"
-          value={15} // example completion percentage
+          value={15}
+          className="scale-75"
         />
 
         <Link
           to={`/earn/resell`} 
-          className="h-8 w-8 rounded-full inline-flex items-center justify-center border-1 border-primary text-primary transition-colors hover:bg-primary/10"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-primary text-primary text-sm font-medium transition-colors hover:bg-primary hover:text-white"
         >
-          <span style={{ fontSize: 14 }} className="material-icons-outlined">
-            north_east
-          </span>
+          Start <ArrowUpRight size={14} />
         </Link>
       </div>
     </div>

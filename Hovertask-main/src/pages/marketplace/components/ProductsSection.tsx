@@ -36,11 +36,11 @@ const ProductsSection = ({
             <section className="space-y-4">
                 {heading && (
                     <div className="flex items-center justify-between">
-                        <h2>{heading}</h2>
+                        <h2 className="dark:text-white">{heading}</h2>
                     </div>
                 )}
-                <div className="p-4 flex gap-4 rounded-2xl bg-[#EBEFFF]">
-                    <p>Loading products...</p>
+                <div className="p-4 flex gap-4 rounded-2xl bg-[#EBEFFF] dark:bg-slate-800">
+                    <p className="dark:text-slate-300">Loading products...</p>
                 </div>
             </section>
         );
@@ -50,9 +50,9 @@ const ProductsSection = ({
         <section className="space-y-4">
             {heading && (
                 <div className="flex items-center justify-between">
-                    <h2>{heading}</h2>
+                    <h2 className="dark:text-white">{heading}</h2>
                     {link && (
-                        <Link to={link} className="font-light text-base">
+                        <Link to={link} className="font-light text-base dark:text-slate-300">
                             View All
                         </Link>
                     )}
@@ -62,7 +62,7 @@ const ProductsSection = ({
             <div
                 className={`${vertical || "p-4"} ${
                     grid || "h-[254px]"
-                } flex gap-4 bg-[#EBEFFF] rounded-2xl overflow-y-hidden max-w-full no-scrollbar`}
+                } flex gap-4 bg-[#EBEFFF] dark:bg-slate-800 rounded-2xl overflow-y-hidden max-w-full no-scrollbar`}
             >
                 {startComponent && (
                     <div className="h-full w-fit max-md:hidden">
@@ -90,7 +90,7 @@ const ProductsSection = ({
 
             {loadAsyncProducts && (
                 <div className="flex justify-end">
-                    <button className="flex items-center justify-center rounded-full h-[28.92px] border border-base text-base cursor-pointer text-[14.39px] p-[7.2px]">
+                    <button className="flex items-center justify-center rounded-full h-[28.92px] border border-base text-base cursor-pointer text-[14.39px] p-[7.2px] dark:text-white">
                         Load more products <img src={arrow} alt="Arrow" />
                     </button>
                 </div>

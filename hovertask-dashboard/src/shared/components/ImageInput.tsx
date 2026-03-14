@@ -1,4 +1,4 @@
-import { Image, Video } from "lucide-react";
+import { Image, Video, UploadCloud, X } from "lucide-react";
 import {
   type DragEvent,
   type InputHTMLAttributes,
@@ -14,10 +14,11 @@ export default function MediaInput(
     InputHTMLAttributes<HTMLInputElement>,
     "type" | "accept" | "onChange" | "className"
   > & {
-    maxFileSizeMB?: number; // ✅ added
+    maxFileSizeMB?: number;
+    label?: string;
   },
 ) {
-  let { maxLength, maxFileSizeMB = 20, ...rest } = props;
+  let { maxLength, maxFileSizeMB = 20, label, ...rest } = props;
   const [draggedOver, setDraggedOver] = useState(false);
   const [filesLength, setFilesLength] = useState<number>(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -105,8 +106,22 @@ export default function MediaInput(
     setFileType(file.type.startsWith("video") ? "video" : "image");
   }
 
+  function clearPreview() {
+    setPreviewUrl("");
+    setFilesLength(0);
+    setFileType(null);
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
+  }
+
   return (
-    <div className="space-y-1">
+    <div className="space-y-2">
+      {label && (
+        <label className="block text-sm font-semibold text-zinc-700">
+          {label}
+        </label>
+      )}
       <div
         onKeyUp={() => inputRef.current?.click()}
         onClick={() => inputRef.current?.click()}
@@ -114,10 +129,11 @@ export default function MediaInput(
         onDrop={handleDrop}
         onDragLeave={handleDragOut}
         className={cn(
-          "aspect-video bg-zinc-200/50 rounded-lg relative border border-zinc-300 text-sm overflow-hidden cursor-pointer",
-          {
-            "border-dashed border-4": draggedOver,
-          },
+          "relative aspect-video rounded-2xl border-2 border-dashed transition-all duration-300 overflow-hidden cursor-pointer group",
+          draggedOver 
+            ? "border-primary bg-primary/10 scale-[1.02] shadow-lg shadow-primary/20" 
+            : "border-zinc-300 bg-zinc-50 hover:border-zinc-400 hover:bg-zinc-100 hover:shadow-md",
+          filesLength && "border-solid border-zinc-200 bg-white"
         )}
       >
         <input
@@ -125,51 +141,89 @@ export default function MediaInput(
           onChange={handleChange}
           type="file"
           accept="image/*,video/*"
-          name={fileType === "video" ? "video_path" : "file_path"} //  dynamic name
-          className="opacity-0"
+          name={fileType === "video" ? "video_path" : "file_path"}
+          className="opacity-0 absolute inset-0 w-full h-full cursor-pointer z-20"
           {...rest}
           multiple={maxLength ? maxLength > 1 : false}
         />
 
+        {/* Upload Content */}
         <div
           className={cn(
-            "absolute inset-0 flex items-center justify-center flex-col gap-2 text-center z-10 bg-white/50",
-            {
-              hidden: !!filesLength,
-            },
+            "absolute inset-0 flex items-center justify-center flex-col gap-3 z-10 transition-all duration-300",
+            filesLength ? "opacity-0 pointer-events-none" : "opacity-100"
           )}
         >
-          {draggedOver ? (
-            <p>Drop it like it's hot 🔥</p>
-          ) : (
-            <>
-              <Image />
-              <Video />
-              <span>Click or Drag & Drop (Image / Video)</span>
-            </>
-          )}
+          {/* Animated icon container */}
+          <div className={cn(
+            "w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300",
+            draggedOver 
+              ? "bg-primary/20 scale-110" 
+              : "bg-zinc-200 group-hover:bg-zinc-300 group-hover:scale-105"
+          )}>
+            {draggedOver ? (
+              <UploadCloud className="w-8 h-8 text-primary animate-bounce" />
+            ) : (
+              <>
+                <Image className="w-5 h-5 text-zinc-400" />
+                <Video className="w-5 h-5 text-zinc-400" />
+              </>
+            )}
+          </div>
+          
+          <div className="text-center">
+            <p className="text-sm font-medium text-zinc-700">
+              {draggedOver ? "Drop your files here" : "Click or drag files to upload"}
+            </p>
+            <p className="text-xs text-zinc-500 mt-1">
+              Supports images and videos up to {maxFileSizeMB}MB
+            </p>
+          </div>
         </div>
 
-        {previewUrl &&
-          (fileType === "video" ? (
-            <video
-              src={previewUrl}
-              controls
-              className="max-h-full max-w-full block mx-auto"
-            />
-          ) : (
-            <img
-              src={previewUrl}
-              className="max-h-full max-w-full block mx-auto object-contain"
-              alt=""
-            />
-          ))}
+        {/* Preview Content */}
+        {previewUrl && (
+          <div className="absolute inset-0 flex items-center justify-center bg-zinc-50 animate-fadeIn">
+            {fileType === "video" ? (
+              <video
+                src={previewUrl}
+                controls
+                className="max-h-full max-w-full object-contain"
+              />
+            ) : (
+              <img
+                src={previewUrl}
+                className="max-h-full max-w-full object-contain"
+                alt="Preview"
+              />
+            )}
+            
+            {/* Clear button */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                clearPreview();
+              }}
+              className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center text-zinc-500 hover:text-red-500 hover:scale-110 transition-all duration-200 z-20"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* ✅ Display upload limits */}
-      <p className="text-xs text-gray-500 text-center">
-        Maximum {maxLength} file(s), up to {maxFileSizeMB} MB each
-      </p>
+      {/* Upload limits */}
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-zinc-500">
+          Maximum {maxLength} file(s), up to {maxFileSizeMB} MB each
+        </p>
+        {filesLength > 0 && (
+          <span className="text-xs font-medium text-primary">
+            {filesLength} file(s) selected
+          </span>
+        )}
+      </div>
     </div>
   );
 }

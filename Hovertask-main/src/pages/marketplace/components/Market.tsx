@@ -20,11 +20,11 @@ const Market = () => {
             {location.pathname.includes("dashboard") && (
                 <section className="flex items-center gap-4">
                     <div>
-                        <BsArrowLeft size={30} />
+                        <BsArrowLeft size={30} className="dark:text-white" />
                     </div>
                     <div>
-                        <h2 className="text-2xl">Welcome to Hovertask Marketplace</h2>
-                        <p className="text-xs text-[#000000BF]">
+                        <h2 className="text-2xl dark:text-white">Welcome to Hovertask Marketplace</h2>
+                        <p className="text-xs text-[#000000BF] dark:text-slate-400">
                             Your one-stop platform to buy, sell, and earn effortlessly.
                         </p>
                     </div>
@@ -34,14 +34,12 @@ const Market = () => {
             <Hero />
 
             <div className="my-6">
-                <p className="font-light text-[#000000BF]">
+                <p className="font-light text-[#000000BF] dark:text-slate-400">
                     Discover trending products and services or showcase yours to thousands of buyers daily.
                 </p>
             </div>
 
             <TrendingProductsAndServices products={products} loading={loading}/>
-
-            <BlackFridaySales products={products} loading={loading} />
 
             <BannersCarousel />
 
@@ -49,40 +47,9 @@ const Market = () => {
 
             <TrendingWomensWear products={products} loading={loading} />
 
-            <BlackFridaySales products={products} loading={loading} />
-
             <HottestDeals products={products} loading={loading}/>
-
-            <BannersCarousel />
         </>
     );
 };
 
 export default Market;
-
-
-const BlackFridaySales = ({
-    products,
-    loading
-}: {
-    products: NormalizedProduct[];
-    loading: boolean;
-}) => {
-    return (
-        <section className="grid [grid-template-columns:_auto_1fr] items-center gap-6 overflow-auto no-scrollbar">
-            <div className="w-[192px]">
-                <img
-                    src="/assets/images/Group 1000004394.png"
-                    alt="Black Friday Banner"
-                    className="block w-fit"
-                />
-            </div>
-
-            {loading ? (
-                <p>Loading products...</p>
-            ) : (
-                <ProductsSection products={products} />
-            )}
-        </section>
-    );
-};

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { Megaphone } from "lucide-react";
 import type { Advert } from "../../../../../types.d";
 import AdvertCard from "../../../../shared/components/AdvertCard";
 import apiEndpointBaseURL from "../../../../utils/apiEndpointBaseURL";
@@ -60,18 +61,21 @@ export default function AvailableJobs({ filter, mode }: AvailableJobsProps) {
     .slice(0, mode === "preview" ? 5 : undefined);
 
   return (
-    <div className="space-y-3">
-      <h2 className="text-[21.35px] font-semibold capitalize">
-        {filter ? `Adverts for ${filter}` : "New Available Adverts"}
-      </h2>
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <Megaphone size={20} className="text-primary" />
+        <h2 className="text-lg font-semibold text-zinc-800 capitalize">
+          {filter ? `Adverts for ${filter}` : "New Available Adverts"}
+        </h2>
+      </div>
 
-      <div className="space-y-4">
+      <div className="grid gap-4">
         {loading ? (
-          <p className="text-gray-500 text-sm">Loading adverts...</p>
+          <p className="text-zinc-500 text-sm">Loading adverts...</p>
         ) : filteredAdverts?.length ? (
           filteredAdverts.map((advert) => <AdvertCard {...advert} key={advert.id} />)
         ) : (
-          <p className="text-gray-500 text-sm">
+          <p className="text-zinc-500 text-sm">
             No adverts available for {filter || "this category"} yet.
           </p>
         )}
