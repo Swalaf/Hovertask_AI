@@ -7,7 +7,7 @@ export default function ProductPerformancePage() {
 		<div className="mobile:grid grid-cols-[1fr_200px] min-h-full">
 			<div className="bg-white shadow p-4 space-y-8">
 				<div className="flex gap-4 flex-1">
-					<Link to="/marketplace">
+					<Link to="/dashboard/marketplace">
 						<ArrowLeft />
 					</Link>
 

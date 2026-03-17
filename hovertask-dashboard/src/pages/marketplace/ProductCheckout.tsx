@@ -18,7 +18,7 @@ export default function ProductCheckoutPage() {
 
 	if (!product) {
 		toast.error("This item has not yet been added to cart");
-		navigate(`/marketplace/p/${id}`);
+		navigate(`/dashboard/marketplace/p/${id}`);
 		return null;
 	}
 
@@ -26,7 +26,7 @@ export default function ProductCheckoutPage() {
 		<div className="mobile:grid grid-cols-[1fr_200px] gap-4 min-h-full">
 			<div className="px-4 py-8 space-y-8 overflow-hidden">
 				<div className="flex gap-4 flex-1">
-					<Link to="/marketplace/cart">
+					<Link to="/dashboard/marketplace/cart">
 						<ArrowLeft />
 					</Link>
 
@@ -57,8 +57,8 @@ export default function ProductCheckoutPage() {
 									₦
 									{(product.discount
 										? (product.price -
-												(product.price * product.discount) / 100) *
-											product.cartQuantity
+											(product.price * product.discount) / 100) *
+										product.cartQuantity
 										: product.cartQuantity * product.price
 									).toFixed(2)}
 								</span>
@@ -79,9 +79,9 @@ export default function ProductCheckoutPage() {
 								₦
 								{product.discount
 									? (
-											getPercentageValue(product.price, product.discount) *
-											product.cartQuantity
-										).toFixed(2)
+										getPercentageValue(product.price, product.discount) *
+										product.cartQuantity
+									).toFixed(2)
 									: (product.price * product.cartQuantity).toFixed(2)}
 							</span>
 						</p>
@@ -117,8 +117,8 @@ function CartItemCard(props: CartProduct) {
 							₦
 							{props.discount
 								? Number(
-										getPercentageValue(props.price, props.discount).toFixed(2),
-									).toLocaleString()
+									getPercentageValue(props.price, props.discount).toFixed(2),
+								).toLocaleString()
 								: props.price.toLocaleString()}
 						</p>
 					</div>

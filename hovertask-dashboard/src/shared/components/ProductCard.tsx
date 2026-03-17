@@ -91,7 +91,7 @@ export default function ProductCard(props: ProductCardProps) {
 						{props.discount && props.discount > 0 && (
 							<p className="text-[9.4px] text-[#77777A] line-through">
 								₦{props.price.toLocaleString()}
-								
+
 							</p>
 						)}
 						<p className="text-[11.28px]">
@@ -110,43 +110,43 @@ export default function ProductCard(props: ProductCardProps) {
 					</div>
 				</div>
 				{/* Reseller Banner */}
-{props.resell_budget && props.resell_budget >= 500 && (
-	<div className="bg-gradient-to-r from-purple-600 to-pink-500 text-white text-[9.8px] rounded-lg p-2 shadow-md">
-		<p className="font-semibold leading-tight">
-			Resell & Earn up to{" "}
-			<span className="font-bold">
-				₦500
-			</span>
-		</p>
-		<p className="opacity-90">
-			Perfect for side hustle sellers — high margins & fast turnover!
-		</p>
-	</div>
-)}
+				{props.resell_budget && props.resell_budget >= 500 && (
+					<div className="bg-gradient-to-r from-purple-600 to-pink-500 text-white text-[9.8px] rounded-lg p-2 shadow-md">
+						<p className="font-semibold leading-tight">
+							Resell & Earn up to{" "}
+							<span className="font-bold">
+								₦500
+							</span>
+						</p>
+						<p className="opacity-90">
+							Perfect for side hustle sellers — high margins & fast turnover!
+						</p>
+					</div>
+				)}
 
 				<div className="flex items-center justify-between gap-2">
-				    <Link
+					<Link
 						to={props.linkOverrideURL ?? `/marketplace/p/${props.id}`}
 						onClick={async (e) => {
 							if (isProcessing) return;
 							// Always prevent default so we can decide programmatically whether to navigate
 							e.preventDefault();
-									let cancel = false;
-									if (props.onButtonClickAction) {
-										try {
-											setIsProcessing(true);
-											const res = props.onButtonClickAction();
-											const value = res instanceof Promise ? await res : res;
-											// if handler returns true -> cancel navigation
-											if (value === true) cancel = true;
-										} catch (err) {
-											console.error("onButtonClickAction error:", err);
-										} finally {
-											setIsProcessing(false);
-										}
-									}
+							let cancel = false;
+							if (props.onButtonClickAction) {
+								try {
+									setIsProcessing(true);
+									const res = props.onButtonClickAction();
+									const value = res instanceof Promise ? await res : res;
+									// if handler returns true -> cancel navigation
+									if (value === true) cancel = true;
+								} catch (err) {
+									console.error("onButtonClickAction error:", err);
+								} finally {
+									setIsProcessing(false);
+								}
+							}
 							if (!cancel) {
-								navigate(props.linkOverrideURL ?? `/marketplace/p/${props.id}`);
+								navigate(props.linkOverrideURL ?? `/dashboard/marketplace/p/${props.id}`);
 							}
 						}}
 						className={cn(
@@ -157,17 +157,17 @@ export default function ProductCard(props: ProductCardProps) {
 							},
 						)}
 					>
-								{isProcessing ? (
-									<>
-										<Loading />
-										<span className="sr-only">Loading</span>
-									</>
-								) : (
-									<>
-										<ShoppingBag size={12} />
-										{props.buttonText ?? "View Product"}
-									</>
-								)}
+						{isProcessing ? (
+							<>
+								<Loading />
+								<span className="sr-only">Loading</span>
+							</>
+						) : (
+							<>
+								<ShoppingBag size={12} />
+								{props.buttonText ?? "View Product"}
+							</>
+						)}
 					</Link>
 					<Link
 						to={props.linkOverrideURL ?? `/marketplace/p/${props.id}`}

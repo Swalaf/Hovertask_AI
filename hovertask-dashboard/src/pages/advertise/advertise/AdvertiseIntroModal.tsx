@@ -10,7 +10,7 @@ import apiEndpointBaseURL from "../../../utils/apiEndpointBaseURL";
 import getAuthorization from "../../../utils/getAuthorization";
 
 export default function AdvertiseIntroModal() {
-  const { isOpen, onOpen, onOpenChange } = useDisclosure(); 
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [userBalance, setUserBalance] = useState<number | null>(null);
 
 
@@ -19,22 +19,22 @@ export default function AdvertiseIntroModal() {
     onOpen();
 
     // Example: fetch balance from API (replace URL with your backend route)
-   const fetchBalance = async () => {
-  try {
-    const res = await fetch(`${apiEndpointBaseURL}/wallet/balance`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: getAuthorization(), // ✅ add auth header
-      },
-    });
+    const fetchBalance = async () => {
+      try {
+        const res = await fetch(`${apiEndpointBaseURL}/wallet/balance`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: getAuthorization(), // ✅ add auth header
+          },
+        });
 
-    const data = await res.json();
-    setUserBalance(data.balance); // 👈 backend should return { balance: 2500 }
-  } catch (error) {
-    console.error("Failed to fetch balance:", error);
-  }
-};
+        const data = await res.json();
+        setUserBalance(data.balance); // 👈 backend should return { balance: 2500 }
+      } catch (error) {
+        console.error("Failed to fetch balance:", error);
+      }
+    };
 
 
     fetchBalance();
@@ -72,7 +72,7 @@ export default function AdvertiseIntroModal() {
                 💰 You still have a balance of{" "}
                 <span className="font-semibold text-primary">
                   ₦{userBalance.toLocaleString()}
-                </span>.  
+                </span>.
                 Create a task now to start earning!
               </div>
             )}
@@ -81,7 +81,7 @@ export default function AdvertiseIntroModal() {
             <div className="space-y-4">
               {/* ✅ Button 1: Link to product listing page */}
               <Link
-                to="/marketplace/list-product?type=resell"
+                to="/dashboard/marketplace/list-product?type=resell"
                 className="block w-full border border-primary text-primary rounded-2xl py-4 text-sm hover:bg-primary/5 transition"
               >
                 Advertise on the Hovertask Market <br />

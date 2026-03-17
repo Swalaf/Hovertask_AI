@@ -9,11 +9,10 @@ const ChatMessage = ({
 	<div className={`flex ${isUser ? "justify-end" : "justify-start"} mb-4`}>
 		{!isUser && <User />}
 		<div
-			className={`max-w-sm px-4 py-2 rounded-xl text-sm ${
-				isUser
+			className={`max-w-sm px-4 py-2 rounded-xl text-sm ${isUser
 					? "bg-primary text-white rounded-br-none"
 					: "bg-gray-100 text-gray-800 rounded-bl-none"
-			}`}
+				}`}
 		>
 			{message}
 			<div className="text-[10px] text-gray-400 mt-1 text-right">{time}</div>
@@ -27,7 +26,7 @@ export default function SellerChat() {
 		<div className="mobile:grid grid-cols-[1fr_200px] gap-4 min-h-full">
 			<div className="bg-white shadow-md px-4 py-8 space-y-8 overflow-hidden">
 				<div className="flex gap-4 flex-1">
-					<Link to="/marketplace">
+					<Link to="/dashboard/marketplace">
 						<ArrowLeft />
 					</Link>
 

@@ -80,7 +80,7 @@ function AppAuthWrapper({ children }: { children: any }) {
   // Load user once
   useEffect(() => {
     let isMounted = true;
-    
+
     // Timeout fallback - ensure loading completes after 5 seconds
     const timeoutId = setTimeout(() => {
       if (isMounted && loading) {
@@ -134,7 +134,7 @@ function AppAuthWrapper({ children }: { children: any }) {
   // Paystack callback stays open
   if (location.pathname === "/payment/callback") return children;
 
-  
+
   // User NOT authenticated
   if (!user) {
     const params = new URLSearchParams(location.search);
@@ -151,7 +151,7 @@ function AppAuthWrapper({ children }: { children: any }) {
     }
 
     // Default redirect to Sign In - use main website in dev
-    const redirectUrl = import.meta.env.DEV 
+    const redirectUrl = import.meta.env.DEV
       ? "http://localhost:5174/signin"
       : "https://hovertask.com/signin";
     window.location.href = redirectUrl;
@@ -171,77 +171,79 @@ export default function App() {
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route element={<RootLayout />} path="*">
-                <Route path="logout" element={<Logout />} />
-                <Route index element={<Dashboard />} />
+                  <Route path="logout" element={<Logout />} />
+                  <Route index element={<Dashboard />} />
 
-                <Route path="become-a-member" element={<MembershipPage />} />
-                <Route path="choose-online-payment-method" element={<ChoosePaymentMethodPage />} />
-                <Route path="fund-wallet" element={<FundWalletPage />} />
-                <Route path="edit-profile" element={<EditProfilePage />} />
-                <Route path="update-bank-details" element={<UpdateBankDetailsPage />} />
-                <Route path="transactions-history" element={<TransactionsHistoryPage />} />
-                <Route path="transactions-history/:id" element={<SingleTransactionPage />} />
-                <Route path="change-password" element={<ChangePasswordPage />} />
-                <Route path="update-location" element={<UpdateLocationPage />} />
-                <Route path="notifications" element={<NotificationsPage />} />
-                <Route path="terms" element={<TermsPage />} />
-                <Route path="privacy-policy" element={<PrivacyPolicyPage />} />
+                  <Route path="become-a-member" element={<MembershipPage />} />
+                  <Route path="choose-online-payment-method" element={<ChoosePaymentMethodPage />} />
+                  <Route path="fund-wallet" element={<FundWalletPage />} />
+                  <Route path="edit-profile" element={<EditProfilePage />} />
+                  <Route path="update-bank-details" element={<UpdateBankDetailsPage />} />
+                  <Route path="transactions-history" element={<TransactionsHistoryPage />} />
+                  <Route path="transactions-history/:id" element={<SingleTransactionPage />} />
+                  <Route path="change-password" element={<ChangePasswordPage />} />
+                  <Route path="update-location" element={<UpdateLocationPage />} />
+                  <Route path="notifications" element={<NotificationsPage />} />
+                  <Route path="terms" element={<TermsPage />} />
+                  <Route path="privacy-policy" element={<PrivacyPolicyPage />} />
 
-                {/* Earn */}
-                <Route path="earn" element={<Earn />} />
-                <Route path="earn/tasks" element={<Tasks />} />
-                <Route path="earn/tasks-history" element={<TasksHistory />} />
-                <Route path="earn/tasks/:id" element={<TaskInfoPage />} />
-                <Route path="earn/adverts" element={<AdvertsPage />} />
-                <Route path="earn/adverts/:id" element={<AdvertsInfoPage />} />
-                <Route path="earn/resell" element={<ResellPage />} />
-                <Route path="earn/connect-accounts" element={<ConnectAccountsPage />} />
+                  {/* Earn */}
+                  <Route path="earn" element={<Earn />} />
+                  <Route path="earn/tasks" element={<Tasks />} />
+                  <Route path="earn/tasks-history" element={<TasksHistory />} />
+                  <Route path="earn/tasks/:id" element={<TaskInfoPage />} />
+                  <Route path="earn/adverts" element={<AdvertsPage />} />
+                  <Route path="earn/adverts/:id" element={<AdvertsInfoPage />} />
+                  <Route path="earn/resell" element={<ResellPage />} />
+                  <Route path="earn/connect-accounts" element={<ConnectAccountsPage />} />
 
-                {/* Marketplace */}
-                <Route path="marketplace" element={<MarketplacePage />} />
-                <Route path="marketplace/list-product" element={<ListProductPage />} />
-                <Route path="marketplace/c/:category" element={<CategoryPage />} />
-                <Route path="marketplace/p/:id" element={<SingleProductPage />} />
-                <Route path="marketplace/s/:id" element={<SellerPage />} />
-                <Route path="marketplace/cart" element={<CartPage />} />
-                <Route path="marketplace/chat" element={<SellerChat />} />
-                <Route path="marketplace/checkout/:id" element={<ProductCheckoutPage />} />
-                <Route path="marketplace/listings" element={<ProductDashboardPage />} />
-                <Route path="marketplace/performance" element={<ProductPerformancePage />} />
+                  {/* Marketplace */}
+                  <Route path="dashboard/marketplace" element={<MarketplacePage />} />
+                  <Route path="dashboard/marketplace/list-product" element={<ListProductPage />} />
+                  <Route path="dashboard/marketplace/edit-product/:id" element={<ListProductPage />} />
+                  <Route path="dashboard/marketplace/featured" element={<CategoryPage />} />
+                  <Route path="dashboard/marketplace/c/:category" element={<CategoryPage />} />
+                  <Route path="dashboard/marketplace/p/:id" element={<SingleProductPage />} />
+                  <Route path="dashboard/marketplace/s/:id" element={<SellerPage />} />
+                  <Route path="dashboard/marketplace/cart" element={<CartPage />} />
+                  <Route path="dashboard/marketplace/chat" element={<SellerChat />} />
+                  <Route path="dashboard/marketplace/checkout/:id" element={<ProductCheckoutPage />} />
+                  <Route path="dashboard/marketplace/listings" element={<ProductDashboardPage />} />
+                  <Route path="dashboard/marketplace/performance" element={<ProductPerformancePage />} />
 
-                {/* Advertise */}
-                <Route path="advertise" element={<AdvertisePage />} />
-                <Route path="advertise/post-advert" element={<PostAdvertPage />} />
-                <Route path="advertise/engagement-tasks" element={<EngagementTasks />} />
-                <Route path="advertise/advert-tasks-history" element={<AdvertTasksHistoryPage />} />
-                <Route path="advertise/advert-task-performance/:id" element={<AdvertTaskPerformancePage />} />
-                <Route path="advertise/engagement-tasks-history" element={<EngagementTasksHistoryPage />} />
-                <Route path="advertise/engagement-task-performance/:id" element={<EngagementTaskPerformancePage />} />
+                  {/* Advertise */}
+                  <Route path="advertise" element={<AdvertisePage />} />
+                  <Route path="advertise/post-advert" element={<PostAdvertPage />} />
+                  <Route path="advertise/engagement-tasks" element={<EngagementTasks />} />
+                  <Route path="advertise/advert-tasks-history" element={<AdvertTasksHistoryPage />} />
+                  <Route path="advertise/advert-task-performance/:id" element={<AdvertTaskPerformancePage />} />
+                  <Route path="advertise/engagement-tasks-history" element={<EngagementTasksHistoryPage />} />
+                  <Route path="advertise/engagement-task-performance/:id" element={<EngagementTaskPerformancePage />} />
 
-                {/* Add Me Up */}
-                <Route path="add-me-up" element={<AddMeUp />} />
-                <Route path="add-me-up/profile" element={<Profile />} />
-                <Route path="add-me-up/list-profile" element={<ListProfile />} />
-                <Route path="add-me-up/list-profile-form" element={<ListProfileForm />} />
-                <Route path="add-me-up/points" element={<PointsPage />} />
+                  {/* Add Me Up */}
+                  <Route path="add-me-up" element={<AddMeUp />} />
+                  <Route path="add-me-up/profile" element={<Profile />} />
+                  <Route path="add-me-up/list-profile" element={<ListProfile />} />
+                  <Route path="add-me-up/list-profile-form" element={<ListProfileForm />} />
+                  <Route path="add-me-up/points" element={<PointsPage />} />
 
-                {/* Refer */}
-                <Route path="refer-and-earn" element={<ReferAndEarnPage />} />
+                  {/* Refer */}
+                  <Route path="refer-and-earn" element={<ReferAndEarnPage />} />
 
-                {/* KYC */}
-                <Route path="kyc" element={<KycVerification />} />
-                <Route path="kyc/start" element={<KycVerificationForm />} />
+                  {/* KYC */}
+                  <Route path="kyc" element={<KycVerification />} />
+                  <Route path="kyc/start" element={<KycVerificationForm />} />
 
-                {/* Payment callback */}
-                <Route path="payment/callback" element={<PaymentCallbackPage />} />
+                  {/* Payment callback */}
+                  <Route path="payment/callback" element={<PaymentCallbackPage />} />
 
-                {/* Verify */}
-                <Route path="VerifyEmail" element={<VerifyEmailPage />} />
+                  {/* Verify */}
+                  <Route path="VerifyEmail" element={<VerifyEmailPage />} />
 
-                {/* Reseller conversions */}
-                <Route path="reseller-conversion" element={<ResellerConversionPage />} />
-              </Route>
-            </Routes>
+                  {/* Reseller conversions */}
+                  <Route path="reseller-conversion" element={<ResellerConversionPage />} />
+                </Route>
+              </Routes>
             </Suspense>
           </AppAuthWrapper>
         </BrowserRouter>

@@ -69,7 +69,7 @@ const ProductsSection = (props: ProductSectionProps) => {
 							key={product.id}
 							{...product}
 							responsive={useResponsiveCard}
-							linkOverrideURL={`/marketplace/p/${product.id}`}
+							linkOverrideURL={`/dashboard/marketplace/p/${product.id}`}
 						/>
 					))}
 				</div>

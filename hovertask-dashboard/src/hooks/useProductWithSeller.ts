@@ -59,7 +59,7 @@ export default function useProductWithSeller(id: string) {
 
         if (!productData.success) {
           toast.error("This product does not exist or was removed.");
-          navigate("/marketplace");
+          navigate("/dashboard/marketplace");
           return;
         }
 
@@ -75,7 +75,7 @@ export default function useProductWithSeller(id: string) {
         console.error(err);
         setError("Failed to load product details.");
         toast.error("We couldn't complete this request at the moment.");
-        navigate("/marketplace");
+        navigate("/dashboard/marketplace");
       } finally {
         setLoading(false);
       }

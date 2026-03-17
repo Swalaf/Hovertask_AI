@@ -1,0 +1,43 @@
+<?php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Task extends Model
+{
+    protected $table = 'tasks';
+
+    protected $fillable = ['user_id', 'title', 'description', 'platforms', 'task_amount', 'task_type', 'task_count_total', 'task_count_remaining', 'priority', 'start_date', 'due_date', 'gender', 'location', 'no_of_participants', 'payment_per_task', 'religion', 'social_media_url', 'type_of_comment', 'status', 'completed', 'category', 'payment_method', 'payment_gateway',
+        // Task category (engagement, freelance, job)
+        'task_category',
+        // Freelance task fields
+        'skills_required', 'pricing_type', 'hourly_rate', 'fixed_price', 'experience_level', 'project_duration',
+        // Job task fields
+        'job_type', 'salary_range_min', 'salary_range_max', 'job_location', 'qualifications_required', 'application_deadline', 'company_name', 'job_benefits',
+        // Existing
+        'advert_id'];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    protected $casts = [
+        'platforms' => 'array',
+    ];
+
+    public function advert()
+    {
+        return $this->belongsTo(Advertise::class, 'advert_id');
+    }
+
+    public function advertiseImages()
+    {
+        return $this->hasMany(AdvertiseImages::class);
+    }
+
+    public function completedTasks()
+    {
+        return $this->hasMany(CompletedTask::class, 'task_id');
+    }
+}

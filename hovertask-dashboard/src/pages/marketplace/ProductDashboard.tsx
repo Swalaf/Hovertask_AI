@@ -68,13 +68,13 @@ function ProductDashboard() {
         </div>
         <div className="flex gap-3">
           <Link
-            to="/marketplace/performance"
+            to="/dashboard/marketplace/performance"
             className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
           >
             <BarChart3 size={16} /> View Analytics
           </Link>
           <Link
-            to="/marketplace/list-product?type=list-product"
+            to="/dashboard/marketplace/list-product?type=list-product"
             className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors"
           >
             <Plus size={16} /> New Listing
@@ -84,7 +84,7 @@ function ProductDashboard() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard 
+        <StatCard
           icon={<Eye className="text-blue-600" />}
           label="Total Views"
           value={stats.totalViews}
@@ -92,21 +92,21 @@ function ProductDashboard() {
           positive
           color="bg-blue-50"
         />
-        <StatCard 
+        <StatCard
           icon={<Users className="text-green-600" />}
           label="Active Listings"
           value={stats.activeListings}
           change={`of ${products.length}`}
           color="bg-green-50"
         />
-        <StatCard 
+        <StatCard
           icon={<Star className="text-amber-600" />}
           label="Featured"
           value={stats.featuredListings}
           change={stats.featuredListings > 0 ? "Active" : "None"}
           color="bg-amber-50"
         />
-        <StatCard 
+        <StatCard
           icon={<DollarSign className="text-purple-600" />}
           label="Est. Earnings"
           value={stats.totalEarnings}
@@ -121,14 +121,14 @@ function ProductDashboard() {
           icon={<ShoppingBag className="text-blue-600" />}
           title="List New Product"
           description="Add a product to sell"
-          link="/marketplace/list-product?type=list-product"
+          link="/dashboard/marketplace/list-product?type=list-product"
           color="from-blue-50 to-blue-100"
         />
         <QuickActionCard
           icon={<Crown className="text-amber-600" />}
           title="Go Featured"
           description="Boost your visibility"
-          link="/marketplace/featured"
+          link="/dashboard/marketplace/featured"
           color="from-amber-50 to-amber-100"
         />
         <QuickActionCard
@@ -148,7 +148,7 @@ function ProductDashboard() {
         <div className="p-4 sm:p-6 space-y-6">
           {/* Summary with Filter */}
           <ProductStatusSummary products={products} filter={filter} setFilter={setFilter} />
-          
+
           {/* Product Listings */}
           <ProductListings products={products} filter={filter} />
         </div>

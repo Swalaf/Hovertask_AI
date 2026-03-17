@@ -1,12 +1,13 @@
 import { toast } from "sonner";
 import getAuthorization from "../../utils/getAuthorization";
+import apiEndpointBaseURL from "../../utils/apiEndpointBaseURL";
 
 export default async function verifyFundWalletTransaction(
   transactionId: string,
 ): Promise<any> {
   try {
     const res = await fetch(
-      `https://backend.hovertask.com/api/wallet/verify-payment/${encodeURIComponent(transactionId)}`,
+      `${apiEndpointBaseURL}/wallet/verify-payment/${encodeURIComponent(transactionId)}`,
       {
         method: "GET", // explicit
         headers: {

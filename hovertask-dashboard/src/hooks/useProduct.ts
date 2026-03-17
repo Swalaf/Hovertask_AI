@@ -35,7 +35,7 @@ export default function useProduct(id: string): Product | null {
 						toast.error(
 							"We couldn't complete this request at the moment. Try again soon",
 						);
-						navigate("/marketplace");
+						navigate("/dashboard/marketplace");
 						return;
 					}
 
@@ -44,7 +44,7 @@ export default function useProduct(id: string): Product | null {
 						toast.error(
 							"The product you were looking for does not exist, or has been removed.",
 						);
-						navigate("/marketplace");
+						navigate("/dashboard/marketplace");
 						return;
 					}
 
@@ -54,7 +54,7 @@ export default function useProduct(id: string): Product | null {
 					toast.error(
 						"We couldn't complete this request at the moment. Try again soon",
 					);
-					navigate("/marketplace");
+					navigate("/dashboard/marketplace");
 				}
 			}
 

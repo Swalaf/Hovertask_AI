@@ -1,10 +1,10 @@
 import { useSelector } from "react-redux";
 import type { AuthUserDTO } from "../../../types";
-import { 
-  Wallet, 
-  TrendingUp, 
-  Users, 
-  ShoppingBag, 
+import {
+  Wallet,
+  TrendingUp,
+  Users,
+  ShoppingBag,
   Megaphone,
   ArrowRight,
   Star,
@@ -62,7 +62,7 @@ export default function Dashboard() {
       <section className="bg-white rounded-2xl p-6 shadow-sm border border-zinc-100">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-zinc-800">Marketplace</h2>
-          <Link to="/marketplace" className="text-primary font-medium flex items-center gap-1 hover:gap-2 transition-all">
+          <Link to="/dashboard/marketplace" className="text-primary font-medium flex items-center gap-1 hover:gap-2 transition-all">
             Explore <ArrowRight size={16} />
           </Link>
         </div>
@@ -86,13 +86,13 @@ function HeroSection({ user }: { user: AuthUserDTO }) {
           </p>
         </div>
         <div className="flex gap-3">
-          <Link 
+          <Link
             to="/advertise/post-advert"
             className="flex items-center gap-2 bg-white text-primary px-6 py-3 rounded-xl font-semibold hover:bg-white/90 transition-colors"
           >
             <Plus size={20} /> Create Ad
           </Link>
-          <Link 
+          <Link
             to="/earn/tasks"
             className="flex items-center gap-2 bg-white/20 text-white px-6 py-3 rounded-xl font-semibold hover:bg-white/30 transition-colors"
           >
@@ -144,7 +144,7 @@ function StatsGrid({ user }: { user: AuthUserDTO }) {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       {stats.map((stat, index) => (
-        <div 
+        <div
           key={index}
           className="bg-white rounded-2xl p-5 shadow-sm border border-zinc-100 hover:shadow-md transition-shadow"
         >
@@ -166,7 +166,7 @@ function QuickActions() {
   const actions = [
     { label: "Post Ad", icon: <Megaphone size={20} />, path: "/advertise/post-advert", color: "bg-blue-500" },
     { label: "Find Tasks", icon: <CheckCircle2 size={20} />, path: "/earn/tasks", color: "bg-green-500" },
-    { label: "Browse Market", icon: <ShoppingBag size={20} />, path: "/marketplace", color: "bg-purple-500" },
+    { label: "Browse Market", icon: <ShoppingBag size={20} />, path: "/dashboard/marketplace", color: "bg-purple-500" },
     { label: "Resell Products", icon: <TrendingUp size={20} />, path: "/earn/resell", color: "bg-amber-500" },
     { label: "Fund Wallet", icon: <Wallet size={20} />, path: "/fund-wallet", color: "bg-cyan-500" },
     { label: "Refer Friends", icon: <Users size={20} />, path: "/refer-and-earn", color: "bg-pink-500" },

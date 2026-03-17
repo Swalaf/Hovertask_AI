@@ -29,7 +29,7 @@ export default function MarketplaceAside({
 				</p>
 				<div className="space-y-2">
 					<Link
-						to="/marketplace/list-product?type=list-product"
+						to="/dashboard/marketplace/list-product?type=list-product"
 						className="flex items-center justify-between bg-white text-primary px-4 py-2.5 rounded-xl font-medium text-sm hover:bg-white/90 transition-colors"
 					>
 						<span className="flex items-center gap-2">
@@ -38,7 +38,7 @@ export default function MarketplaceAside({
 						<ArrowRight size={16} />
 					</Link>
 					<Link
-						to="/marketplace/list-product?type=resell"
+						to="/dashboard/marketplace/list-product?type=resell"
 						className="flex items-center justify-between bg-white/20 text-white px-4 py-2.5 rounded-xl font-medium text-sm hover:bg-white/30 transition-colors"
 					>
 						<span className="flex items-center gap-2">
@@ -59,19 +59,19 @@ export default function MarketplaceAside({
 						</h3>
 						<span className="text-xs text-slate-500">{categories?.length || 0} categories</span>
 					</div>
-					
+
 					{/* Quick Category Links */}
 					<div className="grid grid-cols-2 gap-2">
-						<Link to="/marketplace" onClick={() => setCurrentCategory("all")} className="text-xs text-center py-2 px-3 bg-slate-100 hover:bg-primary hover:text-white rounded-lg transition-colors">
+						<Link to="/dashboard/marketplace" onClick={() => setCurrentCategory("all")} className="text-xs text-center py-2 px-3 bg-slate-100 hover:bg-primary hover:text-white rounded-lg transition-colors">
 							All Products
 						</Link>
-						<Link to="/marketplace/c/featured" className="text-xs text-center py-2 px-3 bg-amber-50 hover:bg-amber-500 hover:text-white text-amber-700 rounded-lg transition-colors flex items-center justify-center gap-1">
+						<Link to="/dashboard/marketplace/c/featured" className="text-xs text-center py-2 px-3 bg-amber-50 hover:bg-amber-500 hover:text-white text-amber-700 rounded-lg transition-colors flex items-center justify-center gap-1">
 							<Star size={12} className="fill-amber-500" /> Featured
 						</Link>
-						<Link to="/marketplace/c/trending" className="text-xs text-center py-2 px-3 bg-green-50 hover:bg-green-500 hover:text-white text-green-700 rounded-lg transition-colors">
+						<Link to="/dashboard/marketplace/c/trending" className="text-xs text-center py-2 px-3 bg-green-50 hover:bg-green-500 hover:text-white text-green-700 rounded-lg transition-colors">
 							Trending
 						</Link>
-						<Link to="/marketplace/c/new" className="text-xs text-center py-2 px-3 bg-blue-50 hover:bg-blue-500 hover:text-white text-blue-700 rounded-lg transition-colors">
+						<Link to="/dashboard/marketplace/c/new" className="text-xs text-center py-2 px-3 bg-blue-50 hover:bg-blue-500 hover:text-white text-blue-700 rounded-lg transition-colors">
 							New Arrivals
 						</Link>
 					</div>
@@ -82,13 +82,12 @@ export default function MarketplaceAside({
 								{categories.map((category) => (
 									<Link
 										key={category.key}
-										to={`/marketplace/c/${category.key}`}
+										to={`/dashboard/marketplace/c/${category.key}`}
 										onClick={() => setCurrentCategory(category.key)}
-										className={`flex items-center justify-between py-2 px-3 rounded-xl text-sm transition-colors ${
-											currentCategory === category.key
-												? "bg-primary text-white"
-												: "bg-slate-50 hover:bg-slate-100 text-slate-700"
-										}`}
+										className={`flex items-center justify-between py-2 px-3 rounded-xl text-sm transition-colors ${currentCategory === category.key
+											? "bg-primary text-white"
+											: "bg-slate-50 hover:bg-slate-100 text-slate-700"
+											}`}
 									>
 										<span>{category.label}</span>
 										{currentCategory === category.key && <ArrowRight size={14} />}
@@ -121,13 +120,13 @@ export default function MarketplaceAside({
 					Seller Tools
 				</h3>
 				<div className="space-y-2">
-					<Link to="/marketplace/listings" className="flex items-center justify-between py-2 px-3 rounded-xl text-sm bg-slate-50 hover:bg-slate-100 text-slate-700 transition-colors">
+					<Link to="/dashboard/marketplace/listings" className="flex items-center justify-between py-2 px-3 rounded-xl text-sm bg-slate-50 hover:bg-slate-100 text-slate-700 transition-colors">
 						<span className="flex items-center gap-2">
 							<ShoppingBag size={14} /> My Listings
 						</span>
 						<ArrowRight size={14} />
 					</Link>
-					<Link to="/marketplace/performance" className="flex items-center justify-between py-2 px-3 rounded-xl text-sm bg-slate-50 hover:bg-slate-100 text-slate-700 transition-colors">
+					<Link to="/dashboard/marketplace/performance" className="flex items-center justify-between py-2 px-3 rounded-xl text-sm bg-slate-50 hover:bg-slate-100 text-slate-700 transition-colors">
 						<span className="flex items-center gap-2">
 							<BarChart3 size={14} /> Performance
 						</span>

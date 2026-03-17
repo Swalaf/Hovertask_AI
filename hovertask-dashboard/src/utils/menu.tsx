@@ -10,7 +10,7 @@ import {
 	Wallet,
 	BarChart2
 } from "lucide-react";
-import { FaFacebook, FaInstagram, FaTwitter, FaWhatsapp,} from "react-icons/fa";
+import { FaFacebook, FaInstagram, FaTwitter, FaWhatsapp, } from "react-icons/fa";
 import { SiTiktok } from "react-icons/si";
 
 
@@ -40,111 +40,121 @@ export default [
 				label: "Earn by Reselling ",
 				icon: <List size={13} />,
 			},
-            {
+			{
 				path: "/earn/tasks-history",
 				label: "Completed Tasks History ",
 				icon: <List size={13} />,
 			},
 
-		],	
+		],
 	},
 	{
 		basePath: "/advertise",
 		label: "Advertise",
 		icon: <CheckCircle size={13} />,
 		options: [
-  {
-    path: "/advertise/post-advert?platform=WhatsApp",
-    label: "Get Your Advert Posted On WhatsApp",
-    icon: <FaWhatsapp size={13} />,
-  },
-  {
-    path: "/advertise/post-advert?platform=Facebook",
-    label: "Get Your Advert Posted On Facebook",
-    icon: <FaFacebook size={13} />,
-  },
-  {
-    path: "/advertise/post-advert?platform=Instagram",
-    label: "Get Your Advert Posted On Instagram",
-    icon: <FaInstagram size={13} />,
-  },
-  {
-    path: "/advertise/post-advert?platform=X",
-    label: "Get Your Advert Posted On X (Twitter)",
-    icon: <FaTwitter size={13} />,
-  },
-  {
-    path: "/advertise/post-advert?platform=TikTok",
-    label: "Get Your Advert Posted On TikTok",
-    icon: <SiTiktok size={13} />,
-  },
-   {
-    path: "/advertise/post-advert?type=engagement&engagementType=Get Real People to Like your Social Media Post",
-    label: "Get more Likes on social media",
-    icon: <SiTiktok size={13} />,
-  },
-  {
-    path: "/advertise/post-advert?type=engagement&engagementType=Get Real People to Follow you",
-    label: "Get more Followers on social media",
-    icon: <SiTiktok size={13} />,
-  },
-  {
-    path: "/advertise/post-advert?type=engagement&engagementType=Get Real People to Comment to your Social Media Post",
-    label: "Get more Comments on social media",
-    icon: <SiTiktok size={13} />,
-  },
-  {
-    path: "/advertise/post-advert?type=engagement&engagementType=Get Real People to Subscribe to your Channel",
-    label: "Get more subscribers on social media",
-    icon: <SiTiktok size={13} />,
-  },
-  {
+			{
+				path: "/advertise/post-advert?platform=WhatsApp",
+				label: "Get Your Advert Posted On WhatsApp",
+				icon: <FaWhatsapp size={13} />,
+			},
+			{
+				path: "/advertise/post-advert?platform=Facebook",
+				label: "Get Your Advert Posted On Facebook",
+				icon: <FaFacebook size={13} />,
+			},
+			{
+				path: "/advertise/post-advert?platform=Instagram",
+				label: "Get Your Advert Posted On Instagram",
+				icon: <FaInstagram size={13} />,
+			},
+			{
+				path: "/advertise/post-advert?platform=X",
+				label: "Get Your Advert Posted On X (Twitter)",
+				icon: <FaTwitter size={13} />,
+			},
+			{
+				path: "/advertise/post-advert?platform=TikTok",
+				label: "Get Your Advert Posted On TikTok",
+				icon: <SiTiktok size={13} />,
+			},
+			{
+				path: "/advertise/post-advert?type=engagement&engagementType=Get Real People to Like your Social Media Post",
+				label: "Get more Likes on social media",
+				icon: <SiTiktok size={13} />,
+			},
+			{
+				path: "/advertise/post-advert?type=engagement&engagementType=Get Real People to Follow you",
+				label: "Get more Followers on social media",
+				icon: <SiTiktok size={13} />,
+			},
+			{
+				path: "/advertise/post-advert?type=engagement&engagementType=Get Real People to Comment to your Social Media Post",
+				label: "Get more Comments on social media",
+				icon: <SiTiktok size={13} />,
+			},
+			{
+				path: "/advertise/post-advert?type=engagement&engagementType=Get Real People to Subscribe to your Channel",
+				label: "Get more subscribers on social media",
+				icon: <SiTiktok size={13} />,
+			},
+			{
 				path: "/advertise/advert-tasks-history",
 				label: "Advert Task History ",
 				icon: <List size={13} />,
- },
- {
+			},
+			{
 				path: "/advertise/engagement-tasks-history",
 				label: "Engagement Task History",
 				icon: <List size={13} />,
-},
+			},
 
-  
-],
+
+		],
 
 	},
-    {
-	    path: "/fund-wallet",
+	{
+		path: "/fund-wallet",
 		label: "Wallet",
 		icon: <Wallet size={13} />,
-    },
+	},
 	{
-		basePath: "/marketplace",
+		basePath: "/dashboard/marketplace",
 		label: "Marketplace",
 		icon: <Store size={13} />,
 		options: [
 			{
-				path: "/marketplace/list-product?type=list-product",
-				label: "List a New Product",
-				icon: <List size={13} />,
+				path: "/dashboard/marketplace",
+				label: "Browse Marketplace",
+				icon: <Store size={13} />,
 			},
 			{
-				path: "/marketplace/listings",
-				label: "View Product Listings",
+				path: "/dashboard/marketplace/listings",
+				label: "My Listings",
 				icon: <ListCheck size={13} />,
 			},
 			{
-				path: "/marketplace/list-product?type=resell",
-				label: "Add Resell Product",
+				path: "/dashboard/marketplace/list-product?type=list-product",
+				label: "Add Product",
+				icon: <List size={13} />,
+			},
+			{
+				path: "/dashboard/marketplace/list-product?type=resell",
+				label: "Resell Product",
 				icon: <Target size={13} />,
+			},
+			{
+				path: "/reseller-conversion",
+				label: "Reseller Stats",
+				icon: <BarChart2 size={13} />,
 			},
 		],
 	},
 	{
-    path: "/reseller-conversion",
-    label: "Reseller Conversions",
-    icon: <BarChart2 size={13} />,
-    },
+		path: "/reseller-conversion",
+		label: "Reseller Conversions",
+		icon: <BarChart2 size={13} />,
+	},
 	{
 		basePath: "#",
 		label: "Buy Followers",
@@ -156,7 +166,7 @@ export default [
 				label: "Buy Followers",
 				icon: <UserPlus size={13} />,
 			},
-			
+
 		],
 	},
 	{

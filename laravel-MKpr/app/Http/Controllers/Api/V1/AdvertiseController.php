@@ -42,7 +42,7 @@ class AdvertiseController extends Controller
 
  public function create(Request $request)
 {
-    $type = $request->input('type'); // engagement OR advert
+    $type = $request->input('type'); // engagement, advert, freelance, or job
 
     // Initialize variables
     $createAds = null;
@@ -92,39 +92,50 @@ class AdvertiseController extends Controller
         return response()->json(['error' => $validator->errors()], 400);
     }
 
-    // Create Advert
-    if ($type === 'advert') {
-        $createAds = $this->AdvertiseRepository->create($request->all(), $request);
-    }
+    // Create Advert / Task
+    try {
+        // Create Advert
+        if ($type === 'advert') {
+            $createAds = $this->AdvertiseRepository->create($request->all(), $request);
+        }
 
-    // Create Engagement Task
-    if ($type === 'engagement') {
-        $taskData = [
-            'title' => $request->input('title') ?? 'Engagement Task',
-            'description' => $request->input('description'),
-            'location' => $request->input('location'),
-            'gender' => $request->input('gender'),
-            'religion' => $request->input('religion'),
-            'no_of_participants' => $request->input('number_of_participants'),
-            'social_media_url' => $request->input('social_media_url'),
-            'type_of_comment' => 'General',
-            'payment_per_task' => $request->input('payment_per_task'),
-            'task_duration' => $request->input('deadline'),
-            'task_count_total' => $request->input('number_of_participants'),
-            'task_amount' => $request->input('estimated_cost'),
-            'task_count_remaining' => $request->input('number_of_participants'),
-            'payment_method' => $request->input('payment_method'),
-            'payment_gateway' => 'paystack',
-            'task_type' => 1,
-            'status' => 'pending',
-            'priority' => 'medium',
-            'category' => $request->input('category'),
-            'platforms' => $request->input('platforms'),
-            'start_date' => now(),
-            'due_date' => $request->input('deadline'),
-        ];
+        // Create Engagement Task
+        if ($type === 'engagement') {
+            $taskData = [
+                'title' => $request->input('title') ?? 'Engagement Task',
+                'description' => $request->input('description'),
+                'location' => $request->input('location'),
+                'gender' => $request->input('gender'),
+                'religion' => $request->input('religion'),
+                'no_of_participants' => $request->input('number_of_participants'),
+                'social_media_url' => $request->input('social_media_url'),
+                'type_of_comment' => 'General',
+                'payment_per_task' => $request->input('payment_per_task'),
+                'task_duration' => $request->input('deadline'),
+                'task_count_total' => $request->input('number_of_participants'),
+                'task_amount' => $request->input('estimated_cost'),
+                'task_count_remaining' => $request->input('number_of_participants'),
+                'payment_method' => $request->input('payment_method'),
+                'payment_gateway' => 'paystack',
+                'task_type' => 1,
+                'status' => 'pending',
+                'priority' => 'medium',
+                'category' => $request->input('category'),
+                'platforms' => $request->input('platforms'),
+                'start_date' => now(),
+                'due_date' => $request->input('deadline'),
+            ];
 
-        $createTask = $this->TaskRepository->create($taskData);
+            $createTask = $this->TaskRepository->create($taskData);
+        }
+    } catch (\Exception $e) {
+        // If repository threw an exception (e.g. insufficient wallet balance or Cloudinary error),
+        // return a clear JSON response instead of letting Laravel convert it to a 500.
+        $statusCode = strpos($e->getMessage(), 'Insufficient') !== false ? 400 : 500;
+        return response()->json([
+            'status' => false,
+            'message' => $e->getMessage(),
+        ], $statusCode);
     }
 
     // ============================================

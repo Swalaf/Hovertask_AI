@@ -1,0 +1,53 @@
+/Applications/XAMPP/xamppfiles/bin/php /usr/local/bin/composer install
+/Applications/XAMPP/xamppfiles/bin/php artisan key;generate
+/Applications/XAMPP/xamppfiles/bin/php artisan migrate
+/Applications/XAMPP/xamppfiles/bin/php artisan db:seed
+/Applications/XAMPP/xamppfiles/bin/php artisan storage:link
+/Applications/XAMPP/xamppfiles/bin/php artisan vendor:publish --tag=charts_config
+/Applications/XAMPP/xamppfiles/bin/php artisan notifications:table
+/Applications/XAMPP/xamppfiles/bin/php artisan make:migration create_user_tasks_table
+
+/Applications/XAMPP/xamppfiles/bin/php artisan make:model UserTask
+/Applications/XAMPP/xamppfiles/bin/php artisan make:migration add_participants_payment_deadline_to_advertises_table --table=advertises
+/Applications/XAMPP/xamppfiles/bin/php artisan make:migration add_has_paid_advert_fee_to_users_table --table=users
+/Applications/XAMPP/xamppfiles/bin/php artisan make:migration add_amount_to_referrals_table --table=referrals
+C:\xampp\php\php artisan make:migration add_advert_id_to_tasks_table --table=tasks
+\xampp\php artisan make:migration add_advert_id_to_tasks_table --table=tasks
+
+/Applications/XAMPP/xamppfiles/bin/php artisan serve 
+/Applications/XAMPP/xamppfiles/bin/php artisan make:controller PartnerController
+/Applications/XAMPP/xamppfiles/bin/php artisan make:model Partner
+/Applications/XAMPP/xamppfiles/bin/php artisan make:migration add_start_time_and_end_time_to_revision_sessions_table
+/Applications/XAMPP/xamppfiles/bin/php artisan cache:clear
+
+/Applications/XAMPP/xamppfiles/bin/php artisan make:middleware RoleMiddleware
+/Applications/XAMPP/xamppfiles/bin/php artisan make:notification BaseNotification
+
+/Applications/XAMPP/xamppfiles/bin/php artisan make:seeder
+/Applications/XAMPP/xamppfiles/bin/php artisan make:factory
+/Applications/XAMPP/xamppfiles/bin/php artisan make:command
+/Applications/XAMPP/xamppfiles/bin/php artisan make:job
+/Applications/XAMPP/xamppfiles/bin/php artisan make:listener
+/Applications/XAMPP/xamppfiles/bin/php artisan make:event
+/Applications/XAMPP/xamppfiles/bin/php artisan make:notification
+/Applications/XAMPP/xamppfiles/bin/php artisan make:mail
+/Applications/XAMPP/xamppfiles/bin/php artisan make:policy RevisionSessionPolicy --model=RevisionSession
+/Applications/XAMPP/xamppfiles/bin/php artisan make:resource
+/Applications/XAMPP/xamppfiles/bin/php artisan make:rule
+/Applications/XAMPP/xamppfiles/bin/php artisan make:cast
+/Applications/XAMPP/xamppfiles/bin/php artisan make:channel
+/Applications/XAMPP/xamppfiles/bin/php artisan make:component
+/Applications/XAMPP/xamppfiles/bin/php artisan make:job
+/Applications/XAMPP/xamppfiles/bin/php artisan make:listener
+/Applications/XAMPP/xamppfiles/bin/php artisan make:mail
+/Applications/XAMPP/xamppfiles/bin/php artisan make:notification
+/Applications/XAMPP/xamppfiles/bin/php artisan make:observer
+/Applications/XAMPP/xamppfiles/bin/php artisan make:policy
+/Applications/XAMPP/xamppfiles/bin/php artisan make:provider
+/Applications/XAMPP/xamppfiles/bin/php artisan make:request
+/Applications/XAMPP/xamppfiles/bin/php artisan make:rule
+/Applications/XAMPP/xamppfiles/bin/php artisan make:seeder
+/Applications/XAMPP/xamppfiles/bin/php artisan make:test
+/Applications/XAMPP/xamppfiles/bin/php artisan make:unit-test
+/Applications/XAMPP/xamppfiles/bin/php artisan make:livewire
+/Applications/XAMPP/xamppfiles/bin/php artisan make:livewire-component

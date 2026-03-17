@@ -33,27 +33,27 @@ export default function ListProductPage() {
 		<div className="mobile:grid grid-cols-[1fr_200px] min-h-full">
 			<div className="bg-white shadow p-4 space-y-8">
 				<div className="flex gap-4 flex-1">
-					<Link to="/marketplace">
+					<Link to="/dashboard/marketplace">
 						<ArrowLeft />
 					</Link>
 
-					{ isResellType && (
-					<div className="space-y-2">
-						<h1 className="text-xl font-medium">List a Product  for resell</h1>
-						<p className="text-sm text-zinc-500">
-							Add a new product or service for resell task to get more convertion
-							
-						</p>
-					</div>
+					{isResellType && (
+						<div className="space-y-2">
+							<h1 className="text-xl font-medium">List a Product  for resell</h1>
+							<p className="text-sm text-zinc-500">
+								Add a new product or service for resell task to get more convertion
+
+							</p>
+						</div>
 					)}
 					{isListProduct && (
-                    
-					<div className="space-y-2">
-						<h1 className="text-xl font-medium">List a New Product</h1>
-					</div>
+
+						<div className="space-y-2">
+							<h1 className="text-xl font-medium">List a New Product</h1>
+						</div>
 					)}
 				</div>
-				
+
 
 				<hr className="border-dashed" />
 
@@ -71,63 +71,63 @@ export default function ListProductPage() {
 
 
 
- function SellerInformation() {
-  const authUser = useSelector<any, AuthUserDTO>(
-    (state: any) => state.auth.value
-  );
+function SellerInformation() {
+	const authUser = useSelector<any, AuthUserDTO>(
+		(state: any) => state.auth.value
+	);
 
- return (
-  <div className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 bg-white rounded-2xl shadow-sm border gap-4 md:gap-0">
-    {/* Left: Profile + Info */}
-    <div className="flex items-start md:items-center gap-3 md:gap-4 w-full md:w-auto">
-      <img
-        src={authUser.avatar || "/images/default-user.png"}
-        width={48}
-        height={48}
-        className="rounded-full bg-zinc-200 flex-shrink-0"
-        alt={authUser.fname}
-      />
+	return (
+		<div className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 bg-white rounded-2xl shadow-sm border gap-4 md:gap-0">
+			{/* Left: Profile + Info */}
+			<div className="flex items-start md:items-center gap-3 md:gap-4 w-full md:w-auto">
+				<img
+					src={authUser.avatar || "/images/default-user.png"}
+					width={48}
+					height={48}
+					className="rounded-full bg-zinc-200 flex-shrink-0"
+					alt={authUser.fname}
+				/>
 
-      <div className="flex-1 space-y-1 min-w-0">
-        <p className="font-medium text-sm truncate">
-          {authUser.fname} {authUser.lname}
-        </p>
-        <p className="text-xs text-zinc-500 truncate">@{authUser.username}</p>
+				<div className="flex-1 space-y-1 min-w-0">
+					<p className="font-medium text-sm truncate">
+						{authUser.fname} {authUser.lname}
+					</p>
+					<p className="text-xs text-zinc-500 truncate">@{authUser.username}</p>
 
-        {/* Online status */}
-        <div className="flex items-center gap-2 text-xs text-zinc-600 flex-wrap">
-          <span className="flex items-center gap-1 truncate">
-            <img src="/images/nigerian-flag.png" width={16} alt="flag" />
-            <span className="flex items-center gap-1 truncate">
-              <span className="h-2 w-2 rounded-full bg-green-500"></span>
-              Online
-            </span>
-          </span>
-        </div>
+					{/* Online status */}
+					<div className="flex items-center gap-2 text-xs text-zinc-600 flex-wrap">
+						<span className="flex items-center gap-1 truncate">
+							<img src="/images/nigerian-flag.png" width={16} alt="flag" />
+							<span className="flex items-center gap-1 truncate">
+								<span className="h-2 w-2 rounded-full bg-green-500"></span>
+								Online
+							</span>
+						</span>
+					</div>
 
-        {/* Badges */}
-        <div className="flex items-center gap-2 text-xs mt-1 flex-wrap">
-          <span className="px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-medium truncate">
-            Verified ID
-          </span>
-          <span className="flex items-center gap-1 truncate">
-            ⭐ <span className="font-medium">4.8</span>
-          </span>
-        </div>
-      </div>
-    </div>
+					{/* Badges */}
+					<div className="flex items-center gap-2 text-xs mt-1 flex-wrap">
+						<span className="px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-medium truncate">
+							Verified ID
+						</span>
+						<span className="flex items-center gap-1 truncate">
+							⭐ <span className="font-medium">4.8</span>
+						</span>
+					</div>
+				</div>
+			</div>
 
-    {/* Right: Action Buttons */}
-    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
-      <button className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 text-white text-sm rounded-full w-full sm:w-auto">
-        <PhoneCall size={16} /> Contact Seller
-      </button>
-      <button className="flex items-center justify-center gap-2 px-4 py-2 border border-blue-400 text-blue-500 text-sm rounded-full w-full sm:w-auto">
-        <MessageSquare size={16} /> Start Chat
-      </button>
-    </div>
-  </div>
-);
+			{/* Right: Action Buttons */}
+			<div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
+				<button className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 text-white text-sm rounded-full w-full sm:w-auto">
+					<PhoneCall size={16} /> Contact Seller
+				</button>
+				<button className="flex items-center justify-center gap-2 px-4 py-2 border border-blue-400 text-blue-500 text-sm rounded-full w-full sm:w-auto">
+					<MessageSquare size={16} /> Start Chat
+				</button>
+			</div>
+		</div>
+	);
 }
 
 function ListingForm() {
@@ -242,79 +242,79 @@ function ListingForm() {
 		>
 			{/* image upload */}
 			<div className="flex border border-dashed border-zinc-300 rounded-md p-3">
-  {/* Left Section */}
-  <div className="w-1/2 flex flex-col justify-center space-y-2 text-sm">
-    <div>
-      <p className="font-semibold">Add Images/Photos</p>
-      <p className="text-zinc-500">Add Visuals for Better Engagement</p>
-    </div>
-    <div>
-      <p className="font-semibold">Video Upload</p>
-      <p className="text-zinc-500">Showcase your product with a 30-second video.</p>
-    </div>
-  </div>
+				{/* Left Section */}
+				<div className="w-1/2 flex flex-col justify-center space-y-2 text-sm">
+					<div>
+						<p className="font-semibold">Add Images/Photos</p>
+						<p className="text-zinc-500">Add Visuals for Better Engagement</p>
+					</div>
+					<div>
+						<p className="font-semibold">Video Upload</p>
+						<p className="text-zinc-500">Showcase your product with a 30-second video.</p>
+					</div>
+				</div>
 
-  {/* Right Section */}
-  <div className="w-1/2 flex flex-col items-center justify-center">
-    <p className="text-xs mb-2 text-center">
-      Photos {images.length}/5 - You can add up to 5 photos.
-    </p>
+				{/* Right Section */}
+				<div className="w-1/2 flex flex-col items-center justify-center">
+					<p className="text-xs mb-2 text-center">
+						Photos {images.length}/5 - You can add up to 5 photos.
+					</p>
 
-    <div
-      onClick={() => imageInputRef.current?.click()}
-      onDragOver={handleDragOver}
-      onDrop={handleDrop}
-      onDragLeave={handleDragOut}
-      className={cn(
-        "bg-zinc-200 rounded-lg relative border border-zinc-400/80 text-sm flex items-center justify-center aspect-video w-full",
-        { "border-dashed border-4": draggedOver },
-      )}
-    >
-      <input
-        ref={imageInputRef}
-        onChange={(e) => {
-          if (e.target.files) {
-            if (e.target.files.length > 5) {
-              e.target.value = "";
-              return toast.error("Only a maximum of 5 images is allowed");
-            }
-            const fileArr = Array.from(e.target.files);
-            const mapped = fileArr.map((f) => ({
-              file_path: URL.createObjectURL(f),
-            }));
-            setImages(mapped);
-          }
-        }}
-        type="file"
-        accept="image/*"
-        multiple
-        className="hidden"
-        name="file_path"
-        required
-      />
+					<div
+						onClick={() => imageInputRef.current?.click()}
+						onDragOver={handleDragOver}
+						onDrop={handleDrop}
+						onDragLeave={handleDragOut}
+						className={cn(
+							"bg-zinc-200 rounded-lg relative border border-zinc-400/80 text-sm flex items-center justify-center aspect-video w-full",
+							{ "border-dashed border-4": draggedOver },
+						)}
+					>
+						<input
+							ref={imageInputRef}
+							onChange={(e) => {
+								if (e.target.files) {
+									if (e.target.files.length > 5) {
+										e.target.value = "";
+										return toast.error("Only a maximum of 5 images is allowed");
+									}
+									const fileArr = Array.from(e.target.files);
+									const mapped = fileArr.map((f) => ({
+										file_path: URL.createObjectURL(f),
+									}));
+									setImages(mapped);
+								}
+							}}
+							type="file"
+							accept="image/*"
+							multiple
+							className="hidden"
+							name="file_path"
+							required
+						/>
 
-      {images.length > 0 ? (
-        <div className="grid grid-cols-3 gap-2 p-2 w-full">
-          {images.map((img, i) => (
-            <img
-              key={i}
-              src={img.file_path}
-              className="h-24 w-full object-cover rounded"
-              alt={`preview-${i}`}
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center gap-2 text-center">
-          <Image className="w-8 h-8" />
-          <span>Drag, Drop, and Upload Your Photo</span>
-        </div>
-      )}
-    </div>
-  </div>
-</div>
+						{images.length > 0 ? (
+							<div className="grid grid-cols-3 gap-2 p-2 w-full">
+								{images.map((img, i) => (
+									<img
+										key={i}
+										src={img.file_path}
+										className="h-24 w-full object-cover rounded"
+										alt={`preview-${i}`}
+									/>
+								))}
+							</div>
+						) : (
+							<div className="flex flex-col items-center justify-center gap-2 text-center">
+								<Image className="w-8 h-8" />
+								<span>Drag, Drop, and Upload Your Photo</span>
+							</div>
+						)}
+					</div>
+				</div>
+			</div>
 
-			
+
 			{/* other form fields ... */}
 			<hr className="border-dashed" />
 
@@ -463,45 +463,45 @@ function ListingForm() {
 				</div>
 
 				{isResellType && (
-  <div className="space-y-2">
-    <label htmlFor="resell_budget" className="flex items-center gap-2">
-      <span>Budget Amount for Reselling (₦)</span>
+					<div className="space-y-2">
+						<label htmlFor="resell_budget" className="flex items-center gap-2">
+							<span>Budget Amount for Reselling (₦)</span>
 
-      {/* Info / Explanation Button */}
-      <button
-        type="button"
-        onClick={budgetInfoModal.onOpen}
-        className="text-primary underline text-xs"
-      >
-        What is this?
-      </button>
-    </label>
+							{/* Info / Explanation Button */}
+							<button
+								type="button"
+								onClick={budgetInfoModal.onOpen}
+								className="text-primary underline text-xs"
+							>
+								What is this?
+							</button>
+						</label>
 
-    <div className="flex gap-2 border p-2 rounded-full border-zinc-400">
-      <span className="font-medium text-base">₦</span>
-      <input
-        {...register("resell_budget", {
-          required: "Budget amount is required for resell products",
-          min: { value: 1, message: "Budget must be greater than 0" },
-          pattern: {
-            value: /^\d+$/,
-            message: "Enter a valid number",
-          },
-        })}
-        type="number"
-        min={1}
-        placeholder="e.g. 100,000"
-        className="outline-none placeholder:text-xs flex-1"
-      />
-    </div>
+						<div className="flex gap-2 border p-2 rounded-full border-zinc-400">
+							<span className="font-medium text-base">₦</span>
+							<input
+								{...register("resell_budget", {
+									required: "Budget amount is required for resell products",
+									min: { value: 1, message: "Budget must be greater than 0" },
+									pattern: {
+										value: /^\d+$/,
+										message: "Enter a valid number",
+									},
+								})}
+								type="number"
+								min={1}
+								placeholder="e.g. 100,000"
+								className="outline-none placeholder:text-xs flex-1"
+							/>
+						</div>
 
-    {errors["resell_budget"] && (
-      <small className="text-danger">
-        {errors["resell_budget"].message as string}
-      </small>
-    )}
-  </div>
-)}
+						{errors["resell_budget"] && (
+							<small className="text-danger">
+								{errors["resell_budget"].message as string}
+							</small>
+						)}
+					</div>
+				)}
 
 
 				{/*<div className="pt-2">
@@ -695,44 +695,44 @@ function ListingForm() {
 				</button>
 			</div>
 
-            {/* Budget Explanation Modal */}
-<Modal isOpen={budgetInfoModal.isOpen} onOpenChange={budgetInfoModal.onOpenChange}>
-  <ModalContent>
-    <ModalBody className="text-center p-6 space-y-4">
+			{/* Budget Explanation Modal */}
+			<Modal isOpen={budgetInfoModal.isOpen} onOpenChange={budgetInfoModal.onOpenChange}>
+				<ModalContent>
+					<ModalBody className="text-center p-6 space-y-4">
 
-      <h3 className="text-lg font-semibold">What is the Resell Budget Amount?</h3>
+						<h3 className="text-lg font-semibold">What is the Resell Budget Amount?</h3>
 
-      <p className="text-sm text-zinc-600 leading-normal">
-        The <b>resell budget amount</b> is the total money you set aside to 
-        <b>pay commissions to resellers</b> for each successful conversion.
-      </p>
+						<p className="text-sm text-zinc-600 leading-normal">
+							The <b>resell budget amount</b> is the total money you set aside to
+							<b>pay commissions to resellers</b> for each successful conversion.
+						</p>
 
-      <p className="text-sm text-zinc-600 leading-normal">
-        Each time a reseller successfully brings a buyer who completes a conversion, 
-        the <b>commission amount</b> you set (e.g., ₦500) will be 
-        <b>deducted from your product’s budget balance</b>.
-      </p>
+						<p className="text-sm text-zinc-600 leading-normal">
+							Each time a reseller successfully brings a buyer who completes a conversion,
+							the <b>commission amount</b> you set (e.g., ₦500) will be
+							<b>deducted from your product’s budget balance</b>.
+						</p>
 
-      <p className="text-sm text-zinc-600">
-        <b>Example:</b><br />
-        If the reseller commission is <b>₦500</b> and a reseller brings a conversion, 
-        then <b>₦500 will be deducted</b> from your product’s budget balance.
-      </p>
+						<p className="text-sm text-zinc-600">
+							<b>Example:</b><br />
+							If the reseller commission is <b>₦500</b> and a reseller brings a conversion,
+							then <b>₦500 will be deducted</b> from your product’s budget balance.
+						</p>
 
-      <button
-        className="px-4 py-2 bg-primary text-white rounded-lg"
-        onClick={budgetInfoModal.onClose}
-      >
-        Got it
-      </button>
+						<button
+							className="px-4 py-2 bg-primary text-white rounded-lg"
+							onClick={budgetInfoModal.onClose}
+						>
+							Got it
+						</button>
 
-    </ModalBody>
-  </ModalContent>
-</Modal>
+					</ModalBody>
+				</ModalContent>
+			</Modal>
 
 
 			{/* preview modal */}
-        
+
 			<ListingPreviewModal
 				{...modalProps}
 				getValues={getValues}
@@ -834,7 +834,7 @@ function ProductListingSuccessModal(props: ReturnType<typeof useDisclosure>) {
 						<div className="flex items-center justify-center gap-4 mt-2">
 							<Link
 								className="bg-primary text-white px-4 py-2 rounded-lg"
-								to="/marketplace/listings"
+								to="/dashboard/marketplace/listings"
 							>
 								Go to Dashboard
 							</Link>

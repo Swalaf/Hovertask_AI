@@ -1,17 +1,19 @@
-import { 
-  ArrowLeft, 
-  Hexagon, 
-  History, 
-  Megaphone, 
-  ArrowRight, 
-  Users, 
-  TrendingUp, 
-  Shield, 
+import {
+  ArrowLeft,
+  Hexagon,
+  History,
+  Megaphone,
+  ArrowRight,
+  Users,
+  TrendingUp,
+  Shield,
   Globe,
   Plus,
   BarChart3,
   FileText,
-  Zap
+  Zap,
+  Briefcase,
+  GraduationCap
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router";

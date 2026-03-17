@@ -31,7 +31,7 @@ export default function CategoryPage() {
 		<div className="mobile:grid grid-cols-[1fr_200px] gap-4 min-h-full">
 			<div className="min-h-full shadow bg-white p-4 space-y-8 overflow-hidden">
 				<div className="flex gap-4 flex-1">
-					<Link to="/marketplace">
+					<Link to="/dashboard/marketplace">
 						<ArrowLeft />
 					</Link>
 
@@ -57,7 +57,7 @@ export default function CategoryPage() {
 				<ProductsSection
 					products={products}
 					heading={extraCategoryHeading}
-					link={`/marketplace/c/${randomCategory}`}
+					link={`/dashboard/marketplace/c/${randomCategory}`}
 				/>
 			</div>
 

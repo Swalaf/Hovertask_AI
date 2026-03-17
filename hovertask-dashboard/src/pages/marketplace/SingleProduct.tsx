@@ -35,9 +35,9 @@ export default function SingleProductPage() {
       ? product.product_images.map((i) => i.file_path)
       : demoImages;
 
-    
 
-       // -----------------------------
+
+  // -----------------------------
   // FEEDBACK: pagination + loading
   // -----------------------------
   /*const {
@@ -57,68 +57,68 @@ export default function SingleProductPage() {
 
   const [loadingContact, setLoadingContact] = useState(false);
 
-const resellerCodeFromURL = new URLSearchParams(window.location.search).get("reseller");
-const abortContactRef = useRef<AbortController | null>(null);
+  const resellerCodeFromURL = new URLSearchParams(window.location.search).get("reseller");
+  const abortContactRef = useRef<AbortController | null>(null);
 
 
-const handleContactSeller = async () => {
-  try {
-    // Cancel previous request if user clicks repeatedly
-    if (abortContactRef.current) abortContactRef.current.abort();
+  const handleContactSeller = async () => {
+    try {
+      // Cancel previous request if user clicks repeatedly
+      if (abortContactRef.current) abortContactRef.current.abort();
 
-    const controller = new AbortController();
-    abortContactRef.current = controller;
+      const controller = new AbortController();
+      abortContactRef.current = controller;
 
-    setLoadingContact(true);
+      setLoadingContact(true);
 
-    // Sanitize reseller code (basic whitelist to avoid injection)
-    const safeReseller = resellerCodeFromURL?.replace(/[^a-zA-Z0-9-_]/g, "") ?? "";
+      // Sanitize reseller code (basic whitelist to avoid injection)
+      const safeReseller = resellerCodeFromURL?.replace(/[^a-zA-Z0-9-_]/g, "") ?? "";
 
-    const response = await fetch(
-      `${apiEndpointBaseURL}/track-conversion/${product?.id}?reseller=${safeReseller}`,
-      {
-        method: "GET",
-        credentials: "include",
-        signal: controller.signal,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: getAuthorization(),
-        },
+      const response = await fetch(
+        `${apiEndpointBaseURL}/track-conversion/${product?.id}?reseller=${safeReseller}`,
+        {
+          method: "GET",
+          credentials: "include",
+          signal: controller.signal,
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: getAuthorization(),
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      // Backend returned an error (but avoid showing backend internals)
+      if (!response.ok) {
+        toast.error(data?.message || "Unable to process request at the moment.");
+        return;
       }
-    );
 
-    const data = await response.json();
+      // Backend success
+      if (data?.whatsapp_url) {
+        toast.success("Redirecting you to WhatsApp…");
+        window.location.href = data.whatsapp_url;
+        return;
+      }
 
-    // Backend returned an error (but avoid showing backend internals)
-    if (!response.ok) {
-      toast.error(data?.message || "Unable to process request at the moment.");
-      return;
+      // No whatsapp link? Give safe generic error
+      toast.error("Seller contact link is currently unavailable.");
+    } catch (error: any) {
+      if (error?.name === "AbortError") return;
+
+      console.error("Contact seller failed:", error);
+
+      // Do not show technical errors to users
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setLoadingContact(false);
     }
-
-    // Backend success
-    if (data?.whatsapp_url) {
-      toast.success("Redirecting you to WhatsApp…");
-      window.location.href = data.whatsapp_url;
-      return;
-    }
-
-    // No whatsapp link? Give safe generic error
-    toast.error("Seller contact link is currently unavailable.");
-  } catch (error: any) {
-    if (error?.name === "AbortError") return;
-
-    console.error("Contact seller failed:", error);
-
-    // Do not show technical errors to users
-    toast.error("Something went wrong. Please try again.");
-  } finally {
-    setLoadingContact(false);
-  }
-};
+  };
 
 
 
-      
+
 
   // Reseller modal state
   const [resellerModalOpen, setResellerModalOpen] = useState(false);
@@ -186,7 +186,7 @@ const handleContactSeller = async () => {
           <>
             {/* Header */}
             <header className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center">
-              <Link to={"/marketplace"} className="shrink-0">
+              <Link to={"/dashboard/marketplace"} className="shrink-0">
                 <ArrowLeft size={20} className="text-gray-600" />
               </Link>
 
@@ -205,7 +205,7 @@ const handleContactSeller = async () => {
 
                   {/*<Link
                     className="text-primary text-xs sm:text-sm hover:underline"
-                    to={`/marketplace/s/${seller.id}`}
+                    to={`/dashboard/marketplace/s/${seller.id}`}
                   >
                     View Profile
                   </Link>*/}
@@ -263,9 +263,8 @@ const handleContactSeller = async () => {
                     <button
                       key={src + i}
                       onClick={() => setActiveImageIndex(i)}
-                      className={`w-8 h-8 sm:w-12 sm:h-12 rounded-md overflow-hidden border ${
-                        activeImageIndex === i ? "border-primary" : "border-gray-300"
-                      }`}
+                      className={`w-8 h-8 sm:w-12 sm:h-12 rounded-md overflow-hidden border ${activeImageIndex === i ? "border-primary" : "border-gray-300"
+                        }`}
                     >
                       <img src={src} alt={`thumb-${i}`} className="w-full h-full object-cover" />
                     </button>
@@ -299,8 +298,8 @@ const handleContactSeller = async () => {
                         ₦
                         {product.discount
                           ? Number(
-                              product.price - (product.price * product.discount) / 100
-                            ).toLocaleString()
+                            product.price - (product.price * product.discount) / 100
+                          ).toLocaleString()
                           : product.price.toLocaleString()}
                       </p>
                     </div>
@@ -328,7 +327,7 @@ const handleContactSeller = async () => {
                   </div>
                 </div>
 
-               <div className="h-1 border-t border-dashed border-[#66666666] w-[85%] mx-auto mt-2"></div>
+                <div className="h-1 border-t border-dashed border-[#66666666] w-[85%] mx-auto mt-2"></div>
 
                 {/* product meta */}
                 <div className="flex flex-col sm:flex-row sm:justify-between gap-2 sm:gap-4 text-xs sm:text-sm text-[#77777A] whitespace-nowrap flex-wrap">
@@ -371,60 +370,59 @@ const handleContactSeller = async () => {
 
 
 
-               
-                <div className="flex flex-wrap gap-2 mt-2">
-                 <button
-  onClick={handleContactSeller}
-  disabled={loadingContact}
-  className={`block w-full px-3 py-3 bg-green-600 rounded-lg text-white text-sm text-center active:scale-95 ${
-    loadingContact ? "opacity-70 cursor-not-allowed" : ""
-  }`}
->
-  {loadingContact ? (
-    <span className="flex items-center justify-center gap-2">
-      <svg
-        className="animate-spin h-5 w-5"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <circle
-          className="opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          strokeWidth="4"
-        ></circle>
-        <path
-          className="opacity-75"
-          fill="currentColor"
-          d="M4 12a8 8 0 018-8v4l3-3-3-3v4a12 12 0 00-12 12h4z"
-        ></path>
-      </svg>
-      Contacting Seller...
-    </span>
-  ) : (
-    "Contact Seller on WhatsApp"
-  )}
-</button>
 
-                 {ENABLE_CART_UI && (
-                  cartProduct ? ( 
-                    <button
-                      onClick={() => (dispatch(removeProduct(id)), toast.success("Removed from cart!"))}
-                      className="flex-1 px-3 py-2 border-primary border rounded-lg text-xs sm:text-sm text-primary"
-                    >
-                      Remove from Cart
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => (dispatch(addProduct({ ...product, cartQuantity: 1 })), toast.success("Added to cart!"))}
-                      className="flex-1 px-3 py-2 border-primary border rounded-lg text-xs sm:text-sm text-primary"
-                    >
-                      Add to Cart
-                    </button>
-                  ))}
+                <div className="flex flex-wrap gap-2 mt-2">
+                  <button
+                    onClick={handleContactSeller}
+                    disabled={loadingContact}
+                    className={`block w-full px-3 py-3 bg-green-600 rounded-lg text-white text-sm text-center active:scale-95 ${loadingContact ? "opacity-70 cursor-not-allowed" : ""
+                      }`}
+                  >
+                    {loadingContact ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <svg
+                          className="animate-spin h-5 w-5"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v4l3-3-3-3v4a12 12 0 00-12 12h4z"
+                          ></path>
+                        </svg>
+                        Contacting Seller...
+                      </span>
+                    ) : (
+                      "Contact Seller on WhatsApp"
+                    )}
+                  </button>
+
+                  {ENABLE_CART_UI && (
+                    cartProduct ? (
+                      <button
+                        onClick={() => (dispatch(removeProduct(id)), toast.success("Removed from cart!"))}
+                        className="flex-1 px-3 py-2 border-primary border rounded-lg text-xs sm:text-sm text-primary"
+                      >
+                        Remove from Cart
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => (dispatch(addProduct({ ...product, cartQuantity: 1 })), toast.success("Added to cart!"))}
+                        className="flex-1 px-3 py-2 border-primary border rounded-lg text-xs sm:text-sm text-primary"
+                      >
+                        Add to Cart
+                      </button>
+                    ))}
                 </div>
               </div>
             </div>
@@ -443,7 +441,7 @@ const handleContactSeller = async () => {
                 <FeedbackList feedback={feedback} />
               )}*/}
 
-              {/* Pagination 
+            {/* Pagination 
               {lastPage > 1 && (
                 <div className="flex justify-between items-center pt-2">
                   <button
@@ -468,36 +466,36 @@ const handleContactSeller = async () => {
                 </div>
               )}*/}
 
-              {/* Feedback form 
+            {/* Feedback form 
               <FeedbackForm productId={Number(id)} onSuccess={handleFeedbackSubmitted} />
             </div>*/}
 
 
             {/* Reseller block */}
             {product?.resell_budget && (
-            <div className="space-y-2">
-              <h2 className="text-primary text-sm font-medium">
-                Want to resell this Product and earn profit?
-              </h2>
-              <p className="text-xs sm:text-sm text-gray-600">
-                Click below to generate your reseller link. All sales made through your link
-                will earn you commission.
-              </p>
-              <div className="flex flex-col lg:flex-row justify-between gap-3">
-                <div>
-                  <h3 className="text-sm sm:text-base font-semibold">💰 Commission Details:</h3>
-                  <p className="text-xs sm:text-sm text-gray-600">
-                    Earn ₦500 per sale through your reseller link.
-                  </p>
+              <div className="space-y-2">
+                <h2 className="text-primary text-sm font-medium">
+                  Want to resell this Product and earn profit?
+                </h2>
+                <p className="text-xs sm:text-sm text-gray-600">
+                  Click below to generate your reseller link. All sales made through your link
+                  will earn you commission.
+                </p>
+                <div className="flex flex-col lg:flex-row justify-between gap-3">
+                  <div>
+                    <h3 className="text-sm sm:text-base font-semibold">💰 Commission Details:</h3>
+                    <p className="text-xs sm:text-sm text-gray-600">
+                      Earn ₦500 per sale through your reseller link.
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleGenerateResellerLink}
+                    className="px-3 py-2 bg-primary rounded-lg text-white text-xs sm:text-sm active:scale-95 transition-transform"
+                  >
+                    Generate Reseller Link
+                  </button>
                 </div>
-                <button
-                  onClick={handleGenerateResellerLink}
-                  className="px-3 py-2 bg-primary rounded-lg text-white text-xs sm:text-sm active:scale-95 transition-transform"
-                >
-                  Generate Reseller Link
-                </button>
               </div>
-            </div>
             )}
           </>
         )}

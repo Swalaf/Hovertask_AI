@@ -12,7 +12,7 @@ export default function CartPage() {
 		<div className="mobile:grid grid-cols-[1fr_200px] gap-4 min-h-full">
 			<div className="bg-white shadow-md px-4 py-8 space-y-8 overflow-hidden">
 				<div className="flex gap-4 flex-1">
-					<Link to="/marketplace">
+					<Link to="/dashboard/marketplace">
 						<ArrowLeft />
 					</Link>
 
@@ -54,8 +54,8 @@ function CartItemCard(props: Product) {
 							₦
 							{props.discount
 								? Number(
-										(props.price * (props.discount / 100)).toLocaleString(),
-									).toFixed(2)
+									(props.price * (props.discount / 100)).toLocaleString(),
+								).toFixed(2)
 								: props.price.toLocaleString()}
 						</p>
 					</div>
@@ -69,14 +69,14 @@ function CartItemCard(props: Product) {
 				</div>
 				<div className="flex items-center gap-2">
 					<Link
-						to={`/marketplace/checkout/${props.id}`}
+						to={`/dashboard/marketplace/checkout/${props.id}`}
 						className="flex gap-1 justify-center items-center rounded-full px-4 py-1.5 text-xs bg-primary text-white max-sm:flex-1"
 					>
 						<ShoppingBag size={12} />
 						Buy Product
 					</Link>
 					<Link
-						to={`/marketplace/p/${props.id}`}
+						to={`/dashboard/marketplace/p/${props.id}`}
 						className="flex items-center justify-center rounded-full min-h-[28.92px] min-w-[28.92px] border border-primary text-primary"
 					>
 						<span style={{ fontSize: 16 }} className="material-icons-outlined">

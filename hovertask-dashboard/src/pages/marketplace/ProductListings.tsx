@@ -31,7 +31,7 @@ function ProductListings({ products, filter }: { products: any[]; filter: string
           {filter !== "all" ? `No products match the "${filter}" filter` : "You haven't listed any products yet"}
         </p>
         <Link
-          to="/marketplace/list-product?type=list-product"
+          to="/dashboard/marketplace/list-product?type=list-product"
           className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
         >
           <Star size={16} /> List Your First Product
@@ -43,9 +43,9 @@ function ProductListings({ products, filter }: { products: any[]; filter: string
   return (
     <div className="space-y-4">
       {filteredProducts.map((p) => (
-        <ProductListingCard 
-          key={p.id} 
-          product={p} 
+        <ProductListingCard
+          key={p.id}
+          product={p}
           isMenuOpen={activeMenu === p.id}
           onMenuToggle={() => setActiveMenu(activeMenu === p.id ? null : p.id)}
         />
@@ -56,12 +56,12 @@ function ProductListings({ products, filter }: { products: any[]; filter: string
 
 function ProductListingCard({ product, isMenuOpen, onMenuToggle }: { product: any; isMenuOpen: boolean; onMenuToggle: () => void }) {
   const [copied, setCopied] = useState(false);
-  
+
   const discount = product.discount;
   const finalPrice = discount ? product.price - (product.price * discount / 100) : product.price;
-  
+
   const copyLink = () => {
-    const url = `${window.location.origin}/marketplace/p/${product.id}`;
+    const url = `${window.location.origin}/dashboard/marketplace/p/${product.id}`;
     navigator.clipboard.writeText(url);
     setCopied(true);
     toast.success("Link copied to clipboard!");
@@ -98,7 +98,7 @@ function ProductListingCard({ product, isMenuOpen, onMenuToggle }: { product: an
             </div>
           )}
         </div>
-        
+
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-1">
             <h3 className="font-medium text-slate-800 truncate">{product.name}</h3>
@@ -138,21 +138,21 @@ function ProductListingCard({ product, isMenuOpen, onMenuToggle }: { product: an
       {/* Right: Actions */}
       <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
         <Link
-          to={`/marketplace/p/${product.id}`}
+          to={`/dashboard/marketplace/p/${product.id}`}
           className="p-2 text-slate-500 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
           title="View Listing"
         >
           <ExternalLink size={16} />
         </Link>
-        
+
         <Link
-          to={`/marketplace/performance?product=${product.id}`}
+          to={`/dashboard/marketplace/performance?product=${product.id}`}
           className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
           title="View Analytics"
         >
           <BarChart3 size={16} />
         </Link>
-        
+
         <button
           onClick={copyLink}
           className="p-2 text-slate-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
@@ -168,11 +168,11 @@ function ProductListingCard({ product, isMenuOpen, onMenuToggle }: { product: an
           >
             <MoreVertical size={16} />
           </button>
-          
+
           {isMenuOpen && (
             <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-slate-200 rounded-lg shadow-lg z-10 py-1">
               <Link
-                to={`/marketplace/edit-product/${product.id}`}
+                to={`/dashboard/marketplace/edit-product/${product.id}`}
                 className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
               >
                 <Edit size={14} /> Edit Listing

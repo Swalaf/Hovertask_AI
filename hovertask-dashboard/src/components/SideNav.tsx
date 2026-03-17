@@ -57,12 +57,14 @@ export default function SideNav() {
     {
       icon: <Store size={20} />,
       label: "Marketplace",
-      path: "/marketplace",
+      path: "/dashboard/marketplace",
       hasDropdown: true,
       options: [
-        { icon: <List size={16} />, label: "Browse", path: "/marketplace" },
-        { icon: <Target size={16} />, label: "List Product", path: "/marketplace/list-product?type=list-product" },
-        { icon: <Target size={16} />, label: "Resell Product", path: "/marketplace/list-product?type=resell" },
+        { icon: <List size={16} />, label: "Browse", path: "/dashboard/marketplace" },
+        { icon: <Target size={16} />, label: "My Listings", path: "/dashboard/marketplace/listings" },
+        { icon: <Target size={16} />, label: "Add Product", path: "/dashboard/marketplace/list-product?type=list-product" },
+        { icon: <Target size={16} />, label: "Resell Product", path: "/dashboard/marketplace/list-product?type=resell" },
+        { icon: <TrendingUp size={16} />, label: "Reseller Stats", path: "/reseller-conversion" },
       ]
     },
     { icon: <BarChart3 size={20} />, label: "Reseller Stats", path: "/reseller-conversion" },

@@ -26,7 +26,7 @@ export default function MarketplacePage() {
 
 	// Featured products (products with discount or high rating)
 	const featuredProducts = products?.filter(p => p.discount || p.rating >= 4) || [];
-	
+
 	// Trending products (most viewed/sold - simulated)
 	const trendingProducts = products?.slice(0, 8) || [];
 
@@ -49,7 +49,7 @@ export default function MarketplacePage() {
 								</p>
 							</div>
 						</div>
-						
+
 						{/* Quick Stats */}
 						<div className="hidden md:flex items-center gap-6">
 							<QuickStat icon={<ShoppingBag size={18} />} label="Products" value={products?.length || 0} color="text-blue-600" bg="bg-blue-50" />
@@ -66,32 +66,32 @@ export default function MarketplacePage() {
 
 				{/* Quick Actions */}
 				<div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-					<QuickActionCard 
+					<QuickActionCard
 						icon={<ShoppingBag className="text-blue-600" />}
 						title="Browse Products"
 						description="Find amazing deals"
-						link="/marketplace"
+						link="/dashboard/marketplace"
 						color="from-blue-50 to-blue-100"
 					/>
-					<QuickActionCard 
+					<QuickActionCard
 						icon={<Sparkles className="text-purple-600" />}
 						title="List Your Product"
 						description="Start selling today"
-						link="/marketplace/list-product?type=list-product"
+						link="/dashboard/marketplace/list-product?type=list-product"
 						color="from-purple-50 to-purple-100"
 					/>
-					<QuickActionCard 
+					<QuickActionCard
 						icon={<Zap className="text-amber-600" />}
 						title="Become a Reseller"
 						description="Earn through promotion"
-						link="/marketplace/list-product?type=resell"
+						link="/dashboard/marketplace/list-product?type=resell"
 						color="from-amber-50 to-amber-100"
 					/>
-					<QuickActionCard 
+					<QuickActionCard
 						icon={<TrendingUp className="text-green-600" />}
 						title="Track Performance"
 						description="View your analytics"
-						link="/marketplace/performance"
+						link="/dashboard/marketplace/performance"
 						color="from-green-50 to-green-100"
 					/>
 				</div>
@@ -111,7 +111,7 @@ export default function MarketplacePage() {
 													<Sparkles className="text-amber-500" size={20} />
 													<h2 className="font-semibold text-lg text-slate-800">Featured Products</h2>
 												</div>
-												<Link to="/marketplace/c/featured" className="text-sm text-primary hover:underline flex items-center gap-1">
+												<Link to="/dashboard/marketplace/c/featured" className="text-sm text-primary hover:underline flex items-center gap-1">
 													View All <ArrowRight size={14} />
 												</Link>
 											</div>
@@ -129,7 +129,7 @@ export default function MarketplacePage() {
 									<ProductsSection
 										products={trendingProducts}
 										heading="Trending Now 🔥"
-										link="/marketplace/c/trending"
+										link="/dashboard/marketplace/c/trending"
 										grid
 										useResponsiveCard
 									/>
@@ -137,7 +137,7 @@ export default function MarketplacePage() {
 									<ProductsSection
 										products={filteredProducts}
 										heading="Best Deals & Services"
-										link="/marketplace/c/best-deals-and-services"
+										link="/dashboard/marketplace/c/best-deals-and-services"
 										grid
 										useResponsiveCard
 									/>
@@ -145,7 +145,7 @@ export default function MarketplacePage() {
 									<ProductsSection
 										products={filteredProducts}
 										heading="Popular Categories"
-										link="/marketplace/c/popular"
+										link="/dashboard/marketplace/c/popular"
 										grid
 										useResponsiveCard
 									/>
@@ -223,12 +223,12 @@ function Hero() {
 						Discover amazing products or start selling today. Join thousands of buyers and sellers on Hovertask Marketplace.
 					</p>
 					<div className="flex flex-wrap justify-center sm:justify-start gap-3 mt-4">
-						<Link to="/marketplace/list-product?type=list-product">
+						<Link to="/dashboard/marketplace/list-product?type=list-product">
 							<Button className="bg-white text-primary font-medium" size="sm">
 								Sell Now
 							</Button>
 						</Link>
-						<Link to="/marketplace">
+						<Link to="/dashboard/marketplace">
 							<Button variant="bordered" className="border-white text-white hover:bg-white/10" size="sm">
 								Browse Products
 							</Button>
@@ -247,14 +247,14 @@ function Hero() {
 function ProductCardV2({ product }: { product: any }) {
 	const discount = product.discount;
 	const finalPrice = discount ? product.price - (product.price * discount / 100) : product.price;
-	
+
 	return (
-		<Link to={`/marketplace/p/${product.id}`} className="block group">
+		<Link to={`/dashboard/marketplace/p/${product.id}`} className="block group">
 			<div className="bg-white rounded-xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1">
 				<div className="relative aspect-square overflow-hidden bg-slate-100">
 					{product.product_images?.[0] ? (
-						<img 
-							src={product.product_images[0].file_path} 
+						<img
+							src={product.product_images[0].file_path}
 							alt={product.name}
 							className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
 						/>
