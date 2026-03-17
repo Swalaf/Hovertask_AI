@@ -19,6 +19,13 @@ Route::get('/', function () {
     return view('pages.homepage');
 })->name('home');
 
+// Admin Authentication Routes
+Route::prefix('admin')->group(function () {
+    Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
+    Route::post('/login', [AdminAuthController::class, 'login']);
+    Route::post('/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
+});
+
 // Dashboard (authenticated users)
 // Note: Dashboard route is in the auth middleware group below
 
