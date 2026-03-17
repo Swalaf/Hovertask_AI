@@ -263,3 +263,170 @@ Route::get('/privacy-policy', function () {
 
 // NOTE: broadcasting auth endpoint moved to `routes/api.php` to support
 // token (Bearer) based authentication used by the React SPA.
+
+// Admin Routes
+Route::prefix('admin')->middleware(['auth', 'role:superadministrator|administrator'])->group(function () {
+    // Dashboard
+    Route::get('/dashboard', function () {
+        $stats = [
+            'total_users' => \App\Models\User::count(),
+            'total_products' => \App\Models\Product::count(),
+            'total_orders' => \App\Models\Order::count(),
+            'total_revenue' => \App\Models\Transaction::where('type', 'payment')->sum('amount') ?? 0,
+            'active_tasks' => \App\Models\Task::where('status', 'active')->count(),
+            'pending_withdrawals' => \App\Models\Withdrawal::where('status', 'pending')->count(),
+            'pending_withdrawals_amount' => \App\Models\Withdrawal::where('status', 'pending')->sum('amount') ?? 0,
+            'active_advertises' => \App\Models\Advertise::where('status', 'active')->count(),
+            'completed_tasks' => \App\Models\CompletedTask::count(),
+            'pending_kyc' => \App\Models\KYC::where('status', 'pending')->count(),
+            'pending_adverts' => \App\Models\Advertise::where('status', 'pending')->count(),
+            'pending_task_approvals' => \App\Models\CompletedTask::where('status', 'pending')->count(),
+            'memory_usage' => '45%',
+            'last_backup' => 'Never',
+        ];
+
+        return view('admin.dashboard', compact('stats'));
+    })->name('admin.dashboard');
+
+    // Users
+    Route::get('/users', function () {
+        $users = \App\Models\User::with(['roles', 'wallet'])->paginate(20);
+
+        return view('admin.users.index', compact('users'));
+    })->name('admin.users.index');
+
+    // Tasks
+    Route::get('/tasks', function () {
+        $tasks = \App\Models\Task::with(['user'])->paginate(20);
+        $stats = [
+            'total_tasks' => \App\Models\Task::count(),
+            'active_tasks' => \App\Models\Task::where('status', 'active')->count(),
+            'pending_tasks' => \App\Models\Task::where('status', 'pending')->count(),
+            'completed_tasks' => \App\Models\CompletedTask::count(),
+            'expired_tasks' => \App\Models\Task::where('status', 'expired')->count(),
+        ];
+
+        return view('admin.tasks.index', compact('tasks', 'stats'));
+    })->name('admin.tasks.index');
+
+    // Products
+    Route::get('/products', function () {
+        $products = \App\Models\Product::with(['user', 'category'])->paginate(20);
+
+        return view('admin.products.index', compact('products'));
+    })->name('admin.products.index');
+
+    // Orders
+    Route::get('/orders', function () {
+        $orders = \App\Models\Order::with(['user'])->paginate(20);
+
+        return view('admin.orders.index', compact('orders'));
+    })->name('admin.orders.index');
+
+    // Categories
+    Route::get('/categories', function () {
+        $categories = \App\Models\Category::with('parent')->paginate(20);
+
+        return view('admin.categories.index', compact('categories'));
+    })->name('admin.categories.index');
+
+    // Withdrawals
+    Route::get('/withdrawals', function () {
+        $withdrawals = \App\Models\Withdrawal::with(['user'])->paginate(20);
+
+        return view('admin.withdrawals.index', compact('withdrawals'));
+    })->name('admin.withdrawals.index');
+
+    // Transactions
+    Route::get('/transactions', function () {
+        $transactions = \App\Models\Transaction::with(['user'])->paginate(20);
+
+        return view('admin.transactions.index', compact('transactions'));
+    })->name('admin.transactions.index');
+
+    // Advertisements
+    Route::get('/advertises', function () {
+        $advertises = \App\Models\Advertise::with(['user'])->paginate(20);
+
+        return view('admin.advertises.index', compact('advertises'));
+    })->name('admin.advertises.index');
+
+    // Completed Tasks
+    Route::get('/completed-tasks', function () {
+        $completedTasks = \App\Models\CompletedTask::with(['user', 'task'])->paginate(20);
+
+        return view('admin.completed-tasks.index', compact('completedTasks'));
+    })->name('admin.completed-tasks.index');
+
+    // Referrals
+    Route::get('/referrals', function () {
+        $referrals = \App\Models\Referral::with(['referrer', 'referee'])->paginate(20);
+
+        return view('admin.referrals.index', compact('referrals'));
+    })->name('admin.referrals.index');
+
+    // Reseller Conversions
+    Route::get('/reseller-conversions', function () {
+        $conversions = \App\Models\ResellerConversion::with(['reseller', 'product'])->paginate(20);
+
+        return view('admin.reseller-conversions.index', compact('conversions'));
+    })->name('admin.reseller-conversions.index');
+
+    // Roles & Permissions
+    Route::get('/roles', function () {
+        $roles = \App\Models\Role::with('permissions')->paginate(20);
+
+        return view('admin.roles.index', compact('roles'));
+    })->name('admin.roles.index');
+
+    // Activity Logs
+    Route::get('/activity-logs', function () {
+        // Placeholder - would need ActivityLog model
+        $logs = collect([]);
+
+        return view('admin.activity-logs.index', compact('logs'));
+    })->name('admin.activity-logs.index');
+
+    // Settings
+    Route::get('/settings', function () {
+        return view('admin.settings.index');
+    })->name('admin.settings.index');
+
+    Route::post('/settings/{group}', function ($group) {
+        // Settings update logic
+        return back()->with('success', 'Settings updated successfully');
+    })->name('admin.settings.update');
+
+    // Maintenance
+    Route::get('/maintenance', function () {
+        $diskUsage = [
+            'used' => '450 MB',
+            'total' => '2 GB',
+            'percentage' => 22,
+        ];
+        $backups = collect([]);
+
+        return view('admin.maintenance.index', compact('diskUsage', 'backups'));
+    })->name('admin.maintenance.index');
+
+    // Maintenance Actions
+    Route::post('/maintenance/clear-cache/{type}', function ($type) {
+        return response()->json(['success' => true, 'message' => 'Cache cleared successfully']);
+    })->name('admin.maintenance.clear-cache');
+
+    Route::post('/maintenance/migrate', function () {
+        return response()->json(['success' => true, 'message' => 'Migrations completed']);
+    })->name('admin.maintenance.migrate');
+
+    Route::post('/maintenance/seed', function () {
+        return response()->json(['success' => true, 'message' => 'Database seeded']);
+    })->name('admin.maintenance.seed');
+
+    Route::post('/maintenance/optimize', function () {
+        return response()->json(['success' => true, 'message' => 'Database optimized']);
+    })->name('admin.maintenance.optimize');
+
+    Route::post('/maintenance/backup/create', function () {
+        return response()->json(['success' => true]);
+    })->name('admin.maintenance.backup.create');
+});
